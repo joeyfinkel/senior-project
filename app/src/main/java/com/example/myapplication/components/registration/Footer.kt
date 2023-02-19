@@ -4,13 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.example.myapplication.components.DefaultButton
 
 @Composable
 fun RegistrationFooter(
@@ -32,8 +30,6 @@ fun RegistrationFooter(
                     .weight(1f)
             )
         }
-        Button(modifier = Modifier.widthIn(min = 100.dp), onClick = onBtnClick) {
-            Text(btnText)
-        }
+        DefaultButton(btnText = btnText, onBtnClick = onBtnClick)
     }
 }

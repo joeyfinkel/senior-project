@@ -5,13 +5,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.myapplication.components.AnimatedColumn
 
 /**
@@ -21,6 +22,7 @@ import com.example.myapplication.components.AnimatedColumn
 @Composable
 fun RegistrationLayout(
     text: String,
+    style: TextStyle = MaterialTheme.typography.titleMedium,
     hasIcon: Boolean = false,
     onIconClick: (() -> Unit)? = null,
     content: @Composable() (() -> Unit)
@@ -46,12 +48,12 @@ fun RegistrationLayout(
                         }
                         Spacer(Modifier.weight(1f))
                     }
-                    Text(text, textAlign = TextAlign.Center, fontSize = 20.sp)
+
+                    Text(text = text, textAlign = TextAlign.Center, style = style)
                 }
                 Spacer(modifier = Modifier.height(40.dp))
                 content()
             }
         }
     }
-
 }

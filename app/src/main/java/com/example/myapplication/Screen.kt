@@ -1,12 +1,15 @@
 package com.example.myapplication
 
-import androidx.compose.runtime.Composable
-import com.example.myapplication.components.registration.Names
-import com.example.myapplication.components.registration.Information
-
+/**
+ * This class is used for adding new screens to the app.
+ * @param route The screen's route.
+ * @param title The screen's title.
+ */
 enum class Screen(val route: String, val title: String? = "") {
+    MainScreen("main"),
     NameRegistration("nameRegistration"),
     InformationRegistration("informationRegistration"),
     UsernameRegistration("usernameRegistration"),
-    Login("login")
+    Login("login"),
+    Posts("posts")
 }
