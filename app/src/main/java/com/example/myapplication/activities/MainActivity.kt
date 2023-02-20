@@ -47,7 +47,9 @@ fun Main() {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Screen.MainScreen.route) {
+        //region Main Screen
         composable(Screen.MainScreen.route) { MainScreen(navController) }
+        //endregion
 
         //region Registration screens
         composable(Screen.NameRegistration.route) { Names(navController) }

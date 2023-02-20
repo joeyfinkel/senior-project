@@ -25,9 +25,11 @@ fun MainScreen(navController: NavController) {
                     contentDescription = "Logo",
                     modifier = Modifier.size(200.dp)
                 )
-//                Spacer(modifier = Modifier.height(40.dp))
-                DefaultButton(200.dp,"Login") { navController.navigate(Screen.Login.route) }
-                DefaultButton(200.dp,"Register") { navController.navigate(Screen.NameRegistration.route) }
+                DefaultButton(280.dp, "Login") { navController.navigate(Screen.Login.route) }
+                DefaultButton(
+                    280.dp,
+                    "Register"
+                ) { navController.navigate(Screen.NameRegistration.route) }
             }
         }
     }

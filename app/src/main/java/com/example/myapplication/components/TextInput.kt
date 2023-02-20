@@ -31,27 +31,22 @@ fun TextInput(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     isError: Boolean = false,
     spacer: Boolean = true,
-    width: Dp = 300.dp
+    width: Dp = 280.dp
 ) {
-    val myModifier = if (width != 300.dp) modifier.then(modifier.width(width)) else modifier
-    val colors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = AppBar,
-        unfocusedBorderColor = AppBar,
-
-        )
-
-
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         singleLine = true,
-        modifier = myModifier,
+        modifier = if (width != 300.dp) modifier.then(modifier.width(width)) else modifier,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
         isError = isError,
-        colors = colors
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = AppBar,
+            unfocusedBorderColor = AppBar,
+        )
     )
 
     if (errorText.isNotEmpty() && isError) Text(errorText)
