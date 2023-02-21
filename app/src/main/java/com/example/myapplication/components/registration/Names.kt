@@ -20,31 +20,33 @@ fun Names(navController: NavController) {
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
+    var (firstName, lastName) = UserState
+
     fun proceedToNextScreen() {
         isClicked.value = true
 
-        if (UserState.firstName.isNotEmpty() && UserState.lastName.isNotEmpty()) {
+        if (firstName.isNotEmpty() && lastName.isNotEmpty()) {
             navController.navigate(Screen.InformationRegistration.route)
         }
     }
 
     RegistrationLayout(text = "Enter your name") {
         TextInput(
-            value = UserState.firstName,
+            value = firstName,
             label = "First name",
             errorText = "Please enter your first name",
-            isError = UserState.firstName.isEmpty() && isClicked.value,
-            onValueChange = { UserState.firstName = it },
+            isError = firstName.isEmpty() && isClicked.value,
+            onValueChange = { firstName = it },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusRequester2.requestFocus() }),
             modifier = Modifier.focusRequester(focusRequester1)
         )
         TextInput(
-            value = UserState.lastName,
+            value = lastName,
             label = "Last name",
             errorText = "Please enter your last name",
-            isError = UserState.lastName.isEmpty() && isClicked.value,
-            onValueChange = { UserState.lastName = it },
+            isError = lastName.isEmpty() && isClicked.value,
+            onValueChange = { lastName = it },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { proceedToNextScreen() }),
             modifier = Modifier.focusRequester(focusRequester2)
