@@ -15,8 +15,6 @@ import com.example.myapplication.state.UserState
 fun Username(navController: NavController) {
     val isClicked = remember { mutableStateOf(false) }
 
-    var (userId) = UserState
-
     fun proceedToNextScreen() {
         // #TODO Add the user to the DB using the information from UserState
         navController.navigate(Screen.Posts.route)
@@ -24,11 +22,11 @@ fun Username(navController: NavController) {
 
     RegistrationLayout(text = "Now, lets create a username") {
         TextInput(
-            value = userId,
+            value = UserState.userId,
             label = "Username",
             errorText = "Please enter your username",
-            isError = userId.isEmpty() && isClicked.value,
-            onValueChange = { userId = it },
+            isError = UserState.userId.isEmpty() && isClicked.value,
+            onValueChange = { UserState.userId = it },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { proceedToNextScreen() }),
         )

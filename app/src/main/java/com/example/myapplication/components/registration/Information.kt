@@ -24,22 +24,21 @@ fun Information(navController: NavController) {
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
-    var (email, password) = UserState
 
     fun isValidEmail(email: String): Boolean {
-        return email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        return email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(UserState.email).matches()
     }
 
     fun proceedToNextScreen() {
         isClicked.value = true
 
-        println("email is valid: ${isValidEmail(email)}")
+        println("email is valid: ${isValidEmail(UserState.email)}")
 
-        if (isValidEmail(email)) {
+        if (isValidEmail(UserState.email)) {
             emailErrorText.value = "Please enter a valid email"
         }
 
-        if (isValidEmail(email) && UserState.password.isNotBlank()) {
+        if (isValidEmail(UserState.email) && UserState.password.isNotBlank()) {
             println("Here")
             navController.navigate(Screen.UsernameRegistration.route)
         }
@@ -47,11 +46,11 @@ fun Information(navController: NavController) {
 
     RegistrationLayout(text = "Continue with your email") {
         TextInput(
-            value = email,
+            value = UserState.email,
             label = "Email",
             errorText = "Please enter your email",
-            isError = isValidEmail(email) && isClicked.value,
-            onValueChange = { email = it },
+            isError = isValidEmail(UserState.email) && isClicked.value,
+            onValueChange = { UserState.email = it },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -60,11 +59,11 @@ fun Information(navController: NavController) {
             modifier = Modifier.focusRequester(focusRequester1)
         )
         TextInput(
-            value = password,
+            value = UserState.password,
             label = "Password",
             errorText = "Please enter your password",
-            isError = password.isEmpty() && isClicked.value,
-            onValueChange = { password = it },
+            isError = UserState.password.isEmpty() && isClicked.value,
+            onValueChange = { UserState.password = it },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Password,
