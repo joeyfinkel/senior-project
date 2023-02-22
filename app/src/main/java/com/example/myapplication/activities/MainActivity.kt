@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.Screen
 import com.example.myapplication.components.*
+import com.example.myapplication.components.post.Post
 import com.example.myapplication.components.registration.Information
 import com.example.myapplication.components.registration.Names
 import com.example.myapplication.components.registration.Username

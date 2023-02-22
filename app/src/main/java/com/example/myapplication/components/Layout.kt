@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.components.bottomoverlay.BottomOverlay
 import com.example.myapplication.components.bottomoverlay.comments.Comments
 import com.example.myapplication.components.icons.AccountCircle
 import com.example.myapplication.state.UserState
@@ -26,6 +27,12 @@ import com.example.myapplication.ui.theme.AppBar
 import com.example.myapplication.ui.theme.DefaultRadius
 import kotlinx.coroutines.CoroutineScope
 
+/**
+ * The general layout of the entire app.
+ * This function renders out the top bar, content, and bottom bar.
+ * @param title The title of the current screen.
+ * @param content The main content of the current page (**placed in between the top and bottom bar**).
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun Layout(
@@ -70,17 +77,10 @@ fun Layout(
                 sheetContent = {
                     if (UserState.isCommentClicked) {
                         Comments()
-                    } else {
+                    } else if (UserState.isEllipsisClicked) {
                         LazyColumn {
                             items(50) {
-                                ListItem(
-                                    text = { androidx.compose.material.Text("Item $it") },
-                                    icon = {
-                                        androidx.compose.material.Icon(
-                                            Icons.Default.Favorite,
-                                            contentDescription = "Localized description"
-                                        )
-                                    })
+                                ListItem { Text("Item $it") }
                             }
                         }
                     }
@@ -112,22 +112,6 @@ fun Layout(
                     }
                 }
             }
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(innerPadding)
-//                    .background(Color.White),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Column(
-//                    modifier = Modifier.padding(top = 10.dp),
-//                    verticalArrangement = Arrangement.Center,
-//                    horizontalAlignment = Alignment.CenterHorizontally
-//                ) {
-//                    content()
-//                    Spacer(modifier = Modifier.weight(1f))
-//                }
-//            }
         },
         bottomBar = {
             if (!sheetState.isVisible)

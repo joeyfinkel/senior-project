@@ -20,7 +20,6 @@ fun Names(navController: NavController) {
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
-
     fun proceedToNextScreen() {
         isClicked.value = true
 

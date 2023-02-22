@@ -13,7 +13,6 @@ object UserState {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var userId by mutableStateOf("")
-    var isValid by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
 }
