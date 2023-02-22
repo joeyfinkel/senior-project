@@ -36,6 +36,7 @@ fun Post(
     state: ModalBottomSheetState,
     coroutineScope: CoroutineScope
 ) {
+    println("Hello world")
     Box(
         modifier = Modifier
             .width(DefaultWidth + 50.dp)
