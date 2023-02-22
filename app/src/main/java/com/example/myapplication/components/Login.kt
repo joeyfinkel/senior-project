@@ -26,7 +26,7 @@ fun Login(navController: NavController) {
     fun proceedToNextScreen() {
         isClicked.value = true
 
-        if (UserState.firstName.isNotEmpty() && UserState.lastName.isNotEmpty()) {
+        if (UserState.userId.isNotEmpty() && UserState.password.isNotEmpty()) {
             navController.navigate(Screen.Posts.route)
         }
     }
