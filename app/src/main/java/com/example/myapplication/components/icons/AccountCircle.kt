@@ -14,25 +14,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.theme.AppBar
+import com.example.myapplication.ui.theme.Primary
 
 @Composable
-fun AccountCircle(size: Dp = 50.dp, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    IconButton(onClick = onClick, modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .background(AppBar, shape = CircleShape)
-                .border(
-                    2.dp, Color.Black, CircleShape
-                )
-                .size(size)
-        ) {
-            Icon(
-                Icons.Outlined.Person,
-                contentDescription = "Test",
-                modifier = Modifier.size(size),
-                tint = Color.Black
-            )
+private fun BaseAccountCircle(size: Dp) {
+    Icon(
+        Icons.Outlined.Person,
+        contentDescription = "Test",
+        modifier = Modifier.size(size),
+        tint = Color.Black
+    )
+}
+
+@Composable
+fun AccountCircle(modifier: Modifier = Modifier, size: Dp = 50.dp, onClick: (() -> Unit)? = null) {
+    if (onClick != null) {
+        IconButton(onClick = onClick, modifier = modifier) {
+            Box(
+                modifier = Modifier
+                    .background(Primary, shape = CircleShape)
+                    .border(
+                        2.dp, Color.Black, CircleShape
+                    )
+                    .size(size)
+            ) {
+                BaseAccountCircle(size)
+            }
         }
     }
+    else {
+        BaseAccountCircle(size)
+    }
+
 }

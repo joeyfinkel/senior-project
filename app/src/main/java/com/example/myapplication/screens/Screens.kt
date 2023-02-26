@@ -1,15 +1,16 @@
-package com.example.myapplication
+package com.example.myapplication.screens
 
 /**
  * This class is used for adding new screens to the app.
  * @param route The screen's route.
- * @param title The screen's title.
  */
-enum class Screen(val route: String, val title: String? = "") {
+enum class Screens(val route: String) {
     MainScreen("main"),
     NameRegistration("nameRegistration"),
     InformationRegistration("informationRegistration"),
     UsernameRegistration("usernameRegistration"),
     Login("login"),
-    Posts("posts")
+    Posts("posts"),
+    UserProfile("userProfile"),
+    FollowersOrFollowingList("followersOrFollowingList"),
 }

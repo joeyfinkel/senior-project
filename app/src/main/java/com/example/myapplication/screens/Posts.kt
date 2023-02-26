@@ -1,4 +1,4 @@
-package com.example.myapplication.components.post
+package com.example.myapplication.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,22 +12,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.theme.AppBar
+import androidx.navigation.NavController
+import com.example.myapplication.components.post.PostActions
+import com.example.myapplication.components.post.PostContent
+import com.example.myapplication.ui.theme.Primary
 import com.example.myapplication.ui.theme.DefaultWidth
 import com.example.myapplication.ui.theme.PostBG
 import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Post(
+fun Posts(
+    userId: Int,
     username: String,
     text: String,
     state: ModalBottomSheetState,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    navController: NavController
 ) {
     Box(
         modifier = Modifier
-            .width(DefaultWidth + 50.dp)
+            .width(DefaultWidth + 100.dp)
             .height(DefaultWidth / 2)
             .shadow(1.dp, RoundedCornerShape(16.dp))
             .fillMaxWidth()
@@ -37,7 +42,7 @@ fun Post(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .border(2.dp, AppBar, RoundedCornerShape(16.dp))
+                .border(2.dp, Primary, RoundedCornerShape(16.dp))
                 .background(PostBG)
         ) {
             Column(
@@ -46,7 +51,12 @@ fun Post(
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                PostContent(username, text)
+                PostContent(
+                    userId = userId,
+                    username = username,
+                    text = text,
+                    navController = navController
+                )
                 PostActions(Modifier.align(Alignment.CenterHorizontally), state, coroutineScope)
             }
         }

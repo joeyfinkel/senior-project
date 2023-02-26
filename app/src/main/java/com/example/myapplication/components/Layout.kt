@@ -3,7 +3,9 @@ package com.example.myapplication.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -17,15 +19,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.myapplication.components.bottomoverlay.BottomOverlay
 import com.example.myapplication.components.bottomoverlay.comments.Comments
 import com.example.myapplication.components.icons.AccountCircle
+import com.example.myapplication.screens.Screens
 import com.example.myapplication.state.UserState
-import com.example.myapplication.ui.theme.AppBar
 import com.example.myapplication.ui.theme.DefaultRadius
+import com.example.myapplication.ui.theme.Primary
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * The general layout of the entire app.
@@ -37,6 +43,8 @@ import kotlinx.coroutines.CoroutineScope
 @Composable
 fun Layout(
     title: String,
+    navController: NavController,
+    lazyListState: LazyListState? = null,
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
 ) {
     val items = listOf("Songs", "Artists", "Playlists")
@@ -51,23 +59,35 @@ fun Layout(
     Scaffold(
         topBar = {
             Surface(
-                color = AppBar,
+                color = Primary,
                 shape = RoundedCornerShape(bottomEnd = DefaultRadius, bottomStart = DefaultRadius)
             ) {
                 SmallTopAppBar(
                     title = {
-                        Text(
-                            title,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                        if (lazyListState != null) {
+                            ClickableText(
+                                text = AnnotatedString(title),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleLarge,
+                                onClick = { scope.launch { lazyListState.scrollToItem(0) } }
+                            )
+                        } else {
+                            Text(
+                                title,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                        }
                     },
                     actions = {
-                        AccountCircle(50.dp) { println("Clicked") }
+                        AccountCircle(size = 50.dp) {
+                            navController.navigate(Screens.UserProfile.route)
+                        }
                     },
                     colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = AppBar
+                        containerColor = Primary
                     )
                 )
             }
@@ -76,7 +96,7 @@ fun Layout(
             BottomOverlay(
                 sheetContent = {
                     if (UserState.isCommentClicked) {
-                        Comments()
+                        Comments(navController)
                     } else if (UserState.isEllipsisClicked) {
                         LazyColumn {
                             items(50) {
@@ -116,10 +136,10 @@ fun Layout(
         bottomBar = {
             if (!sheetState.isVisible)
                 Surface(
-                    color = AppBar,
+                    color = Primary,
                     shape = RoundedCornerShape(topEnd = DefaultRadius, topStart = DefaultRadius)
                 ) {
-                    BottomAppBar(containerColor = AppBar) {
+                    BottomAppBar(containerColor = Primary) {
                         items.forEachIndexed { _, item ->
                             NavigationBarItem(icon = {
                                 Icon(

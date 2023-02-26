@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.theme.AppBar
+import com.example.myapplication.ui.theme.Primary
 
 /**
  * The default text field for the app.
@@ -48,8 +48,8 @@ fun TextInput(
         visualTransformation = visualTransformation,
         isError = isError,
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = AppBar,
-            unfocusedBorderColor = AppBar,
+            focusedBorderColor = Primary,
+            unfocusedBorderColor = Primary,
         )
     )
 
