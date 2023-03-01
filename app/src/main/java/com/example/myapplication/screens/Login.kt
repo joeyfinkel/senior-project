@@ -26,18 +26,18 @@ fun Login(navController: NavController) {
     fun proceedToNextScreen() {
         isClicked.value = true
 
-        if (UserState.userId.isNotEmpty() && UserState.password.isNotEmpty()) {
+        if (UserState.username.isNotEmpty() && UserState.password.isNotEmpty()) {
             navController.navigate(Screens.Posts.route)
         }
     }
 
     RegistrationLayout(text = "Login") {
         TextInput(
-            value = UserState.userId,
+            value = UserState.username,
             label = "Username",
             errorText = "Please enter your username",
-            isError = UserState.userId.isEmpty() && isClicked.value,
-            onValueChange = { UserState.userId = it },
+            isError = UserState.username.isEmpty() && isClicked.value,
+            onValueChange = { UserState.username = it },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusRequester2.requestFocus() }),
             modifier = Modifier.focusRequester(focusRequester1)

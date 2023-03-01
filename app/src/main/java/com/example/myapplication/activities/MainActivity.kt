@@ -24,7 +24,6 @@ import com.example.myapplication.screens.registration.Names
 import com.example.myapplication.screens.registration.Username
 import com.example.myapplication.ui.theme.Background
 import com.example.myapplication.ui.theme.MyApplicationTheme
-import com.example.myapplication.utils.connectToDB
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,20 +50,8 @@ class MainActivity : ComponentActivity() {
 fun Main() {
     val navController = rememberNavController()
     val lazyListState = rememberLazyListState()
-    val con = connectToDB()
-    println("------------------------------------------------------------${con}---------------------------------------------------------------------------")
-//    if (con != null) {
-//        println("Connected")
-//        val stmt = con.createStatement()
-//        val res = stmt?.executeQuery("SELECT * FROM User")
-//
-//        println(res)
-//        con.close()
-//    } else {
-//        println("Not connected")
-//    }
 
-    NavHost(navController = navController, startDestination = Screens.Posts.route) {
+    NavHost(navController = navController, startDestination = Screens.MainScreen.route) {
         //region Main Screen
         composable(Screens.MainScreen.route) { MainScreen(navController) }
         //endregion

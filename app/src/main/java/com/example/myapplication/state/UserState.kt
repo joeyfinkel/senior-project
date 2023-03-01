@@ -12,7 +12,7 @@ object UserState {
     var lastName by mutableStateOf("")
     var email by mutableStateOf("")
     var password by mutableStateOf("")
-    var userId by mutableStateOf("")
+    var username by mutableStateOf("")
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
 }

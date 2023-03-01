@@ -88,7 +88,9 @@ fun Layout(
                     },
                     colors = TopAppBarDefaults.mediumTopAppBarColors(
                         containerColor = Primary
-                    )
+                    ),
+                    // disable user interaction with the top bar
+
                 )
             }
         },
@@ -141,17 +143,19 @@ fun Layout(
                 ) {
                     BottomAppBar(containerColor = Primary) {
                         items.forEachIndexed { _, item ->
-                            NavigationBarItem(icon = {
-                                Icon(
-                                    Icons.Filled.Favorite,
-                                    contentDescription = item
-                                )
-                            },
+                            NavigationBarItem(
+                                icon = {
+                                    Icon(
+                                        Icons.Filled.Favorite,
+                                        contentDescription = item
+                                    )
+                                },
                                 label = { Text(item) },
                                 selected = false,
                                 onClick = { println("Hello") })
                         }
                     }
                 }
-        })
+        }
+    )
 }

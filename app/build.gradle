@@ -64,8 +64,7 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:2.4.0-alpha06"
     implementation 'io.github.cdimascio:dotenv-kotlin:6.4.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.0"
-    implementation 'mysql:mysql-connector-java:8.0.26'
-
+    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
 
     testImplementation 'junit:junit:4.13.2'
 

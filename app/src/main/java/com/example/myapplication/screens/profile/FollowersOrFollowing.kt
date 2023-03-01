@@ -7,10 +7,13 @@ import com.example.myapplication.components.Tabs
 import com.example.myapplication.components.profile.ProfileLayout
 import com.example.myapplication.components.profile.UserToFollow
 import com.example.myapplication.screens.Screens
+import com.example.myapplication.state.FollowersOrFollowingState
 
 @Composable
 fun FollowersOrFollowing(navController: NavController) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember {
+        mutableStateOf(if (FollowersOrFollowingState.selected == "Followers") 0 else 1)
+    }
 
     ProfileLayout(
         title = "johndoe54",
