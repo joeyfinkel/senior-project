@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.myapplication.components.icons.AccountCircle
+import com.example.myapplication.state.SelectedUserState
 
 @Composable
 fun UserToFollow(username: String, navController: NavController) {
@@ -26,7 +27,8 @@ fun UserToFollow(username: String, navController: NavController) {
             modifier = Modifier
                 .weight(1f)
                 .clickable {
-                    //TODO Set selected user to id
+                    SelectedUserState.username = username
+
                     navController.popBackStack()
                 }
         ) {

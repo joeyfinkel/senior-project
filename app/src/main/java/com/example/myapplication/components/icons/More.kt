@@ -5,6 +5,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import com.example.myapplication.R
+import com.example.myapplication.ui.theme.Primary
 
 @Composable
 fun More(onClick: () -> Unit) {

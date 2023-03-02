@@ -27,6 +27,7 @@ import com.example.myapplication.components.bottomoverlay.BottomOverlay
 import com.example.myapplication.components.bottomoverlay.comments.Comments
 import com.example.myapplication.components.icons.AccountCircle
 import com.example.myapplication.screens.Screens
+import com.example.myapplication.state.SelectedUserState
 import com.example.myapplication.state.UserState
 import com.example.myapplication.ui.theme.DefaultRadius
 import com.example.myapplication.ui.theme.Primary
@@ -83,6 +84,7 @@ fun Layout(
                     },
                     actions = {
                         AccountCircle(size = 50.dp) {
+                            SelectedUserState.username = UserState.username
                             navController.navigate(Screens.UserProfile.route)
                         }
                     },
@@ -90,7 +92,6 @@ fun Layout(
                         containerColor = Primary
                     ),
                     // disable user interaction with the top bar
-
                 )
             }
         },
@@ -119,8 +120,7 @@ fun Layout(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding)
-                            .background(Color.White),
+                            .padding(innerPadding),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(

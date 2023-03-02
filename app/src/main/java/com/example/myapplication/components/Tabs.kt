@@ -1,7 +1,9 @@
 package com.example.myapplication.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
@@ -16,28 +18,45 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.theme.Primary
 
+
 @Composable
 fun <T> Tabs(
     tabs: List<T>,
+    asPills: Boolean = false,
     selectedTabIndex: Int,
     onClick: (index: Int) -> Unit,
-    tabContent: @Composable () -> Unit
+    tabContent: @Composable() (() -> Unit)? = null
 ) {
     TabRow(
         selectedTabIndex = selectedTabIndex,
         backgroundColor = Color.LightGray,
         indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                color = Primary
-            )
+            if (!asPills) {
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    color = Primary
+                )
+            }
         },
+        modifier = Modifier
+            .height(48.dp)
+            .background(
+                color = Color.LightGray,
+                shape = if (asPills) RoundedCornerShape(16.dp) else RoundedCornerShape(0.dp)
+            )
     ) {
         tabs.forEachIndexed { index, t ->
             Tab(
                 selected = selectedTabIndex == index,
                 onClick = { onClick(index) },
-                modifier = Modifier.height(48.dp),
+                modifier = Modifier
+                    .height(48.dp)
+                    .background(
+                        color = if (asPills)
+                            if (selectedTabIndex == index) Primary else Color.LightGray
+                        else Color.Transparent,
+                        shape = if (asPills) RoundedCornerShape(16.dp) else RoundedCornerShape(0.dp)
+                    ),
             ) {
                 if (t is String) Text(text = t)
                 if (t is ImageVector) Icon(
@@ -53,5 +72,5 @@ fun <T> Tabs(
             }
         }
     }
-    tabContent()
+    if (tabContent != null) tabContent()
 }

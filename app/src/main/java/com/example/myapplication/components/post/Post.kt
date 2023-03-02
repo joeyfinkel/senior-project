@@ -1,4 +1,4 @@
-package com.example.myapplication.screens
+package com.example.myapplication.components.post
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,22 +13,20 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.myapplication.components.post.PostActions
-import com.example.myapplication.components.post.PostContent
-import com.example.myapplication.ui.theme.Primary
 import com.example.myapplication.ui.theme.DefaultWidth
 import com.example.myapplication.ui.theme.PostBG
+import com.example.myapplication.ui.theme.Primary
+import com.example.myapplication.utils.defaultText
 import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Posts(
+fun Post(
     userId: Int,
     username: String,
-    text: String,
-    state: ModalBottomSheetState,
-    coroutineScope: CoroutineScope,
-    navController: NavController
+    text: String? = defaultText,
+    navController: NavController,
+    actionRow: @Composable() (ColumnScope.() -> Unit)
 ) {
     Box(
         modifier = Modifier
@@ -57,7 +55,7 @@ fun Posts(
                     text = text,
                     navController = navController
                 )
-                PostActions(Modifier.align(Alignment.CenterHorizontally), state, coroutineScope)
+                actionRow()
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -16,6 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.components.*
+import com.example.myapplication.components.post.Post
+import com.example.myapplication.components.post.PostActions
 import com.example.myapplication.screens.*
 import com.example.myapplication.screens.profile.FollowersOrFollowing
 import com.example.myapplication.screens.profile.Profile
@@ -75,13 +78,17 @@ fun Main() {
                     state = lazyListState
                 ) {
                     items(20) {
-                        Posts(
+                        Post(
                             userId = it,
                             username = "User ${it + 1}",
-                            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Arcu risus quis varius quam. Laoreet suspendisse interdum consectetur libero id faucibus nisl. Scelerisque eleifend donec pretium vulputate sapien nec sagittis aliquam malesuada. Quisque non tellus orci ac auctor augue.",
-                            state = state,
-                            coroutineScope = scope,
-                            navController = navController
+                            navController = navController,
+                            actionRow = {
+                                PostActions(
+                                    Modifier.align(Alignment.CenterHorizontally),
+                                    state,
+                                    scope
+                                )
+                            }
                         )
                     }
                 }

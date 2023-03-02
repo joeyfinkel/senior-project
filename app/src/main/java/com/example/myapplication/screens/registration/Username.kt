@@ -36,7 +36,7 @@ fun Username(navController: NavController) {
                 .build()
             val req =
                 Request.Builder()
-                    .url("http://write-now.lesspopmorefizz.com")
+                    .url("http://www.write-now.lesspopmorefizz.com")
                     .addHeader("Content-Type", "application/json")
                     .post(body)
                     .build()
