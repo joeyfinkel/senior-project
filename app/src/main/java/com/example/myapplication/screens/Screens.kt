@@ -13,4 +13,5 @@ enum class Screens(val route: String) {
     Posts("posts"),
     UserProfile("userProfile"),
     FollowersOrFollowingList("followersOrFollowingList"),
+    EditProfile("editProfile")
 }

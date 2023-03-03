@@ -20,6 +20,7 @@ import com.example.myapplication.components.*
 import com.example.myapplication.components.post.Post
 import com.example.myapplication.components.post.PostActions
 import com.example.myapplication.screens.*
+import com.example.myapplication.screens.profile.EditProfile
 import com.example.myapplication.screens.profile.FollowersOrFollowing
 import com.example.myapplication.screens.profile.Profile
 import com.example.myapplication.screens.registration.Information
@@ -100,6 +101,9 @@ fun Main() {
         //endregion
         //region Followers/Following List
         composable(Screens.FollowersOrFollowingList.route) { FollowersOrFollowing(navController) }
+        //endregion
+        //region Edit Profile
+        composable(Screens.EditProfile.route) { EditProfile(navController)}
         //endregion
     }
 }

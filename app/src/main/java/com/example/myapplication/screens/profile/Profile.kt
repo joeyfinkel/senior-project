@@ -18,13 +18,12 @@ import com.example.myapplication.components.Tabs
 import com.example.myapplication.components.icons.AccountCircle
 import com.example.myapplication.components.post.Post
 import com.example.myapplication.components.post.PostActions
-import com.example.myapplication.components.profile.FollowButton
+import com.example.myapplication.components.profile.*
 import com.example.myapplication.components.profile.Content
-import com.example.myapplication.components.profile.ProfileLayout
-import com.example.myapplication.components.profile.RowData
 import com.example.myapplication.screens.Screens
 import com.example.myapplication.state.FollowersOrFollowingState
 import com.example.myapplication.state.SelectedUserState
+import com.example.myapplication.state.UserState
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -53,7 +52,13 @@ fun Profile(navController: NavController) {
                 ) {
                     AccountCircle(size = 75.dp)
                     Text(text = "@${username.trim()}")
-                    FollowButton()
+
+                    if (username == UserState.username) {
+                        EditProfileButton(navController = navController)
+                    } else {
+                        FollowButton()
+                    }
+
                     Column(
                         modifier = Modifier.fillMaxWidth(0.75f),
                         verticalArrangement = Arrangement.Center,

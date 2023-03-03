@@ -34,8 +34,6 @@ fun Information(navController: NavController) {
     fun proceedToNextScreen() {
         isClicked.value = true
 
-        println("email is valid: ${isValidEmail(UserState.email)}")
-
         if (isValidEmail(UserState.email)) {
             emailErrorText.value = "Please enter a valid email"
         }
@@ -74,8 +72,7 @@ fun Information(navController: NavController) {
             keyboardActions = KeyboardActions(onDone = { proceedToNextScreen() }),
             modifier = Modifier.focusRequester(focusRequester2)
         )
-        RegistrationFooter(btnText = "Register", onBtnClick = { proceedToNextScreen() }
-        )
+        RegistrationFooter(btnText = "Register", onBtnClick = { proceedToNextScreen() })
     }
 }
 
