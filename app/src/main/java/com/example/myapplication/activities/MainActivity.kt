@@ -1,5 +1,6 @@
 package com.example.myapplication.activities
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.components.*
 import com.example.myapplication.components.post.Post
 import com.example.myapplication.components.post.PostActions
+import com.example.myapplication.dbtables.Users
 import com.example.myapplication.screens.*
 import com.example.myapplication.screens.profile.EditProfile
 import com.example.myapplication.screens.profile.FollowersOrFollowing
@@ -28,6 +30,9 @@ import com.example.myapplication.screens.registration.Names
 import com.example.myapplication.screens.registration.Username
 import com.example.myapplication.ui.theme.Background
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,11 +54,26 @@ class MainActivity : ComponentActivity() {
  * This function handles the app's routing. To add a new screen to the app, call [composable] with
  * the route of the new [Screens] and provide it with that screen's component.
  */
-@OptIn(ExperimentalMaterialApi::class)
+@SuppressLint("CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun Main() {
     val navController = rememberNavController()
     val lazyListState = rememberLazyListState()
+
+    GlobalScope.launch {
+        val users = Users.getAll()
+        val emails = Users.getEmails()
+
+        for (email in emails) {
+            println(email)
+        }
+    }
+
+
+//    for (email in emails) {
+//        println(email)
+//    }
 
     NavHost(navController = navController, startDestination = Screens.MainScreen.route) {
         //region Main Screen
@@ -103,7 +123,7 @@ fun Main() {
         composable(Screens.FollowersOrFollowingList.route) { FollowersOrFollowing(navController) }
         //endregion
         //region Edit Profile
-        composable(Screens.EditProfile.route) { EditProfile(navController)}
+        composable(Screens.EditProfile.route) { EditProfile(navController) }
         //endregion
     }
 }

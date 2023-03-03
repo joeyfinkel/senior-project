@@ -3,66 +3,58 @@ package com.example.myapplication.screens.registration
 import android.util.Log
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.ImeAction
 import androidx.navigation.NavController
-import com.example.myapplication.screens.Screens
 import com.example.myapplication.components.TextInput
 import com.example.myapplication.components.registration.RegistrationFooter
 import com.example.myapplication.components.registration.RegistrationLayout
+import com.example.myapplication.dbtables.Users
+import com.example.myapplication.screens.Screens
 import com.example.myapplication.state.UserState
+import com.example.myapplication.utils.capitalizeFirstLetter
+import com.example.myapplication.utils.isValid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 
 @Composable
 fun Username(navController: NavController) {
-    val isClicked = remember { mutableStateOf(false) }
+    val isValid = isValid("username")
+
+    val isClicked by remember { mutableStateOf(false) }
+
+    fun insertUser() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val json = JSONObject().apply {
+                put("firstName", capitalizeFirstLetter(UserState.firstName))
+                put("lastName", capitalizeFirstLetter(UserState.lastName))
+                put("email", UserState.email)
+                put("passwordHash", UserState.password)
+                put("username", UserState.username)
+            }
+            val inserted = Users.insert(json)
+
+            Log.d("Inserted", inserted.toString())
+        }
+    }
 
     fun proceedToNextScreen() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val client = OkHttpClient.Builder().build()
-            val body = FormBody.Builder()
-                .add("firstName", UserState.firstName)
-                .add("lastName", UserState.lastName)
-                .add("email", UserState.email)
-                .add("passwordHash", UserState.password)
-                .add("username", UserState.username)
-                .build()
-            val req =
-                Request.Builder()
-                    .url("http://www.write-now.lesspopmorefizz.com")
-                    .addHeader("Content-Type", "application/json")
-                    .post(body)
-                    .build()
-
-            try {
-                val response = client.newCall(req).execute()
-                val responseBody = response.body?.string()
-                if (responseBody != null) {
-                    Log.d("API Response", responseBody)
-                }
-            } catch (e: Exception) {
-                Log.e("API Error", e.toString())
-            }
-
+        if (isValid.isValid) {
+            insertUser()
+            navController.navigate(Screens.Posts.route)
         }
-
-        // #TODO Add the user to the DB using the information from UserState
-        navController.navigate(Screens.Posts.route)
     }
 
     RegistrationLayout(text = "Now, lets create a username") {
         TextInput(
             value = UserState.username,
             label = "Username",
-            errorText = "Please enter your username",
-            isError = UserState.username.isEmpty() && isClicked.value,
+            errorText = isValid.errorText,
+            isError = !isValid.isValid && isClicked,
             onValueChange = { UserState.username = it },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { proceedToNextScreen() }),

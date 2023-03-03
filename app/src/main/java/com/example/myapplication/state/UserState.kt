@@ -15,4 +15,15 @@ object UserState {
     var username by mutableStateOf("")
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
+
+    operator fun get(username: String): Any {
+        return when (username) {
+            "firstName" -> firstName
+            "lastName" -> lastName
+            "email" -> email
+            "passwordHash" -> password
+            "username" -> username
+            else -> ""
+        }
+    }
 }

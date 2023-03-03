@@ -2,9 +2,7 @@ package com.example.myapplication.screens
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -19,12 +17,12 @@ import com.example.myapplication.state.UserState
 
 @Composable
 fun Login(navController: NavController) {
-    val isClicked = remember { mutableStateOf(false) }
+    var isClicked by remember { mutableStateOf(false) }
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
     fun proceedToNextScreen() {
-        isClicked.value = true
+        isClicked = true
 
         if (UserState.username.isNotEmpty() && UserState.password.isNotEmpty()) {
             navController.navigate(Screens.Posts.route)
@@ -36,7 +34,7 @@ fun Login(navController: NavController) {
             value = UserState.username,
             label = "Username",
             errorText = "Please enter your username",
-            isError = UserState.username.isEmpty() && isClicked.value,
+            isError = UserState.username.isEmpty() && isClicked,
             onValueChange = { UserState.username = it },
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusRequester2.requestFocus() }),
@@ -46,7 +44,7 @@ fun Login(navController: NavController) {
             value = UserState.password,
             label = "Password",
             errorText = "Please enter your password",
-            isError = UserState.password.isEmpty() && isClicked.value,
+            isError = UserState.password.isEmpty() && isClicked,
             onValueChange = { UserState.password = it },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(
