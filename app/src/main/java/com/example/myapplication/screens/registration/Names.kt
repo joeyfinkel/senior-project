@@ -54,7 +54,13 @@ fun Names(navController: NavController) {
         RegistrationFooter(
             btnText = "Next",
             additionalText = "Already have an account? Login here",
-            onTextClick = { navController.navigate(Screens.Login.route) },
+            onTextClick = {
+                UserState.firstName = ""
+                UserState.lastName = ""
+                UserState.username = ""
+
+                navController.navigate(Screens.Login.route)
+            },
             onBtnClick = { proceedToNextScreen() },
         )
     }

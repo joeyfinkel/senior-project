@@ -8,3 +8,13 @@ var defaultText =
 fun capitalizeFirstLetter(string: String): String {
     return string.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
 }
+
+fun defaultContentCreator(total: Int): MutableList<String> {
+    val list = mutableListOf<String>()
+
+    for (i in 0..total) {
+        list.add(defaultText)
+    }
+
+    return list
+}

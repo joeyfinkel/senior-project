@@ -20,8 +20,6 @@ import com.example.myapplication.utils.isValid
 
 @Composable
 fun Information(navController: NavController) {
-    var email = UserState.email
-    var password = UserState.password
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
@@ -38,11 +36,11 @@ fun Information(navController: NavController) {
 
     RegistrationLayout(text = "Continue with your email") {
         TextInput(
-            value = email,
+            value = UserState.email,
             label = "Email",
             errorText = isValidEmail.errorText,
             isError = !isValidEmail.isValid && isClicked,
-            onValueChange = { email = it },
+            onValueChange = { UserState.email = it },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -51,11 +49,11 @@ fun Information(navController: NavController) {
             modifier = Modifier.focusRequester(focusRequester1)
         )
         TextInput(
-            value = password,
+            value = UserState.password,
             label = "Password",
             errorText = isValidPassword.errorText,
             isError = !isValidPassword.isValid && isClicked,
-            onValueChange = { password = it },
+            onValueChange = { UserState.password = it },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Password,

@@ -1,11 +1,8 @@
 package com.example.myapplication.state
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import com.example.myapplication.dbtables.Posts
 
 
 object PostState {
-    var isLiked by mutableStateOf(false)
-    var comments by mutableStateOf(mutableListOf<CommentState>())
+    var posts = Posts.create(3)
 }

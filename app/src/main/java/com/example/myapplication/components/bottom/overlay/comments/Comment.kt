@@ -1,4 +1,4 @@
-package com.example.myapplication.components.bottomoverlay.comments
+package com.example.myapplication.components.bottom.overlay.comments
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,7 +16,7 @@ import com.example.myapplication.state.SelectedUserState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Comment(userId: Int, username: String, comment: String, navController: NavController) {
+internal fun Comment(userId: Int, username: String, comment: String, navController: NavController) {
     ListItem(
         modifier = Modifier
             .padding(PaddingValues(0.dp))

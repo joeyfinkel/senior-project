@@ -56,7 +56,12 @@ fun Login(navController: NavController) {
         RegistrationFooter(
             btnText = "Login",
             additionalText = "Don't have an account? Create an account",
-            onTextClick = { navController.navigate(Screens.NameRegistration.route) },
+            onTextClick = {
+                UserState.username = ""
+                UserState.password = ""
+
+                navController.navigate(Screens.NameRegistration.route)
+            },
             onBtnClick = { proceedToNextScreen() },
         )
     }

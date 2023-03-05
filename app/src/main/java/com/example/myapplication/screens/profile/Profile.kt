@@ -17,11 +17,13 @@ import com.example.myapplication.R
 import com.example.myapplication.components.Tabs
 import com.example.myapplication.components.icons.AccountCircle
 import com.example.myapplication.components.post.Post
-import com.example.myapplication.components.post.PostActions
-import com.example.myapplication.components.profile.*
-import com.example.myapplication.components.profile.Content
+import com.example.myapplication.components.profile.EditProfileButton
+import com.example.myapplication.components.profile.FollowButton
+import com.example.myapplication.components.profile.ProfileLayout
+import com.example.myapplication.components.profile.RowData
 import com.example.myapplication.screens.Screens
 import com.example.myapplication.state.FollowersOrFollowingState
+import com.example.myapplication.state.PostState
 import com.example.myapplication.state.SelectedUserState
 import com.example.myapplication.state.UserState
 
@@ -29,7 +31,7 @@ import com.example.myapplication.state.UserState
 @Composable
 fun Profile(navController: NavController) {
     val username = SelectedUserState.username
-    val userId = SelectedUserState.userId
+    val posts = PostState.posts.filter { post -> post.username == username }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     ProfileLayout(
@@ -103,22 +105,21 @@ fun Profile(navController: NavController) {
             }
             item {
                 when (selectedTabIndex) {
-                    0 -> Content(count = 100) {
+                    0 -> posts.forEach { post ->
                         Post(
-                            userId = if (userId.isEmpty()) 0 else userId.toInt(),
-                            username = username,
+                            post = post,
                             navController = navController,
-                            actionRow = {
-                                PostActions(
-                                    Modifier.align(Alignment.CenterHorizontally),
-                                    state,
-                                    scope
-                                )
-                            }
+                            state = state,
+                            coroutineScope = scope
                         )
                     }
-                    1 -> {
-                        Text("Tab 2 Content")
+                    1 -> UserState.likedPosts.forEach { post ->
+                        Post(
+                            post = post,
+                            navController = navController,
+                            state = state,
+                            coroutineScope = scope
+                        )
                     }
                 }
             }

@@ -1,6 +1,5 @@
-package com.example.myapplication.components.bottomoverlay.comments
+package com.example.myapplication.components.bottom.overlay.comments
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -9,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -22,13 +20,13 @@ import com.example.myapplication.components.TextInput
 import com.example.myapplication.components.icons.AccountCircle
 import com.example.myapplication.components.icons.Send
 import com.example.myapplication.screens.Screens
+import com.example.myapplication.utils.defaultContentCreator
 
 
 fun commentCreator(total: Int): MutableList<String> {
     val comments = mutableListOf<String>()
 
     for (i in 0..total) {
-        println("Adding comment $i...")
         comments.add("Comment $i")
     }
 
@@ -40,7 +38,7 @@ fun commentCreator(total: Int): MutableList<String> {
 @Composable
 fun Comments(navController: NavController) {
     var newComment by remember { mutableStateOf("") }
-    val comments by remember { mutableStateOf(commentCreator(2).toList()) }
+    val comments by remember { mutableStateOf(defaultContentCreator(2).toList()) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     fun postComment() {

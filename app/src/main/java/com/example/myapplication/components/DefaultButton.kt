@@ -21,6 +21,7 @@ fun DefaultButton(
     spacedBy: Dp = 15.dp,
     borderRadius: Dp = 20.dp,
     btnText: String,
+    enabled: Boolean = true,
     icon: ImageVector? = null,
     onBtnClick: () -> Unit
 ) {
@@ -30,7 +31,8 @@ fun DefaultButton(
             .then(modifier),
         onClick = onBtnClick,
         colors = ButtonDefaults.buttonColors(containerColor = Primary),
-        shape = RoundedCornerShape(borderRadius)
+        shape = RoundedCornerShape(borderRadius),
+        enabled = enabled
     ) {
         if (icon != null) {
             Row(
