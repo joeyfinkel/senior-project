@@ -44,19 +44,19 @@ fun BottomBar(navController: NavController) {
                 navController = navController,
                 defaultIcon = Icons.Outlined.Home,
                 selectedIcon = Icons.Filled.Home,
-                screen = Screens.Posts.route
+                screen = Screens.Posts
             )
             BaseIcon(
                 navController = navController,
                 defaultIcon = Icons.Outlined.Search,
                 selectedIcon = Icons.Filled.Search,
-                screen = Screens.Search.route
+                screen = Screens.Search
             )
             BaseIcon(
                 navController = navController,
                 defaultIcon = Icons.Outlined.Notifications,
                 selectedIcon = Icons.Filled.Notifications,
-                screen = Screens.Notifications.route
+                screen = Screens.Notifications
             )
         }
     }

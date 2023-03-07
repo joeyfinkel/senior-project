@@ -27,6 +27,9 @@ import com.example.myapplication.screens.posts.NewPost
 import com.example.myapplication.screens.profile.EditProfile
 import com.example.myapplication.screens.profile.FollowersOrFollowing
 import com.example.myapplication.screens.profile.Profile
+import com.example.myapplication.screens.profile.Settings
+import com.example.myapplication.screens.profile.editprofile.EditName
+import com.example.myapplication.screens.profile.editprofile.EditUsername
 import com.example.myapplication.screens.registration.Information
 import com.example.myapplication.screens.registration.Names
 import com.example.myapplication.screens.registration.Username
@@ -57,18 +60,16 @@ fun returnToMainScreen(navController: NavController) {
     val currentDestination = navController.currentDestination?.route
 
     // If the user is on the login screen or the name registration screen, pressing the back button will take them to the main screen.
-    if (currentDestination == Screens.NameRegistration.route || currentDestination == Screens.Login.route) {
-        navController.navigate(Screens.MainScreen.route)
+    if (currentDestination == Screens.NameRegistration || currentDestination == Screens.Login) {
+        navController.navigate(Screens.MainScreen)
     }
 }
 
 fun closeApp(navController: NavController, localContext: Context) {
     val currentDestination = navController.currentDestination?.route
 
-    println(currentDestination)
-
     // If the user is on the main screen or they are logged in, pressing the back button will close the app.
-    if (currentDestination == Screens.MainScreen.route || UserState.isLoggedIn) {
+    if (currentDestination == Screens.MainScreen || UserState.isLoggedIn) {
         (localContext as? Activity)?.finish()
     }
 }
@@ -78,45 +79,66 @@ fun closeApp(navController: NavController, localContext: Context) {
  * the route of the new [Screens] and provide it with that screen's component.
  */
 @SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun Main() {
     val navController = rememberNavController()
     val lazyListState = rememberLazyListState()
     val localContext = LocalContext.current
 
-    GlobalScope.launch {
-        val emails = Users.getEmails()
+//    GlobalScope.launch {
+//        val emails = Users.getEmails()
+//
+//        for (email in emails) {
+//            println(email)
+//        }
+//    }
 
-        for (email in emails) {
-            println(email)
-        }
-    }
-
-    NavHost(navController = navController, startDestination = Screens.MainScreen.route) {
+    NavHost(navController = navController, startDestination = Screens.MainScreen) {
         //region Main Screen
-        composable(Screens.MainScreen.route) { MainScreen(navController) }
+        composable(Screens.MainScreen) { MainScreen(navController) }
         //endregion
-        //region Registration screens
-        composable(Screens.NameRegistration.route) { Names(navController) }
-        composable(Screens.InformationRegistration.route) { Information(navController) }
-        composable(Screens.UsernameRegistration.route) { Username(navController) }
+        //region Registration - Name, Information, Username
+        composable(Screens.NameRegistration) { Names(navController) }
+        composable(Screens.InformationRegistration) { Information(navController) }
+        composable(Screens.UsernameRegistration) { Username(navController) }
         //endregion
         //region Login
-        composable(Screens.Login.route) { Login(navController) }
+        composable(Screens.Login) { Login(navController) }
         //endregion
-        //region Posts
-        composable(Screens.Posts.route) { AllPosts(navController, lazyListState) }
-        composable(Screens.NewPost.route) { NewPost(navController) }
+        //region Posts - Home & New Post
+        composable(Screens.Posts) { AllPosts(navController, lazyListState) }
+        composable(Screens.NewPost) { NewPost(navController) }
         //endregion
         //region User Profile
-        composable(Screens.UserProfile.route) { Profile(navController) }
+        composable(Screens.UserProfile) { Profile(navController) }
+        //region Edit Profile
+        composable(Screens.EditProfile) { EditProfile(navController) }
+        composable(Screens.EditName) { EditName(navController) }
+        composable(Screens.EditUsername) { EditUsername(navController) }
         //endregion
         //region Followers/Following List
-        composable(Screens.FollowersOrFollowingList.route) { FollowersOrFollowing(navController) }
+        composable(Screens.FollowersOrFollowingList) { FollowersOrFollowing(navController) }
         //endregion
-        //region Edit Profile
-        composable(Screens.EditProfile.route) { EditProfile(navController) }
+        //region Settings
+        composable(Screens.Settings) { Settings(navController) }
+        //endregion
+        //endregion
+        //region Search
+        composable(Screens.Search) {
+            Layout(navController = navController) { _, _ ->
+                Text(text = "Search screen")
+
+            }
+        }
+        //endregion
+        //region Notifications
+        composable(Screens.Notifications) {
+            Layout(navController = navController) { _, _ ->
+                Text(text = "Search screen")
+
+            }
+        }
         //endregion
     }
 

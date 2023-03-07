@@ -26,7 +26,7 @@ fun Names(navController: NavController) {
         isClicked.value = true
 
         if (UserState.firstName.isNotEmpty() && UserState.lastName.isNotEmpty()) {
-            navController.navigate(Screens.InformationRegistration.route)
+            navController.navigate(Screens.InformationRegistration)
         }
     }
 
@@ -59,7 +59,7 @@ fun Names(navController: NavController) {
                 UserState.lastName = ""
                 UserState.username = ""
 
-                navController.navigate(Screens.Login.route)
+                navController.navigate(Screens.Login)
             },
             onBtnClick = { proceedToNextScreen() },
         )

@@ -31,7 +31,7 @@ fun Information(navController: NavController) {
     fun proceedToNextScreen() {
         isClicked = true
 
-        if (isValidEmail.isValid) navController.navigate(Screens.UsernameRegistration.route)
+        if (isValidEmail.isValid) navController.navigate(Screens.UsernameRegistration)
     }
 
     RegistrationLayout(text = "Continue with your email") {

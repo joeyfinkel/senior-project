@@ -34,24 +34,51 @@ import com.example.myapplication.ui.theme.Primary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/**
- * The general layout of the entire app.
- * This function renders out the top bar, content, and bottom bar.
- * @param title The title of the current screen.
- * @param content The main content of the current page (**placed in between the top and bottom bar**).
- */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun Layout(
+private fun TopBar(
     title: String,
     navController: NavController,
-    lazyListState: LazyListState? = null,
+    lazyListState: LazyListState,
+    scope: CoroutineScope
+) = Surface(
+    color = Primary,
+    shape = RoundedCornerShape(bottomEnd = DefaultRadius, bottomStart = DefaultRadius)
+) {
+    SmallTopAppBar(
+        title = {
+            ClickableText(
+                text = AnnotatedString(title),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                onClick = { scope.launch { lazyListState.scrollToItem(0) } }
+            )
+        },
+        actions = {
+            AccountCircle(size = 50.dp) {
+                SelectedUserState.username = UserState.username
+                navController.navigate(Screens.UserProfile)
+            }
+        },
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            containerColor = Primary
+        ),
+        // disable user interaction with the top bar
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@Composable
+private fun Layout(
+    navController: NavController,
+    topBar: @Composable (scope: CoroutineScope) -> Unit,
+    floatingActionButton: @Composable () -> Unit,
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    val focusRequester = remember { FocusRequester() }
-    val context = LocalContext.current
+    val currentDestination = navController.currentDestination?.route
+
 
     var maxHeight = 1.0
 
@@ -59,43 +86,7 @@ fun Layout(
     else if (UserState.isCommentClicked) maxHeight = 0.5
 
     Scaffold(
-        topBar = {
-            Surface(
-                color = Primary,
-                shape = RoundedCornerShape(bottomEnd = DefaultRadius, bottomStart = DefaultRadius)
-            ) {
-                SmallTopAppBar(
-                    title = {
-                        if (lazyListState != null) {
-                            ClickableText(
-                                text = AnnotatedString(title),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleLarge,
-                                onClick = { scope.launch { lazyListState.scrollToItem(0) } }
-                            )
-                        } else {
-                            Text(
-                                title,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                        }
-                    },
-                    actions = {
-                        AccountCircle(size = 50.dp) {
-                            SelectedUserState.username = UserState.username
-                            navController.navigate(Screens.UserProfile.route)
-                        }
-                    },
-                    colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = Primary
-                    ),
-                    // disable user interaction with the top bar
-                )
-            }
-        },
+        topBar = { topBar(scope) },
         content = { innerPadding ->
             BottomOverlay(
                 sheetContent = {
@@ -136,14 +127,7 @@ fun Layout(
                 }
             }
         },
-        floatingActionButton = {
-            if (!sheetState.isVisible) {
-                AddCircle {
-                    navController.navigate(Screens.NewPost.route)
-//                    focusRequester.showKeyboard(context)
-                }
-            }
-        },
+        floatingActionButton = { if (currentDestination == Screens.Posts) floatingActionButton() },
         bottomBar = {
             if (!sheetState.isVisible) {
                 BottomBar(navController)
@@ -151,3 +135,44 @@ fun Layout(
         }
     )
 }
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun Layout(
+    title: String,
+    navController: NavController,
+    lazyListState: LazyListState,
+    content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
+) = Layout(
+    navController = navController,
+    topBar = {
+        TopBar(
+            title = title,
+            navController = navController,
+            lazyListState = lazyListState,
+            scope = it
+        )
+    },
+    floatingActionButton = {
+        AddCircle(size = 50.dp) {
+            navController.navigate(Screens.NewPost)
+        }
+    },
+    content = content
+)
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun Layout(
+    navController: NavController,
+    content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
+) = Layout(
+    navController = navController,
+    topBar = { },
+    floatingActionButton = {
+        AddCircle(size = 50.dp) {
+            navController.navigate(Screens.NewPost)
+        }
+    },
+    content = content
+)

@@ -30,11 +30,11 @@ fun MainScreen(navController: NavController) {
                 DefaultButton(
                     width = 280.dp,
                     btnText = "Login"
-                ) { navController.navigate(Screens.Login.route) }
+                ) { navController.navigate(Screens.Login) }
                 DefaultButton(
                     width = 280.dp,
                     btnText = "Register"
-                ) { navController.navigate(Screens.NameRegistration.route) }
+                ) { navController.navigate(Screens.NameRegistration) }
             }
         }
     }

@@ -13,7 +13,7 @@ internal fun PrimaryText(text: String) {
     Text(
         text = text,
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 18.sp,
+        fontSize = 16.sp,
         modifier = Modifier.padding(8.dp)
     )
 }

@@ -3,7 +3,7 @@ package com.example.myapplication.components.profile
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -12,17 +12,28 @@ import com.example.myapplication.components.DefaultButton
 import com.example.myapplication.screens.Screens
 
 @Composable
-fun EditProfileButton(
+fun ProfileButton(
     modifier: Modifier = Modifier,
+    isEdit: Boolean = false,
     borderRadius: Dp = 20.dp,
-    navController: NavController
+    navController: NavController? = null
 ) {
+    var buttonText by remember { mutableStateOf("Follow") }
+
     DefaultButton(
         modifier = modifier,
-        width = 150.dp,
+        width = 100.dp,
         spacedBy = 25.dp,
-        btnText = "Edit profile",
+        btnText = if (isEdit) buttonText else "Edit profile",
+        icon = if (isEdit)
+            if (buttonText == "Follow") Icons.Default.Add else Icons.Default.Check
+        else null,
         borderRadius = borderRadius,
-        onBtnClick = { navController.navigate(Screens.EditProfile.route) }
+        onBtnClick = {
+            if (!isEdit && navController != null)
+                navController.navigate(Screens.EditProfile)
+            else
+                buttonText = if (buttonText == "Follow") "Following" else "Follow"
+        }
     )
 }

@@ -7,4 +7,5 @@ import androidx.compose.runtime.setValue
 object SelectedUserState {
    var userId by mutableStateOf("")
    var username by mutableStateOf("")
+    var displayName by mutableStateOf("")
 }

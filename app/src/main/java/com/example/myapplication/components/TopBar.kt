@@ -7,7 +7,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
 import com.example.myapplication.components.icons.More
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -44,11 +47,15 @@ fun TopBar(
     TopBar(
         leadingIcon = {
             IconButton(onClick = onBackClick) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")
+                Icon(
+                    painterResource(id = R.drawable.chevron_left),
+                    contentDescription = "Back",
+                    modifier = Modifier.size(35.dp)
+                )
             }
         },
         title = {
-            if (title != null) Text(text = title)
+            if (title != null) Text(text = title, fontSize = 16.sp)
         },
         trailingIcon = {
             if (hasEllipsis) More { coroutineScope?.launch { state?.show() } }

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.myapplication.components.DefaultButton
+import com.example.myapplication.components.DropdownList
 import com.example.myapplication.components.TopBar
 import com.example.myapplication.components.icons.AccountCircle
 import com.example.myapplication.components.post.PostContainer
@@ -70,7 +71,7 @@ fun NewPost(navController: NavController) {
                                 )
                             )
                         }
-                        navController.navigate(Screens.Posts.route)
+                        navController.navigate(Screens.Posts)
                     }
                 )
             }
@@ -90,6 +91,13 @@ fun NewPost(navController: NavController) {
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center
                 ) {
+                    DropdownList(
+                        modifier = Modifier
+                            .width(75.dp)
+                            .padding(start = 8.dp),
+                        options = listOf("Public", "Private"),
+                        onOptionClick = { NewPostState.visibility = it}
+                    )
                     TextField(
                         value = value,
                         placeholder = { Text(text = "New Post") },

@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BottomOverlay(
-    sheetContent: @Composable() (() -> Unit),
+    sheetContent: @Composable (BoxScope.() -> Unit),
     maxHeight: Double,
     sheetState: ModalBottomSheetState,
-    content: @Composable() (() -> Unit)
+    content: @Composable (() -> Unit)
 ) {
     ModalBottomSheetLayout(
         sheetState = sheetState,

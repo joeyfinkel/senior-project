@@ -18,6 +18,7 @@ import com.example.myapplication.ui.theme.Primary
 
 @Composable
 fun RowData(primaryText: String, secondaryText: String, onClick: (() -> Unit)? = null) {
+    val width = 60.dp
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -25,7 +26,7 @@ fun RowData(primaryText: String, secondaryText: String, onClick: (() -> Unit)? =
         if (onClick == null) {
             Box(
                 modifier = Modifier
-                    .width(75.dp)
+                    .width(width)
                     .background(Primary, RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
@@ -39,12 +40,12 @@ fun RowData(primaryText: String, secondaryText: String, onClick: (() -> Unit)? =
                     backgroundColor = Primary,
                     contentColor = Color.Black
                 ),
-                modifier = Modifier.width(75.dp),
+                modifier = Modifier.width(width),
                 contentPadding = PaddingValues(0.dp)
             ) {
                 PrimaryText(text = primaryText)
             }
         }
-        Text(text = secondaryText)
+        Text(text = secondaryText, fontSize = 12.sp)
     }
 }

@@ -46,7 +46,7 @@ fun Username(navController: NavController) {
         if (isValid.isValid) {
             insertUser()
             UserState.isLoggedIn = true
-            navController.navigate(Screens.Posts.route)
+            navController.navigate(Screens.Posts)
         }
     }
 

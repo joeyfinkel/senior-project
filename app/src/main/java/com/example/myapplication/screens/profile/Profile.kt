@@ -17,8 +17,7 @@ import com.example.myapplication.R
 import com.example.myapplication.components.Tabs
 import com.example.myapplication.components.icons.AccountCircle
 import com.example.myapplication.components.post.Post
-import com.example.myapplication.components.profile.EditProfileButton
-import com.example.myapplication.components.profile.FollowButton
+import com.example.myapplication.components.profile.ProfileButton
 import com.example.myapplication.components.profile.ProfileLayout
 import com.example.myapplication.components.profile.RowData
 import com.example.myapplication.screens.Screens
@@ -35,8 +34,16 @@ fun Profile(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     ProfileLayout(
-        title = username,
-        onBackClick = { navController.navigate(Screens.Posts.route) },
+        title = SelectedUserState.displayName.ifEmpty { username },
+        navController = navController,
+        onBackClick = {
+            if (UserState.clickedFollower) {
+                navController.navigate(Screens.FollowersOrFollowingList)
+                UserState.clickedFollower = false
+            } else {
+                navController.navigate(Screens.Posts)
+            }
+        },
         hasEllipsis = true
     ) { innerPadding, state, scope ->
         LazyColumn(
@@ -56,9 +63,9 @@ fun Profile(navController: NavController) {
                     Text(text = "@${username.trim()}")
 
                     if (username == UserState.username) {
-                        EditProfileButton(navController = navController)
+                        ProfileButton(navController = navController)
                     } else {
-                        FollowButton()
+                        ProfileButton(isEdit = true)
                     }
 
                     Column(
@@ -76,7 +83,7 @@ fun Profile(navController: NavController) {
                                 secondaryText = "Followers",
                                 onClick = {
                                     FollowersOrFollowingState.selected = "Followers"
-                                    navController.navigate(Screens.FollowersOrFollowingList.route)
+                                    navController.navigate(Screens.FollowersOrFollowingList)
                                 }
                             )
                             RowData(
@@ -84,11 +91,12 @@ fun Profile(navController: NavController) {
                                 secondaryText = "Following",
                                 onClick = {
                                     FollowersOrFollowingState.selected = "Following"
-                                    navController.navigate(Screens.FollowersOrFollowingList.route)
+                                    navController.navigate(Screens.FollowersOrFollowingList)
                                 }
                             )
                             RowData(primaryText = "45", secondaryText = "Likes")
                         }
+                        if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty()) Text(text = UserState.bio)
                     }
                     Spacer(modifier = Modifier.height(15.dp))
                 }
@@ -104,22 +112,27 @@ fun Profile(navController: NavController) {
                 )
             }
             item {
-                when (selectedTabIndex) {
-                    0 -> posts.forEach { post ->
-                        Post(
-                            post = post,
-                            navController = navController,
-                            state = state,
-                            coroutineScope = scope
-                        )
-                    }
-                    1 -> UserState.likedPosts.forEach { post ->
-                        Post(
-                            post = post,
-                            navController = navController,
-                            state = state,
-                            coroutineScope = scope
-                        )
+                Column(
+                    modifier = Modifier.padding(top = 5.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    when (selectedTabIndex) {
+                        0 -> posts.forEach { post ->
+                            Post(
+                                post = post,
+                                navController = navController,
+                                state = state,
+                                coroutineScope = scope
+                            )
+                        }
+                        1 -> UserState.likedPosts.forEach { post ->
+                            Post(
+                                post = post,
+                                navController = navController,
+                                state = state,
+                                coroutineScope = scope
+                            )
+                        }
                     }
                 }
             }

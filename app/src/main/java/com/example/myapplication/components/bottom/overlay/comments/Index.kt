@@ -88,7 +88,7 @@ fun Comments(navController: NavController) {
             onValueChange = { newComment = it },
             leadingIcon = {
                 AccountCircle(size = 35.dp) {
-                    navController.navigate(Screens.UserProfile.route)
+                    navController.navigate(Screens.UserProfile)
                 }
             },
             trailingIcon = {

@@ -14,6 +14,7 @@ import com.example.myapplication.components.profile.UserToFollow
 import com.example.myapplication.screens.Screens
 import com.example.myapplication.state.FollowersOrFollowingState
 import com.example.myapplication.state.SelectedUserState
+import com.example.myapplication.state.UserState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -23,8 +24,13 @@ fun FollowersOrFollowing(navController: NavController) {
     }
 
     ProfileLayout(
-        title = SelectedUserState.username,
-        onBackClick = { navController.navigate(Screens.UserProfile.route) }
+        title = FollowersOrFollowingState.selected,
+        navController = navController,
+        onBackClick = {
+            SelectedUserState.username = UserState.username
+
+            navController.navigate(Screens.UserProfile)
+        }
     ) { innerPadding, _, _ ->
         Column(
             modifier = Modifier
@@ -35,7 +41,11 @@ fun FollowersOrFollowing(navController: NavController) {
                 tabs = listOf("Followers", "Following"),
                 asPills = true,
                 selectedTabIndex = selectedTabIndex,
-                onClick = { index -> selectedTabIndex = index }
+                onClick = { index ->
+                    selectedTabIndex = index
+                    FollowersOrFollowingState.selected =
+                        if (index == 0) "Followers" else "Following"
+                }
             ) {
                 LazyColumn {
                     items(100) { idx ->

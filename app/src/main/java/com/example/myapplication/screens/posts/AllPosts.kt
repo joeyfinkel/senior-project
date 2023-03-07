@@ -6,16 +6,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.myapplication.components.Layout
 import com.example.myapplication.components.post.Post
-import com.example.myapplication.components.post.PostActions
-import com.example.myapplication.dbtables.Post
-import com.example.myapplication.dbtables.Posts
 import com.example.myapplication.state.PostState
 
 @OptIn(ExperimentalMaterialApi::class)

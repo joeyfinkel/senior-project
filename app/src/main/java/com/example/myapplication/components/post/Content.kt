@@ -34,7 +34,7 @@ fun PostContent(userId: Int, username: String, text: String? = defaultText, navC
             SelectedUserState.userId = userId.toString()
             SelectedUserState.username = username
 
-            navController.navigate(Screens.UserProfile.route)
+            navController.navigate(Screens.UserProfile)
         }
         Column(
             modifier = Modifier

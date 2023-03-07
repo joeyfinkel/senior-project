@@ -31,7 +31,7 @@ internal fun Comment(userId: Int, username: String, comment: String, navControll
             AccountCircle(size = 35.dp) {
                 SelectedUserState.userId = userId.toString()
 
-                navController.navigate(Screens.UserProfile.route)
+                navController.navigate(Screens.UserProfile)
             }
         },
         trailing = { Like { println("You liked this comment") } }
