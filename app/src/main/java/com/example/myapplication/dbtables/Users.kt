@@ -2,18 +2,20 @@ package com.example.myapplication.dbtables
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import okhttp3.MediaType
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.DataOutputStream
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 data class User(
     val id: Int,
@@ -39,7 +41,7 @@ data class User(
 class Users private constructor() {
     companion object {
         private const val URL = "http://www.write-now.lesspopmorefizz.com"
-        private val client = OkHttpClient.Builder().build()
+        private val client = OkHttpClient()
 
         private suspend fun getJson(): String? = CoroutineScope(Dispatchers.IO).async {
             val request = Request.Builder().url(URL).build()
@@ -88,6 +90,14 @@ class Users private constructor() {
             return getAll().map { it.email }
         }
 
+        suspend fun getUsernames(): List<String> {
+            return getAll().map { it.username }
+        }
+
+        suspend fun getPasswords(): List<String> {
+            return getAll().map { it.passwordHash }
+        }
+
         fun insert(json: JSONObject): Boolean {
             val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
             val req = Request.Builder()
@@ -104,6 +114,9 @@ class Users private constructor() {
                 val response = client.newCall(req).execute()
                 val responseBody = response.body?.string()
 
+                Log.d("Response message", response.message)
+                Log.d("Response code", response.code.toString())
+
                 return if (response.isSuccessful) {
                     true
                 } else {
@@ -116,6 +129,70 @@ class Users private constructor() {
 
                 return false
             }
+        }
+
+        fun insert2(json: JSONObject) {
+            val url = URL(this.URL)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+
+            // set request headers
+            connection.setRequestProperty("Content-Type", "application/json")
+
+            // send post data
+            connection.doOutput = true
+            val outputStream = DataOutputStream(connection.outputStream)
+            outputStream.writeBytes(json.toString())
+            outputStream.flush()
+            outputStream.close()
+
+            val responseCode = connection.responseCode
+            println("POST Response Code :: $responseCode")
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val inputStream = BufferedReader(InputStreamReader(connection.inputStream))
+                val response = StringBuffer()
+
+                var inputLine: String?
+                while (inputStream.readLine().also { inputLine = it } != null) {
+                    response.append(inputLine)
+                }
+                inputStream.close()
+
+                // print result
+                println(response.toString())
+            } else {
+                println("POST request failed")
+            }
+        }
+
+        fun insert3(json: JSONObject) {
+            val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
+            val req = Request.Builder().url(URL).post(body).build()
+
+            client.newCall(req).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e("API Error", e.toString())
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseBody = response.body?.string()
+
+                    Log.d("Response message", response.message)
+                    Log.d("Response code", response.code.toString())
+
+                    if (response.isSuccessful) {
+                        Log.d("API Success", "User inserted")
+                    } else {
+                        Log.e("API Error", "Unexpected response code: ${response.code}")
+                        Log.e("API Error", responseBody ?: "No response body")
+                    }
+
+                    response.close().apply { Log.d("API Success", "Response closed") }
+                }
+            })
         }
     }
 }

@@ -36,9 +36,17 @@ fun Username(navController: NavController) {
                 put("passwordHash", UserState.password)
                 put("username", UserState.username)
             }
-            val inserted = Users.insert(json)
 
-            Log.d("Inserted", inserted.toString())
+//            try {
+//            val inserted = Users.insert(json)
+//
+//            Log.d("Inserted", inserted.toString())
+//
+//            } catch (e: Exception) {
+//                Log.e("Error", e.toString())
+//            }
+
+            Users.insert3(json)
         }
     }
 
