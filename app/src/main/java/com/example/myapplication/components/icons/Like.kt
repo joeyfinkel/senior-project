@@ -9,13 +9,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun Like(onClick: (color: Color) -> Unit) {
-    var color by remember { mutableStateOf(Color.Black) }
-    var icon by remember { mutableStateOf(Icons.Default.FavoriteBorder) }
+fun Like(isLiked: Boolean = false, onClick: (color: Color) -> Unit) {
+    val filled = Icons.Default.Favorite
+    val border = Icons.Default.FavoriteBorder
+
+    var color by remember { mutableStateOf(if (isLiked) Color.Red else Color.Black) }
+    var icon by remember { mutableStateOf(if (isLiked) filled else border) }
 
     fun toggleLike() {
-        val filled = Icons.Default.Favorite
-        val border = Icons.Default.FavoriteBorder
 
         color = if (color == Color.Red) Color.Black else Color.Red
         icon = if (icon == filled) border else filled

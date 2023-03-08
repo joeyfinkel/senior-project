@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.theme.AppBar
+import com.example.myapplication.ui.theme.Primary
 
 @Composable
 fun AnimatedColumn(
@@ -42,7 +42,7 @@ fun AnimatedColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White)
-                    .border(1.dp, AppBar, RoundedCornerShape(16.dp))
+                    .border(1.dp, Primary, RoundedCornerShape(16.dp))
             ) {
                 Column(
                     horizontalAlignment = horizontalAlignment,

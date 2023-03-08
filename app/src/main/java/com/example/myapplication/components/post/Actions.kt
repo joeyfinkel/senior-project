@@ -14,16 +14,24 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.components.icons.Comment
 import com.example.myapplication.components.icons.Like
 import com.example.myapplication.components.icons.More
+import com.example.myapplication.dbtables.Post
 import com.example.myapplication.state.UserState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun PostActions(modifier: Modifier, state: ModalBottomSheetState, coroutineScope: CoroutineScope) {
+fun PostActions(
+    modifier: Modifier,
+    state: ModalBottomSheetState,
+    coroutineScope: CoroutineScope,
+    post: Post,
+    onLike: (Color) -> Unit
+) {
     Box(
         modifier = Modifier
-            .fillMaxSize().then(modifier),
+            .fillMaxSize()
+            .then(modifier),
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
@@ -31,14 +39,7 @@ fun PostActions(modifier: Modifier, state: ModalBottomSheetState, coroutineScope
             horizontalArrangement = Arrangement.spacedBy(50.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Like {
-                // Change DB table data here...
-                if (it == Color.Red) {
-                    println("You liked the post")
-                } else {
-                    println("You unliked the post")
-                }
-            }
+            Like(post.isLiked) { onLike(it) }
             Comment {
                 UserState.isCommentClicked = true
                 UserState.isEllipsisClicked = false

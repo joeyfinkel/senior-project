@@ -1,4 +1,4 @@
-package com.example.myapplication.components.bottomoverlay
+package com.example.myapplication.components.bottom.overlay
 
 import androidx.compose.runtime.Composable
 

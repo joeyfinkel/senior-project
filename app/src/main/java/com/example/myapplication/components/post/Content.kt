@@ -9,7 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.myapplication.components.icons.AccountCircle
+import com.example.myapplication.screens.Screens
+import com.example.myapplication.state.SelectedUserState
+import com.example.myapplication.utils.defaultText
 
 /**
  * The content of the post. It will render out the who posted it and what they posted.
@@ -17,18 +21,20 @@ import com.example.myapplication.components.icons.AccountCircle
  * @param text The contents of the post.
  */
 @Composable
-fun PostContent(username: String, text: String) {
+fun PostContent(userId: Int, username: String, text: String? = defaultText, navController: NavController) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         AccountCircle(
-            35.dp,
+            size = 35.dp,
             modifier = Modifier.align(Alignment.Top)
         ) {
-            // TODO Need to implement going to account page on click
-            println("Hello there")
+            SelectedUserState.userId = userId.toString()
+            SelectedUserState.username = username
+
+            navController.navigate(Screens.UserProfile)
         }
         Column(
             modifier = Modifier
@@ -43,12 +49,13 @@ fun PostContent(username: String, text: String) {
                 style = MaterialTheme.typography.subtitle1
             )
             Spacer(modifier = Modifier.width(5.dp))
-            Text(
-                text = text,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (text != null) {
+                Text(
+                    text = text,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
-
     }
 }

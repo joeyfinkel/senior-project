@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun Send(color: Color = Color.Unspecified, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
+fun Send(color: Color = Color.Unspecified, enabled: Boolean, onClick: () -> Unit) {
+    IconButton(onClick = onClick, enabled = enabled) {
         Icon(
             Icons.Default.Send,
             contentDescription = "Send",

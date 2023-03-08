@@ -1,4 +1,4 @@
-package com.example.myapplication.components.registration
+package com.example.myapplication.screens.registration
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,8 +10,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
 import androidx.navigation.NavController
-import com.example.myapplication.Screen
+import com.example.myapplication.screens.Screens
 import com.example.myapplication.components.TextInput
+import com.example.myapplication.components.registration.RegistrationFooter
+import com.example.myapplication.components.registration.RegistrationLayout
 import com.example.myapplication.state.UserState
 
 @Composable
@@ -24,7 +26,7 @@ fun Names(navController: NavController) {
         isClicked.value = true
 
         if (UserState.firstName.isNotEmpty() && UserState.lastName.isNotEmpty()) {
-            navController.navigate(Screen.InformationRegistration.route)
+            navController.navigate(Screens.InformationRegistration)
         }
     }
 
@@ -52,7 +54,13 @@ fun Names(navController: NavController) {
         RegistrationFooter(
             btnText = "Next",
             additionalText = "Already have an account? Login here",
-            onTextClick = { navController.navigate(Screen.Login.route) },
+            onTextClick = {
+                UserState.firstName = ""
+                UserState.lastName = ""
+                UserState.username = ""
+
+                navController.navigate(Screens.Login)
+            },
             onBtnClick = { proceedToNextScreen() },
         )
     }
