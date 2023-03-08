@@ -86,13 +86,13 @@ fun Main() {
     val lazyListState = rememberLazyListState()
     val localContext = LocalContext.current
 
-//    GlobalScope.launch {
-//        val emails = Users.getEmails()
-//
-//        for (email in emails) {
-//            println(email)
-//        }
-//    }
+    GlobalScope.launch {
+        val emails = Users.getEmails()
+
+        for (email in emails) {
+            println(email)
+        }
+    }
 
     NavHost(navController = navController, startDestination = Screens.MainScreen) {
         //region Main Screen

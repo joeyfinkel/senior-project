@@ -40,7 +40,7 @@ data class User(
 
 class Users private constructor() {
     companion object {
-        private const val URL = "http://www.write-now.lesspopmorefizz.com"
+        private const val URL = "https://write-now.lesspopmorefizz.com"
         private val client = OkHttpClient()
 
         private suspend fun getJson(): String? = CoroutineScope(Dispatchers.IO).async {
