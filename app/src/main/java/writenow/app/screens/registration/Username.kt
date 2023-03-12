@@ -6,6 +6,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import writenow.app.components.TextInput
 import writenow.app.components.registration.RegistrationFooter
@@ -18,43 +21,32 @@ import writenow.app.utils.isValid
 
 @Composable
 fun Username(navController: NavController) {
-//    var isRegistered by remember { mutableStateOf(false) }
     var isClicked by remember { mutableStateOf(false) }
-    val jsonObject by remember {
-        mutableStateOf(JSONObject().apply {
-            put("firstName", capitalizeFirstLetter(UserState.firstName))
-            put("lastName", capitalizeFirstLetter(UserState.lastName))
-            put("email", UserState.email)
-            put("passwordHash", UserState.password)
-        })
-    }
 
     val isValid = isValid("username")
 
-//    LaunchedEffect(key1 = isClicked) {
-//            Log.d("Clicked", "$isClicked")
-//        if (isClicked) {
-//            Log.d("Clicked", "$isClicked")
-//            jsonObject.put("username", UserState.username)
-//            isRegistered = Users.register(jsonObject)
-//        }
-//    }
-
     fun proceedToNextScreen() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val json = JSONObject().apply {
+                put("firstName", capitalizeFirstLetter(UserState.firstName))
+                put("lastName", capitalizeFirstLetter(UserState.lastName))
+                put("email", UserState.email)
+                put("passwordHash", UserState.password)
+                put("username", UserState.username)
+            }
+
+            Users.register(json) {
+                UserState.isLoggedIn = true
+            }
+        }
+    }
+
+    fun register() {
         isClicked = true
 
-        jsonObject.put("username", UserState.username)
-
-        if (!isValid.isValid) return
-
-        Users.register(jsonObject) {
-            if (it && UserState.username.isNotEmpty()) {
-                UserState.isLoggedIn = true
-
-                navController.navigate(Screens.Posts)
-            } else {
-                UserState.isLoggedIn = false
-            }
+        if (isValid.isValid) {
+            proceedToNextScreen()
+            navController.navigate(Screens.Posts)
         }
     }
 
@@ -64,17 +56,13 @@ fun Username(navController: NavController) {
             label = "Username",
             errorText = isValid.errorText,
             isError = !isValid.isValid && isClicked,
-            onValueChange = {
-                UserState.username = it
-
-//                jsonObject.put("username", UserState.username)
-            },
+            onValueChange = { UserState.username = it },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Done,
                 capitalization = KeyboardCapitalization.Sentences
             ),
-            keyboardActions = KeyboardActions(onDone = { proceedToNextScreen() }),
+            keyboardActions = KeyboardActions(onDone = { register() }),
         )
-        RegistrationFooter(btnText = "Let's get started!", onBtnClick = { proceedToNextScreen() })
+        RegistrationFooter(btnText = "Let's get started!", onBtnClick = { register() })
     }
 }

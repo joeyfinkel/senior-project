@@ -1,13 +1,15 @@
 package writenow.app.dbtables
 
 import android.util.Log
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 
 data class User(
     val id: Int,
@@ -50,25 +52,38 @@ class Users private constructor() {
             }
         }.await()
 
-        private suspend fun post(section: String, json: JSONObject): Boolean =
-            CoroutineScope(Dispatchers.IO).async {
-                val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
-                val req = Request.Builder().url("$URL/$section").post(body).build()
+        private fun post(section: String, json: JSONObject, callback: (Boolean) -> Unit) {
+            val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
+            val req = Request.Builder().url("$URL/$section").post(body).build()
 
-                client.newCall(req).execute()
-
-                return@async try {
-                    val response = client.newCall(req).execute()
-                    val isSuccess = response.isSuccessful
-
-                    Log.d("Res", "Posted data")
-                    response.close()
-                    isSuccess
-                } catch (e: Exception) {
+            client.newCall(req).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
                     Log.e("API Error", e.toString())
-                    false
+
+                    callback(false)
                 }
-            }.await()
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseBody = response.body?.string()
+
+                    Log.d("Response message", response.message)
+                    Log.d("Response code", response.code.toString())
+
+                    if (response.isSuccessful) {
+                        Log.d("API Success", "Posted successfully")
+
+                        callback(true)
+                    } else {
+                        Log.e("API Error", "Unexpected response code: ${response.code}")
+                        Log.e("API Error", responseBody ?: "No response body")
+
+                        callback(false)
+                    }
+
+                    response.close().apply { Log.d("API Success", "Response closed") }
+                }
+            })
+        }
 
         suspend fun getAll(): List<User> {
             val json = getJson()
@@ -99,22 +114,16 @@ class Users private constructor() {
         }
 
         fun register(jsonObject: JSONObject, callback: (Boolean) -> Unit) {
-            runBlocking {
-                val res = withContext(Dispatchers.Default) {
-                    post("register", jsonObject)
-                }
-
-                callback(res)
-            }
+            post("register", jsonObject, callback)
         }
 
-        suspend fun login(username: String, password: String): Boolean {
+        fun login(username: String, password: String, callback: (Boolean) -> Unit) {
             val json = JSONObject().apply {
                 put("username", username)
                 put("password", password)
             }
 
-            return post("login", json)
+            post("login", json, callback)
         }
     }
 }

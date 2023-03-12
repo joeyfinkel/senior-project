@@ -27,21 +27,21 @@ fun Login(navController: NavController) {
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
-    LaunchedEffect(key1 = isClicked) {
-        isLoggedIn = Users.login(UserState.username, UserState.password)
-    }
-
     fun login() {
         val isNotEmpty = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
 
         if (isNotEmpty) {
+            Users.login(UserState.username, UserState.password) { isLoggedIn = it }
+
             if (isLoggedIn) {
+                println("Logged in")
                 UserState.isLoggedIn = true
                 errorText = ""
                 isError = false
 
                 navController.navigate(Screens.Posts)
             } else {
+                println("Incorrect username or password")
                 isError = true
                 errorText = "Incorrect username or password"
             }
