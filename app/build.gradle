@@ -8,11 +8,11 @@ ext {
 }
 
 android {
-    namespace 'com.example.myapplication'
+    namespace 'writenow.app'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.myapplication"
+        applicationId "writenow.app"
         minSdk 24
         targetSdk 33
         versionCode 1
