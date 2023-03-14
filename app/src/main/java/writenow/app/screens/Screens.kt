@@ -37,4 +37,5 @@ object Screens {
     const val Settings = "settings"
     const val EditName = "editName"
     const val EditUsername = "editUsername"
+    const val SpecificPost = "specificPost"
 }

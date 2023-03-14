@@ -46,3 +46,8 @@ fun isValid(prop: String, check: Boolean = true): IsValid {
 
     return IsValid(returnFn(), text)
 }
+
+@Composable
+fun isValid(prop1: String, prop2: String): Boolean {
+    return isValid(prop1, true).isValid && isValid(prop2, true).isValid
+}

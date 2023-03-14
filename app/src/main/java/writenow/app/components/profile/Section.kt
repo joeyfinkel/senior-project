@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrange
 
 @Composable
 fun Section(
@@ -26,7 +26,7 @@ fun Section(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        if (title != null) Text(text = title, color = Primary, fontWeight = FontWeight.Bold)
+        if (title != null) Text(text = title, color = PersianOrange, fontWeight = FontWeight.Bold)
         Column(verticalArrangement = Arrangement.spacedBy(columnSpacing)) {
             content()
         }

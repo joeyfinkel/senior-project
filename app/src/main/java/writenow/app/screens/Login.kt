@@ -1,5 +1,6 @@
 package writenow.app.screens
 
+import android.util.Log
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.*
@@ -10,46 +11,81 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import writenow.app.components.TextInput
 import writenow.app.components.registration.RegistrationFooter
 import writenow.app.components.registration.RegistrationLayout
+import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.state.UserState
+import java.time.LocalDate
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @Composable
 fun Login(navController: NavController) {
     var errorText by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
-    var isLoggedIn by remember { mutableStateOf(false) }
 
     val isClicked by remember { mutableStateOf(false) }
 
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
 
-    fun login() {
-        val isNotEmpty = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
+    suspend fun performLogin(): Boolean {
+        return suspendCoroutine { continuation ->
+            CoroutineScope(Dispatchers.IO).launch {
+                val isNotEmpty = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
 
-        if (isNotEmpty) {
-            Users.login(UserState.username, UserState.password) { isLoggedIn = it }
+                Users.login(UserState.username, UserState.password) { loggedIn, user ->
+                    if (isNotEmpty && loggedIn) {
+                        UserState.isLoggedIn = true
+                        errorText = ""
+                        isError = false
 
-            if (isLoggedIn) {
-                println("Logged in")
-                UserState.isLoggedIn = true
-                errorText = ""
-                isError = false
-
-                navController.navigate(Screens.Posts)
-            } else {
-                println("Incorrect username or password")
-                isError = true
-                errorText = "Incorrect username or password"
+                        if (user != null) {
+                            UserState.id = user.id
+                            UserState.username = user.username
+                            UserState.email = user.email
+                            UserState.firstName = user.firstName
+                            UserState.lastName = user.lastName
+                        }
+                        continuation.resume(true)
+                    } else {
+                        UserState.isLoggedIn = false
+                        errorText = "Incorrect username or password"
+                        isError = true
+                        Log.e("Logged in", "False")
+                        continuation.resume(false)
+                    }
+                }
             }
-        } else {
-            isError = true
-            errorText = "Please enter your username and password"
         }
     }
+
+    fun login() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val isNotEmpty = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
+            val date = LocalDate.now().dayOfMonth
+
+            if (isNotEmpty) {
+                val loggedIn = performLogin()
+
+                if (loggedIn) {
+                    navController.navigate(Screens.Posts)
+                    if (date == Posts.getLastPostDate(UserState.username)) {
+                        UserState.hasPosted = true
+                    }
+                }
+            } else {
+                isError = true
+                errorText = "Please enter your username and password"
+            }
+        }
+    }
+
 
     RegistrationLayout(text = "Login") {
         TextInput(

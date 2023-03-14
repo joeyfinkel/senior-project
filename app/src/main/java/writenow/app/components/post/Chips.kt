@@ -1,21 +1,22 @@
 package writenow.app.components.post
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrange
+import writenow.app.ui.theme.PlaceholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Chips(values: List<String>) {
     var selectedChip by remember { mutableStateOf(0) }
+
+    val darkMode = isSystemInDarkTheme()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -27,16 +28,16 @@ fun Chips(values: List<String>) {
                 enabled = selectedChip != index,
                 colors = ChipDefaults.chipColors(
                     backgroundColor = if (selectedChip == index) {
-                        Primary
+                        PersianOrange
                     } else {
                         Color.Unspecified
                     },
-                    disabledBackgroundColor = Primary,
-                    contentColor = Color.Black,
+                    disabledBackgroundColor = PersianOrange,
+                    contentColor = MaterialTheme.colors.onPrimary,
                     disabledContentColor = Color.White
                 )
             ) {
-                Text(text = value)
+                Text(text = value, color = PlaceholderColor(darkMode))
             }
         }
     }

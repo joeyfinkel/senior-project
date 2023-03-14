@@ -1,54 +1,44 @@
 package writenow.app.dbtables
 
-import writenow.app.utils.defaultText
+import android.util.Log
+import org.json.JSONObject
 
 data class Post(
     val id: Int,
-    val userId: Int,
+    val uuid: Int,
     val username: String,
     val text: String,
-    val likes: Int,
-    val comments: Int,
-    val date: String,
-    var isLiked: Boolean = false,
-) {
-    operator fun get(s: String): Any? {
-        return when (s) {
-            "id" -> id
-            "userId" -> userId
-            "text" -> text
-            "likes" -> likes
-            "comments" -> comments
-            "date" -> date
-            else -> null
-        }
-    }
-}
+    val visible: Int,
+    var createdAt: String
+)
 
 class Posts private constructor() {
     companion object {
-        /**
-         * Creates a list of posts with default values for testing purposes
-         * @param total The total number of posts to create
-         */
-        fun create(total: Int): MutableList<Post> {
-            val posts = mutableListOf<Post>()
+        private val utils = DBUtils("post")
 
-            for (i in 1..total) {
-                posts.add(
-                    Post(
-                        id = i,
-                        userId = i,
-                        text = defaultText,
-                        likes = 0,
-                        comments = 0,
-                        date = "2021-01-01",
-                        username = "User $i"
-                    )
+        suspend fun getAll(): List<Post> {
+            return utils.getAll {
+                Post(
+                    it.getInt("postID"),
+                    it.getInt("uuid"),
+                    it.getString("username"),
+                    it.getString("postContents"),
+                    it.getInt("visible"),
+                    it.getString("created")
                 )
             }
+        }
 
-            return posts
+        suspend fun getLastPostDate(username: String): Int {
+            val posts = getAll()
+            val lastPost = posts.filter { it.username == username }.maxByOrNull { it.createdAt }!!
+            val date = lastPost.createdAt.substringBefore(" ")
+            Log.d("Posts", "getLastPostDate: $date")
+            return date.substring(date.lastIndexOf("-") + 1).toInt()
+        }
+
+        fun post(jsonObject: JSONObject, callback: (Boolean) -> Unit) {
+            utils.post("add", jsonObject, callback)
         }
     }
 }

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import writenow.app.components.TopBar
-import writenow.app.components.bottomoverlay.BottomOverlay
+import writenow.app.components.bottom.overlay.BottomOverlay
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState

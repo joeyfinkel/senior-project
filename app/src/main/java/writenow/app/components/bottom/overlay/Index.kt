@@ -1,8 +1,9 @@
-package writenow.app.components.bottomoverlay
+package writenow.app.components.bottom.overlay
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +38,8 @@ fun BottomOverlay(
         },
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         scrimColor = Color.Black.copy(alpha = 0.5f),
-        sheetBackgroundColor = Color.White,
+        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
+        sheetContentColor = MaterialTheme.colorScheme.onSurface
     ) {
         content()
     }

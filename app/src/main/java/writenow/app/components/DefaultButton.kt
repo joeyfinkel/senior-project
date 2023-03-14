@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrangeLight
 
 @Composable
 fun DefaultButton(
@@ -32,7 +33,12 @@ fun DefaultButton(
             .widthIn(min = width)
             .then(modifier),
         onClick = onBtnClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Primary),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = PersianOrangeLight,
+            disabledContentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
         shape = RoundedCornerShape(borderRadius),
         enabled = enabled
     ) {

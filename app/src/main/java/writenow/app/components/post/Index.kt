@@ -22,7 +22,7 @@ fun Post(
 ) {
     PostContainer(height = DefaultWidth / 2) {
         PostContent(
-            userId = post.userId,
+            userId = post.uuid,
             username = post.username,
             text = post.text,
             navController = navController
@@ -36,11 +36,11 @@ fun Post(
                 val likedPosts = UserState.likedPosts
 
                 if (it == Color.Red) {
-                    post.isLiked = true
+//                    post.isLiked = true
 
                     if (!likedPosts.contains(post)) likedPosts.add(post)
                 } else {
-                    post.isLiked = false
+//                    post.isLiked = false
 
                     if (likedPosts.contains(post)) likedPosts.remove(post)
                 }

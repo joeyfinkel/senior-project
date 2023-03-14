@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import writenow.app.components.*
+import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
@@ -37,17 +39,17 @@ import writenow.app.screens.registration.Information
 import writenow.app.screens.registration.Names
 import writenow.app.screens.registration.Username
 import writenow.app.state.UserState
-import writenow.app.ui.theme.Background
 import writenow.app.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyApplicationTheme {
+            MyApplicationTheme(dynamicColor = false) {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(), color = Background
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     Main()
                 }
@@ -88,9 +90,14 @@ fun Main() {
 
     GlobalScope.launch {
         val emails = Users.getEmails()
+        var posts = Posts.getAll()
 
-        for (email in emails) {
-            println(email)
+//        for (email in emails) {
+//            println(email)
+//        }
+
+        for (post in posts) {
+            println(post)
         }
     }
 

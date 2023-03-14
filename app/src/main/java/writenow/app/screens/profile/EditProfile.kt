@@ -1,8 +1,10 @@
 package writenow.app.screens.profile
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,12 +15,14 @@ import writenow.app.components.icons.AccountCircle
 import writenow.app.components.profile.*
 import writenow.app.screens.Screens
 import writenow.app.state.UserState
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrange
+import writenow.app.ui.theme.PlaceholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EditProfile(navController: NavController) {
     var bio by remember { mutableStateOf("") }
+    val darkMode = isSystemInDarkTheme()
 
     ProfileLayout(
         title = "Edit profile",
@@ -37,7 +41,7 @@ fun EditProfile(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     AccountCircle(size = 75.dp)
-                    Text(text = "Change photo")
+                    Text(text = "Change photo", color = MaterialTheme.colorScheme.onSurface)
                 }
             }
             item { Spacer(modifier = Modifier.height(25.dp)) }
@@ -58,20 +62,23 @@ fun EditProfile(navController: NavController) {
                             .height(150.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(text = "Bio")
+                        Text(text = "Bio", color = MaterialTheme.colorScheme.onSurface)
                         OutlinedTextField(
                             value = UserState.bio,
                             placeholder = {
                                 if (UserState.bio.isEmpty() || UserState.bio.isBlank())
                                     Text(text = "Add some more info about yourself")
                             },
-//                            maxLines = 5,
                             modifier = Modifier.fillMaxSize(),
                             onValueChange = { UserState.bio = it },
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Primary,
-                                unfocusedBorderColor = Primary,
-                                cursorColor = MaterialTheme.colors.primary
+                                textColor = MaterialTheme.colorScheme.onSurface,
+                                placeholderColor = PlaceholderColor(darkMode),
+                                trailingIconColor = PlaceholderColor(darkMode),
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                focusedBorderColor = PersianOrange,
+                                unfocusedBorderColor = PersianOrange,
+                                cursorColor = PersianOrange
                             ),
                             trailingIcon = { Text(text = "${UserState.bio.length}/100") }
                         )

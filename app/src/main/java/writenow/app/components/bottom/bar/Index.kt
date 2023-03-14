@@ -1,4 +1,4 @@
-package writenow.app.components.bottombar
+package writenow.app.components.bottom.bar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,10 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import writenow.app.components.bottom.bar.BaseIcon
 import writenow.app.screens.Screens
 import writenow.app.ui.theme.DefaultRadius
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrange
 
 @Composable
 fun BottomBar(navController: NavController) {
@@ -27,7 +26,7 @@ fun BottomBar(navController: NavController) {
             .fillMaxWidth()
             .height(64.dp)
             .background(
-                color = Primary,
+                color = PersianOrange,
                 shape = RoundedCornerShape(
                     topEnd = DefaultRadius,
                     topStart = DefaultRadius

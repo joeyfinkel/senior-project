@@ -1,5 +1,6 @@
 package writenow.app.components.profile
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -10,7 +11,7 @@ import writenow.app.components.ClickableRow
 internal fun BottomOverlayButton(
     icon: Painter,
     text: String,
-    color: Color = Color.Black,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) = ClickableRow(
     key = text,
@@ -24,7 +25,7 @@ internal fun BottomOverlayButton(
 internal fun BottomOverlayButton(
     icon: ImageVector,
     text: String,
-    color: Color = Color.Unspecified,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) = ClickableRow(
     key = text,

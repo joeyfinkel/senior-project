@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,39 +23,37 @@ private fun ClickableRow(
     trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
-    color: Color = Color.Unspecified,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     leadingIcon: @Composable (() -> Unit)? = null,
     onClick: () -> Unit
+) = Row(
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick() }
+        .height(height)
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .height(height)
-    ) {
-        if (leadingIcon != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(15.dp)
-            ) {
-                leadingIcon()
-                Text(text = key, color = color)
-            }
-        } else {
+    if (leadingIcon != null) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            leadingIcon()
             Text(text = key, color = color)
         }
+    } else {
+        Text(text = key, color = color)
+    }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (trailingText && value != null) Text(text = value)
-            if (chevron) Icon(
-                painter = painterResource(id = R.drawable.chevron_right),
-                contentDescription = "Right",
-                modifier = Modifier.size(25.dp),
-                tint = Color.Gray
-            )
-        }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (trailingText && value != null) Text(text = value, color = color)
+        if (chevron) Icon(
+            painter = painterResource(id = R.drawable.chevron_right),
+            contentDescription = "Right",
+            modifier = Modifier.size(25.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
@@ -65,7 +64,7 @@ fun ClickableRow(
     trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
-    color: Color = Color.Black,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) = ClickableRow(
     key = key,
@@ -85,7 +84,7 @@ fun ClickableRow(
     trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
-    color: Color = Color.Black,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     leadingIcon: ImageVector,
     onClick: () -> Unit
 ) = ClickableRow(
@@ -113,7 +112,7 @@ fun ClickableRow(
     trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
-    color: Color = Color.Black,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     leadingIcon: Painter,
     onClick: () -> Unit
 ) = ClickableRow(

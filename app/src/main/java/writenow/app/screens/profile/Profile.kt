@@ -7,6 +7,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +23,6 @@ import writenow.app.components.profile.ProfileLayout
 import writenow.app.components.profile.RowData
 import writenow.app.screens.Screens
 import writenow.app.state.FollowersOrFollowingState
-import writenow.app.state.PostState
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
 
@@ -30,7 +30,7 @@ import writenow.app.state.UserState
 @Composable
 fun Profile(navController: NavController) {
     val username = SelectedUserState.username
-    val posts = PostState.posts.filter { post -> post.username == username }
+//    val posts = PostState.posts.filter { post -> post.username == username }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     ProfileLayout(
@@ -60,7 +60,7 @@ fun Profile(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     AccountCircle(size = 75.dp)
-                    Text(text = "@${username.trim()}")
+                    Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
 
                     if (username == UserState.username) {
                         ProfileButton(navController = navController)
@@ -96,7 +96,8 @@ fun Profile(navController: NavController) {
                             )
                             RowData(primaryText = "45", secondaryText = "Likes")
                         }
-                        if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty()) Text(text = UserState.bio)
+                        if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty())
+                            Text(text = UserState.bio)
                     }
                     Spacer(modifier = Modifier.height(15.dp))
                 }
@@ -117,7 +118,7 @@ fun Profile(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     when (selectedTabIndex) {
-                        0 -> posts.forEach { post ->
+                        0 -> UserState.posts.forEach { post ->
                             Post(
                                 post = post,
                                 navController = navController,

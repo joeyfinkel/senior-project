@@ -1,7 +1,7 @@
 package writenow.app.state
 
-import writenow.app.dbtables.Posts
+import writenow.app.dbtables.Post
 
 object PostState {
-    var posts = Posts.create(3)
+    var posts = mutableListOf<Post>()
 }

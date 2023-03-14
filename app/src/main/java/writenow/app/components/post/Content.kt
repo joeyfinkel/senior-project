@@ -1,8 +1,8 @@
 package writenow.app.components.post
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +21,12 @@ import writenow.app.utils.defaultText
  * @param text The contents of the post.
  */
 @Composable
-fun PostContent(userId: Int, username: String, text: String? = defaultText, navController: NavController) {
+fun PostContent(
+    userId: Int,
+    username: String,
+    text: String? = defaultText,
+    navController: NavController
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -46,7 +51,8 @@ fun PostContent(userId: Int, username: String, text: String? = defaultText, navC
                 text = username,
                 maxLines = 1,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.subtitle1
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.width(5.dp))
             if (text != null) {
@@ -54,6 +60,7 @@ fun PostContent(userId: Int, username: String, text: String? = defaultText, navC
                     text = text,
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

@@ -20,25 +20,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import writenow.app.components.bottom.bar.BottomBar
+import writenow.app.components.bottom.overlay.BottomOverlay
 import writenow.app.components.bottom.overlay.comments.Comments
-import writenow.app.components.bottombar.BottomBar
-import writenow.app.components.bottomoverlay.BottomOverlay
 import writenow.app.components.icons.AccountCircle
 import writenow.app.components.icons.AddCircle
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
 import writenow.app.ui.theme.DefaultRadius
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrange
 
 @Composable
 private fun TopBar(
-    title: String,
-    navController: NavController,
-    lazyListState: LazyListState,
-    scope: CoroutineScope
+    title: String, navController: NavController, lazyListState: LazyListState, scope: CoroutineScope
 ) = Surface(
-    color = Primary,
+    color = PersianOrange,
     shape = RoundedCornerShape(bottomEnd = DefaultRadius, bottomStart = DefaultRadius)
 ) {
     SmallTopAppBar(
@@ -47,7 +44,9 @@ private fun TopBar(
                 text = AnnotatedString(title),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
                 onClick = { scope.launch { lazyListState.scrollToItem(0) } }
             )
         },
@@ -58,7 +57,7 @@ private fun TopBar(
             }
         },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = Primary
+            containerColor = PersianOrange
         ),
         // disable user interaction with the top bar
     )
@@ -82,8 +81,7 @@ private fun Layout(
     if (UserState.isEllipsisClicked) maxHeight = 0.35
     else if (UserState.isCommentClicked) maxHeight = 0.5
 
-    Scaffold(
-        topBar = { topBar(scope) },
+    Scaffold(topBar = { topBar(scope) },
         content = { innerPadding ->
             BottomOverlay(
                 sheetContent = {
@@ -98,39 +96,40 @@ private fun Layout(
                     }
                 },
                 maxHeight = maxHeight,
-                sheetState = sheetState
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
+                sheetState = sheetState,
+                content = {
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier.padding(top = 10.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            contentAlignment = Alignment.Center
                         ) {
-                            content(sheetState, scope)
-                            Spacer(modifier = Modifier.weight(1f))
+                            Column(
+                                modifier = Modifier.padding(top = 10.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                content(sheetState, scope)
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }
-            }
+            )
         },
-        floatingActionButton = { if (currentDestination == Screens.Posts) floatingActionButton() },
+        contentColor = MaterialTheme.colorScheme.onSurface,
+//        floatingActionButton = { if (currentDestination == Screens.Posts && UserState.hasPosted) floatingActionButton() },
         bottomBar = {
             if (!sheetState.isVisible) {
                 BottomBar(navController)
             }
-        }
-    )
+        })
 }
 
 @OptIn(ExperimentalMaterialApi::class)

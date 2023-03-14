@@ -39,7 +39,7 @@ fun PostActions(
             horizontalArrangement = Arrangement.spacedBy(50.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Like(post.isLiked) { onLike(it) }
+            Like(false) { onLike(it) }
             Comment {
                 UserState.isCommentClicked = true
                 UserState.isEllipsisClicked = false

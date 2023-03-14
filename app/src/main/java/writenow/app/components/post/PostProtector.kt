@@ -2,6 +2,7 @@ package writenow.app.components.post
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,13 +37,15 @@ fun PostProtector(navController: NavController) {
             text = "Oops, you didn't post yet!",
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
-            fontSize = 34.sp
+            fontSize = 34.sp,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = if (name == "") genericMessage else "Hello $name, $genericMessage".trim(),
             textAlign = TextAlign.Justify,
             fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(200.dp))
         DefaultButton(btnText = "Post") { navController.navigate(Screens.NewPost) }

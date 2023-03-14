@@ -1,5 +1,6 @@
 package writenow.app.screens.registration
 
+import android.util.Log
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.*
@@ -36,7 +37,12 @@ fun Username(navController: NavController) {
             }
 
             Users.register(json) {
-                UserState.isLoggedIn = true
+                if (it) {
+                    UserState.isLoggedIn = true
+                    Log.d("Success", "registered")
+                } else {
+                    Log.d("Error", "failed to register")
+                }
             }
         }
     }

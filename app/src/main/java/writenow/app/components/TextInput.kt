@@ -1,10 +1,12 @@
 package writenow.app.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -14,7 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrange
+import writenow.app.ui.theme.PlaceholderColor
 
 /**
  * The default text field for the app.
@@ -37,6 +40,8 @@ fun TextInput(
     spacer: Boolean = true,
     width: Dp = 280.dp
 ) {
+    val darkMode = isSystemInDarkTheme()
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -50,9 +55,12 @@ fun TextInput(
         visualTransformation = visualTransformation,
         isError = isError,
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = Primary,
-            unfocusedBorderColor = Primary,
-            cursorColor = Primary,
+            textColor = MaterialTheme.colorScheme.onSurface,
+            placeholderColor = PlaceholderColor(darkMode),
+            unfocusedLabelColor = PlaceholderColor(darkMode),
+            focusedBorderColor = PersianOrange,
+            unfocusedBorderColor = PersianOrange,
+            cursorColor = PersianOrange,
         )
     )
 

@@ -24,6 +24,9 @@ object UserState {
     var isEllipsisClicked by mutableStateOf(false)
     var clickedFollower by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)
+    val selectedPost by mutableStateOf(false)
+
+    var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()
 
     operator fun get(username: String): Any {

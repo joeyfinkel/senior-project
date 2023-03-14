@@ -4,16 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import writenow.app.ui.theme.DefaultWidth
-import writenow.app.ui.theme.PostBG
-import writenow.app.ui.theme.Primary
+import writenow.app.ui.theme.PersianOrange
 
 @Composable
 fun PostContainer(
@@ -44,9 +43,8 @@ fun PostContainer(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
-                .border(2.dp, Primary, RoundedCornerShape(16.dp))
-                .background(PostBG)
+                .background(MaterialTheme.colorScheme.surface)
+                .border(2.dp, PersianOrange, RoundedCornerShape(16.dp))
         ) {
             Column(
                 modifier = Modifier
