@@ -49,8 +49,8 @@ fun PostContainer(
             Column(
                 modifier = Modifier
                     .padding(top = 5.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 content()
             }

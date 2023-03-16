@@ -21,17 +21,21 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BottomOverlay(
     sheetContent: @Composable (BoxScope.() -> Unit),
-    maxHeight: Double,
+    maxHeight: Double = 1.0,
+    fullScreen: Boolean = false,
     sheetState: ModalBottomSheetState,
     content: @Composable (() -> Unit)
 ) {
+    val modifier = if (fullScreen) Modifier.fillMaxSize() else Modifier
+        .fillMaxWidth()
+        .height((LocalConfiguration.current.screenHeightDp * maxHeight).dp)
+
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetContent = {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height((LocalConfiguration.current.screenHeightDp * maxHeight).dp)
+                    .then(modifier)
             ) {
                 sheetContent()
             }

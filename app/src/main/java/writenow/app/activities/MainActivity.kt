@@ -21,11 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import writenow.app.components.*
-import writenow.app.dbtables.Posts
-import writenow.app.dbtables.Users
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
 import writenow.app.screens.posts.NewPost
@@ -87,19 +83,6 @@ fun Main() {
     val navController = rememberNavController()
     val lazyListState = rememberLazyListState()
     val localContext = LocalContext.current
-
-    GlobalScope.launch {
-        val emails = Users.getEmails()
-        var posts = Posts.getAll()
-
-//        for (email in emails) {
-//            println(email)
-//        }
-
-        for (post in posts) {
-            println(post)
-        }
-    }
 
     NavHost(navController = navController, startDestination = Screens.MainScreen) {
         //region Main Screen

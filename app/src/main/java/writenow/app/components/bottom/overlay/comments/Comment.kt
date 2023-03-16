@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.components.icons.AccountCircle
-import writenow.app.components.icons.Like
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 
@@ -34,6 +33,6 @@ internal fun Comment(userId: Int, username: String, comment: String, navControll
                 navController.navigate(Screens.UserProfile)
             }
         },
-        trailing = { Like { println("You liked this comment") } }
+//        trailing = { Like { println("You liked this comment") } }
     )
 }

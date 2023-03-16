@@ -24,7 +24,7 @@ data class User(
     }
 }
 
-class Users private constructor() : DBUtils("user") {
+class Users private constructor() {
     companion object {
         private val utils = DBUtils("user")
 

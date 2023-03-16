@@ -5,54 +5,69 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.components.Layout
+import writenow.app.components.bottom.overlay.BottomOverlay
 import writenow.app.components.post.Post
 import writenow.app.components.post.PostProtector
 import writenow.app.dbtables.Post
 import writenow.app.dbtables.Posts
 import writenow.app.state.PostState
 import writenow.app.state.UserState
-import java.time.LocalDate
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AllPosts(navController: NavController, lazyListState: LazyListState) {
     val posts = remember { mutableStateListOf<Post>() }
+    val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
 
     LaunchedEffect(Unit) {
-        val date = LocalDate.now().dayOfMonth
-        posts.addAll(Posts.getAll())
+        if (posts.isEmpty()) posts.addAll(Posts.getAll())
 
-        PostState.posts = posts
-        UserState.posts =
-            posts.filter { post -> post.username == UserState.username }.toMutableList()
-
+        PostState.allPosts = posts
     }
 
-    Layout(
-        title = "WriteNow",
-        navController = navController,
-        lazyListState = lazyListState
-    ) { state, scope ->
-        if (UserState.hasPosted) {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(25.dp), state = lazyListState) {
-                itemsIndexed(posts) { _, item ->
-                    Post(
-                        post = item,
-                        navController = navController,
-                        state = state,
-                        coroutineScope = scope
-                    )
-                }
+    CompositionLocalProvider(UserState.selectedPostState provides sheetState) {
+        Layout(
+            title = "WriteNow", navController = navController, lazyListState = lazyListState
+        ) { state, scope ->
+            if (UserState.hasPosted) {
+                BottomOverlay(
+                    sheetContent = {},
+                    fullScreen = true,
+                    sheetState = sheetState,
+                    content = {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(25.dp), state = lazyListState
+                        ) {
+                            itemsIndexed(posts) { _, item ->
+                                Post(
+                                    post = item,
+                                    navController = navController,
+                                    state = state,
+                                    coroutineScope = scope
+                                )
+                            }
+                        }
+                    })
+//            LazyColumn(verticalArrangement = Arrangement.spacedBy(25.dp), state = lazyListState) {
+//                itemsIndexed(posts) { _, item ->
+//                    Post(
+//                        post = item,
+//                        navController = navController,
+//                        state = state,
+//                        coroutineScope = scope
+//                    )
+//                }
+//            }
+            } else {
+                PostProtector(navController = navController)
             }
-        } else {
-            PostProtector(navController = navController)
         }
     }
 }

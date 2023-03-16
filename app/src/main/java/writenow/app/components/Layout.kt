@@ -24,7 +24,6 @@ import writenow.app.components.bottom.bar.BottomBar
 import writenow.app.components.bottom.overlay.BottomOverlay
 import writenow.app.components.bottom.overlay.comments.Comments
 import writenow.app.components.icons.AccountCircle
-import writenow.app.components.icons.AddCircle
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
@@ -68,10 +67,10 @@ private fun TopBar(
 private fun Layout(
     navController: NavController,
     topBar: @Composable (scope: CoroutineScope) -> Unit,
-    floatingActionButton: @Composable () -> Unit,
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val selectedPostState = UserState.selectedPostState.current
     val scope = rememberCoroutineScope()
     val currentDestination = navController.currentDestination?.route
 
@@ -81,7 +80,8 @@ private fun Layout(
     if (UserState.isEllipsisClicked) maxHeight = 0.35
     else if (UserState.isCommentClicked) maxHeight = 0.5
 
-    Scaffold(topBar = { topBar(scope) },
+    Scaffold(
+        topBar = { topBar(scope) },
         content = { innerPadding ->
             BottomOverlay(
                 sheetContent = {
@@ -124,12 +124,12 @@ private fun Layout(
             )
         },
         contentColor = MaterialTheme.colorScheme.onSurface,
-//        floatingActionButton = { if (currentDestination == Screens.Posts && UserState.hasPosted) floatingActionButton() },
         bottomBar = {
             if (!sheetState.isVisible) {
                 BottomBar(navController)
             }
-        })
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -149,11 +149,6 @@ fun Layout(
             scope = it
         )
     },
-    floatingActionButton = {
-        AddCircle(size = 50.dp) {
-            navController.navigate(Screens.NewPost)
-        }
-    },
     content = content
 )
 
@@ -165,10 +160,5 @@ fun Layout(
 ) = Layout(
     navController = navController,
     topBar = { },
-    floatingActionButton = {
-        AddCircle(size = 50.dp) {
-            navController.navigate(Screens.NewPost)
-        }
-    },
     content = content
 )

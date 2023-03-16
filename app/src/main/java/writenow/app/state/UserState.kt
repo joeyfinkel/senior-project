@@ -1,8 +1,9 @@
 package writenow.app.state
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.annotation.SuppressLint
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.runtime.*
 import androidx.navigation.NavController
 import writenow.app.dbtables.Post
 import writenow.app.screens.Screens
@@ -24,8 +25,12 @@ object UserState {
     var isEllipsisClicked by mutableStateOf(false)
     var clickedFollower by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)
-    val selectedPost by mutableStateOf(false)
 
+    @SuppressLint("CompositionLocalNaming")
+    @OptIn(ExperimentalMaterialApi::class)
+    var selectedPostState = compositionLocalOf<ModalBottomSheetState> {
+        error("No ModalBottomSheetState found!")
+    }
     var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()
 

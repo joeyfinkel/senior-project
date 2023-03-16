@@ -13,7 +13,7 @@ import writenow.app.ui.theme.PlaceholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Chips(values: List<String>) {
+fun Chips(values: List<String>, onClick: (Int) -> Unit) {
     var selectedChip by remember { mutableStateOf(0) }
 
     val darkMode = isSystemInDarkTheme()
@@ -24,7 +24,10 @@ fun Chips(values: List<String>) {
     ) {
         values.forEachIndexed { index, value ->
             Chip(
-                onClick = { selectedChip = index },
+                onClick = {
+                    selectedChip = index
+                    onClick(index)
+                },
                 enabled = selectedChip != index,
                 colors = ChipDefaults.chipColors(
                     backgroundColor = if (selectedChip == index) {

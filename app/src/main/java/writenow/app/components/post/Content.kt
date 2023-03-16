@@ -1,5 +1,6 @@
 package writenow.app.components.post
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +26,8 @@ fun PostContent(
     userId: Int,
     username: String,
     text: String? = defaultText,
-    navController: NavController
+    navController: NavController,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -44,7 +46,8 @@ fun PostContent(
         Column(
             modifier = Modifier
                 .padding(top = 5.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
             verticalArrangement = Arrangement.Center
         ) {
             Text(

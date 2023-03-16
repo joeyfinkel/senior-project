@@ -37,6 +37,7 @@ import writenow.app.ui.theme.PlaceholderColor
 @Composable
 fun NewPost(navController: NavController) {
     var value by remember { mutableStateOf("") }
+    var isPublic by remember { mutableStateOf(true) }
 
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -47,7 +48,7 @@ fun NewPost(navController: NavController) {
             val json = JSONObject().apply {
                 put("userID", UserState.id)
                 put("postContents", value)
-                put("visible", 1)
+                put("visible", if (isPublic) 1 else 0)
             }
 
             Posts.post(json) { Log.d("NewPost", "post: $it") }
@@ -93,7 +94,7 @@ fun NewPost(navController: NavController) {
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Chips(values = listOf("Public", "Private"))
+                    Chips(values = listOf("Public", "Private"), onClick = { isPublic = it == 0 })
                     TextField(
                         value = value,
                         placeholder = { Text(text = "New Post") },
