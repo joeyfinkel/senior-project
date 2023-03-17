@@ -18,7 +18,7 @@ import writenow.app.ui.theme.DefaultWidth
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Post(
-    post: Post,
+    post: Post?,
     navController: NavController,
     state: ModalBottomSheetState,
     coroutineScope: CoroutineScope,
@@ -29,7 +29,8 @@ fun Post(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        likedPost = LikesAndComments.getLikedPost(UserState.id, post.id)
+        if (post != null)
+            likedPost = LikesAndComments.getLikedPost(UserState.id, post.id)
 
         // If the post is liked, add it to the liked posts list
         if (likedPost != null && likedPost?.liked == 1) {
@@ -43,19 +44,24 @@ fun Post(
         }
     }
 
-    PostContainer(height = DefaultWidth / 2) {
-        PostContent(
-            userId = post.uuid,
-            username = post.username,
-            text = post.text,
-            navController = navController,
-            onClick = { scope.launch { sheetState.show() } },
-        )
-        PostActions(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            state = state,
-            coroutineScope = coroutineScope,
-            postId = post.id
-        )
+    if (post != null) {
+        PostContainer(height = DefaultWidth / 2) {
+            PostContent(
+                userId = post.uuid,
+                username = post.username,
+                text = post.text,
+                navController = navController,
+                onClick = {
+                    UserState.selectedPost = post
+                    scope.launch { sheetState.show() }
+                },
+            )
+            PostActions(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                state = state,
+                coroutineScope = coroutineScope,
+                postId = post.id
+            )
+        }
     }
 }

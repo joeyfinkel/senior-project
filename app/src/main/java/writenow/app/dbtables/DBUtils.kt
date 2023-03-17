@@ -12,11 +12,13 @@ import org.json.JSONObject
 import java.io.IOException
 
 class DBUtils(table: String) {
-    private val url = "http://write-now.lesspopmorefizz.com/api/$table"
+    private val url = "https://write-now.lesspopmorefizz.com/api/$table"
     private val client = OkHttpClient()
 
     private suspend fun getJson(): String? = CoroutineScope(Dispatchers.IO).async {
-        val request = Request.Builder().url(url).build()
+        val request = Request.Builder().url(url).get().build()
+
+        Log.d("URL", url)
 
         return@async try {
             val response = client.newCall(request).execute()

@@ -25,6 +25,7 @@ object UserState {
     var isEllipsisClicked by mutableStateOf(false)
     var clickedFollower by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)
+    var selectedPost by mutableStateOf<Post?>(null)
 
     @SuppressLint("CompositionLocalNaming")
     @OptIn(ExperimentalMaterialApi::class)

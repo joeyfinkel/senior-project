@@ -1,6 +1,5 @@
 package writenow.app.dbtables
 
-import android.util.Log
 import org.json.JSONObject
 
 data class User(
@@ -45,10 +44,6 @@ class Users private constructor() {
             return getAll().map { it[prop] }.filterIsInstance<T>()
         }
 
-        suspend fun getEmails(): List<String> {
-            return getAll().map { it.email }
-        }
-
         fun register(jsonObject: JSONObject, callback: (Boolean) -> Unit) {
             utils.post("register", jsonObject, callback)
         }
@@ -59,9 +54,8 @@ class Users private constructor() {
                 put("password", password)
             }
             val user = getAll().find { it.username.equals(username, true) }
-
+            println("$user")
             utils.post("login", json) {
-                Log.d("login2", "it: $it, user: $user")
                 if (it && user != null) callback(true, user)
                 else callback(false, null)
             }

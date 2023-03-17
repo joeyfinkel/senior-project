@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,6 +26,7 @@ import java.time.LocalDate
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Login(navController: NavController) {
     var errorText by remember { mutableStateOf("") }
@@ -33,6 +36,7 @@ fun Login(navController: NavController) {
 
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     suspend fun performLogin(): Boolean {
         return suspendCoroutine { continuation ->
@@ -66,6 +70,8 @@ fun Login(navController: NavController) {
     }
 
     fun login() {
+        keyboardController?.hide()
+
         CoroutineScope(Dispatchers.Main).launch {
             val isNotEmpty = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
             val date = LocalDate.now().dayOfMonth
