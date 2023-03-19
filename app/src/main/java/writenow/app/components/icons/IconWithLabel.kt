@@ -1,5 +1,6 @@
 package writenow.app.components.icons
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,30 +10,16 @@ import androidx.compose.ui.Modifier
 
 /**
  * The default icon with label component.
- * @param direction The direction in which the icon and label will be arranged. If no direction is specified, the icon and label will be arranged in a row
  * @param icon The icon to be displayed.
  * @param label The label to be displayed.
  */
 @Composable
-fun IconWithLabel(
-    direction: String? = null,
+private fun IconWithLabel(
     icon: @Composable () -> Unit,
     label: @Composable () -> Unit
 ) {
-    when (direction) {
-        "column" -> Column {
-            icon()
-            label()
-        }
-        "row" -> Row {
-            icon()
-            label()
-        }
-        else -> {
-            icon()
-            label()
-        }
-    }
+    icon()
+    label()
 }
 
 /**
@@ -74,9 +61,10 @@ fun IconWithLabel(
     horizontalArrangement: Arrangement.Horizontal,
     verticalAlignment: Alignment.Vertical,
     icon: @Composable () -> Unit,
-    label: @Composable () -> Unit
+    label: @Composable () -> Unit,
+    onClick: () -> Unit
 ) = Row(
-    modifier = modifier,
+    modifier = modifier.clickable(onClick = onClick),
     horizontalArrangement = horizontalArrangement,
     verticalAlignment = verticalAlignment
 ) {

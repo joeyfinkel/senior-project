@@ -1,4 +1,4 @@
-package writenow.app.screens.profile
+package writenow.app.screens.profile.editprofile
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -84,51 +84,6 @@ fun EditProfile(navController: NavController) {
                         )
                     }
                 }
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(horizontal = 15.dp),
-//                    horizontalAlignment = Alignment.Start,
-//                    verticalArrangement = Arrangement.spacedBy(5.dp)
-//                ) {
-//                    Text(
-//                        text = "About you",
-//                        style = MaterialTheme.typography.caption,
-//                        color = Color.Gray
-//                    )
-//                    Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-//                        ClickableRow(
-//                            key = "Name",
-//                            value = UserState.displayName
-//                        )
-//                        ClickableRow(key = "Username", value = UserState.username)
-//                        Column(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .height(150.dp)
-//                        ) {
-//                            Text(text = "Bio")
-//                            OutlinedTextField(
-//                                value = bio,
-//                                placeholder = {
-//                                    if (UserState.bio.isEmpty() || UserState.bio.isBlank()) Text(
-//                                        text = "Add some more info about yourself",
-//                                    )
-//                                },
-//                                modifier = Modifier.fillMaxSize(),
-//                                onValueChange = {
-//                                    bio = it
-//                                    UserState.bio = bio
-//                                },
-//                                colors = TextFieldDefaults.outlinedTextFieldColors(
-//                                    focusedBorderColor = Primary,
-//                                    unfocusedBorderColor = Primary,
-//                                    cursorColor = MaterialTheme.colors.primary
-//                                )
-//                            )
-//                        }
-//                    }
-//                }
             }
         }
     }

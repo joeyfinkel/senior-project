@@ -1,29 +1,36 @@
 package writenow.app.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import writenow.app.R
 import writenow.app.components.bottom.bar.BottomBar
 import writenow.app.components.bottom.overlay.BottomOverlay
+import writenow.app.components.bottom.overlay.BottomOverlayButtonContainer
 import writenow.app.components.bottom.overlay.comments.Comments
 import writenow.app.components.icons.AccountCircle
+import writenow.app.components.post.SelectedPost
+import writenow.app.components.profile.BottomOverlayButton
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
@@ -39,15 +46,13 @@ private fun TopBar(
 ) {
     SmallTopAppBar(
         title = {
-            ClickableText(
-                text = AnnotatedString(title),
+            ClickableText(text = AnnotatedString(title),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleLarge.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
-                onClick = { scope.launch { lazyListState.scrollToItem(0) } }
-            )
+                onClick = { scope.launch { lazyListState.scrollToItem(0) } })
         },
         actions = {
             AccountCircle(size = 50.dp) {
@@ -58,7 +63,6 @@ private fun TopBar(
         colors = TopAppBarDefaults.mediumTopAppBarColors(
             containerColor = PersianOrange
         ),
-        // disable user interaction with the top bar
     )
 }
 
@@ -70,66 +74,69 @@ private fun Layout(
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val selectedPostState = UserState.selectedPostState.current
     val scope = rememberCoroutineScope()
-    val currentDestination = navController.currentDestination?.route
-
+    val totalChildren = 2
 
     var maxHeight = 1.0
 
-    if (UserState.isEllipsisClicked) maxHeight = 0.35
+    if (UserState.isEllipsisClicked) maxHeight = totalChildren.toFloat() * 0.07
     else if (UserState.isCommentClicked) maxHeight = 0.5
+    else if (UserState.isPostClicked) maxHeight = 1.5
 
-    Scaffold(
-        topBar = { topBar(scope) },
-        content = { innerPadding ->
-            BottomOverlay(
-                sheetContent = {
-                    if (UserState.isCommentClicked) {
-                        Comments(navController)
-                    } else if (UserState.isEllipsisClicked) {
-                        LazyColumn {
-                            items(50) {
-                                ListItem { Text("Item $it") }
-                            }
-                        }
+    Scaffold(topBar = { topBar(scope) }, bottomBar = {
+        BottomBar(navController = navController, modifier = Modifier.zIndex(1f))
+    }, contentColor = MaterialTheme.colorScheme.onSurface, content = { innerPadding ->
+        BottomOverlay(sheetContent = {
+            if (UserState.isCommentClicked) {
+                Comments(navController)
+            } else if (UserState.isEllipsisClicked) {
+                BottomOverlayButtonContainer(layoutId = "postOverlay") {
+                    BottomOverlayButton(
+                        icon = painterResource(id = R.drawable.report),
+                        text = "Report",
+                    ) {
+
                     }
-                },
-                maxHeight = maxHeight,
-                sheetState = sheetState,
-                content = {
-                    Column(
+                    BottomOverlayButton(
+                        icon = Icons.Default.Delete, text = "Delete", color = Color.Red
+                    ) {
+
+                    }
+                }
+            } else if (UserState.isPostClicked) {
+                SelectedPost(
+                    scope = scope, sheetState = sheetState, navController = navController
+                )
+            }
+        },
+            maxHeight = maxHeight,
+            sheetState = sheetState,
+            modifier = Modifier.zIndex(2f),
+            content = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(innerPadding),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding),
-                            contentAlignment = Alignment.Center
+                        Column(
+                            modifier = Modifier.padding(top = 10.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Column(
-                                modifier = Modifier.padding(top = 10.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                content(sheetState, scope)
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
+                            content(sheetState, scope)
+                            Spacer(modifier = Modifier.weight(1f))
                         }
                     }
                 }
-            )
-        },
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        bottomBar = {
-            if (!sheetState.isVisible) {
-                BottomBar(navController)
-            }
-        }
-    )
+            })
+    })
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -140,16 +147,11 @@ fun Layout(
     lazyListState: LazyListState,
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
 ) = Layout(
-    navController = navController,
-    topBar = {
+    navController = navController, topBar = {
         TopBar(
-            title = title,
-            navController = navController,
-            lazyListState = lazyListState,
-            scope = it
+            title = title, navController = navController, lazyListState = lazyListState, scope = it
         )
-    },
-    content = content
+    }, content = content
 )
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -158,7 +160,5 @@ fun Layout(
     navController: NavController,
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
 ) = Layout(
-    navController = navController,
-    topBar = { },
-    content = content
+    navController = navController, topBar = { }, content = content
 )

@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +24,7 @@ fun TopBar(
     modifier = Modifier
         .fillMaxWidth()
         .height(50.dp)
-        .padding(horizontal = 5.dp),
+        .padding(horizontal = 2.dp),
     horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically
 ) {
@@ -55,17 +56,13 @@ fun TopBar(
         if (title != null) Text(
             text = title,
             fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
         )
     },
     trailingIcon = {
         if (hasEllipsis) More { coroutineScope?.launch { state?.show() } }
-        else Box(
-            modifier = Modifier.width(
-                40.dp
-            ),
-            content = {}
-        )
+        else Box(modifier = Modifier.width(40.dp), content = {})
     }
 )
 

@@ -32,7 +32,6 @@ import writenow.app.state.UserState
 @Composable
 fun Profile(navController: NavController) {
     val username = SelectedUserState.username
-//    val posts = PostState.posts.filter { post -> post.username == username }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val posts = remember { mutableStateListOf<Post>() }
 

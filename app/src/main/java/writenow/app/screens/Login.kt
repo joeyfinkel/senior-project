@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import writenow.app.components.TextInput
 import writenow.app.components.registration.RegistrationFooter
 import writenow.app.components.registration.RegistrationLayout
-import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.state.UserState
 import java.time.LocalDate
@@ -56,6 +55,7 @@ fun Login(navController: NavController) {
                             UserState.firstName = user.firstName
                             UserState.lastName = user.lastName
                         }
+
                         continuation.resume(true)
                     } else {
                         UserState.isLoggedIn = false
@@ -81,9 +81,10 @@ fun Login(navController: NavController) {
 
                 if (loggedIn) {
                     navController.navigate(Screens.Posts)
-                    if (date == Posts.getLastPostDate(UserState.username)) {
-                        UserState.hasPosted = true
-                    }
+                    UserState.getHasPosted()
+//                    if (date == Posts.getLastPostDate(UserState.username)) {
+//                        UserState.hasPosted = true
+//                    }
                 }
             } else {
                 isError = true

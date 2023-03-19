@@ -23,22 +23,12 @@ import writenow.app.screens.Screens
 import writenow.app.utils.defaultContentCreator
 
 
-fun commentCreator(total: Int): MutableList<String> {
-    val comments = mutableListOf<String>()
-
-    for (i in 0..total) {
-        comments.add("Comment $i")
-    }
-
-    return comments
-}
-
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Comments(navController: NavController) {
     var newComment by remember { mutableStateOf("") }
     val comments by remember { mutableStateOf(defaultContentCreator(2).toList()) }
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
     fun postComment() {

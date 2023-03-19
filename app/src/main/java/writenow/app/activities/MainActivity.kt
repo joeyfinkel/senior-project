@@ -15,21 +15,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.launch
 import writenow.app.components.*
+import writenow.app.dbtables.Users
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
 import writenow.app.screens.posts.NewPost
-import writenow.app.screens.profile.EditProfile
 import writenow.app.screens.profile.FollowersOrFollowing
 import writenow.app.screens.profile.Profile
 import writenow.app.screens.profile.Settings
 import writenow.app.screens.profile.editprofile.EditName
+import writenow.app.screens.profile.editprofile.EditProfile
 import writenow.app.screens.profile.editprofile.EditUsername
 import writenow.app.screens.registration.Information
 import writenow.app.screens.registration.Names
@@ -40,6 +41,11 @@ import writenow.app.ui.theme.MyApplicationTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycleScope.launch {
+            Users.getUserLoginInfo(this@MainActivity)
+            UserState.getHasPosted()
+        }
+
         setContent {
             MyApplicationTheme(dynamicColor = false) {
                 // A surface container using the 'background' color from the theme
@@ -77,14 +83,18 @@ fun closeApp(navController: NavController, localContext: Context) {
  * the route of the new [Screens] and provide it with that screen's component.
  */
 @SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Main() {
     val navController = rememberNavController()
-    val lazyListState = rememberLazyListState()
+    val lazyListState = rememberLazyListState(0)
     val localContext = LocalContext.current
+    val isLoggedIn = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
 
-    NavHost(navController = navController, startDestination = Screens.MainScreen) {
+    NavHost(
+        navController = navController,
+        startDestination = if (isLoggedIn) Screens.Posts else Screens.MainScreen
+    ) {
         //region Main Screen
         composable(Screens.MainScreen) { MainScreen(navController) }
         //endregion
@@ -139,8 +149,8 @@ fun Main() {
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MyApplicationTheme { Main() }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun DefaultPreview() {
+//    MyApplicationTheme { Main() }
+//}

@@ -33,6 +33,5 @@ internal fun Comment(userId: Int, username: String, comment: String, navControll
                 navController.navigate(Screens.UserProfile)
             }
         },
-//        trailing = { Like { println("You liked this comment") } }
     )
 }

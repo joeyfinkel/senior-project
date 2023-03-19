@@ -21,10 +21,13 @@ private fun PostContent(
     userId: Int,
     username: String,
     text: String? = defaultText,
+    onClickEnabled: Boolean = true,
     navController: NavController,
     onClick: () -> Unit
 ) = Row(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 10.dp),
     horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically
 ) {
@@ -41,7 +44,7 @@ private fun PostContent(
         modifier = Modifier
             .padding(top = 5.dp)
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(enabled = onClickEnabled, onClick = onClick),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
@@ -73,6 +76,7 @@ fun PostContent(
     userId: Int,
     username: String,
     text: String? = defaultText,
+    onClickEnabled: Boolean = true,
     navController: NavController,
     trailingIcon: (@Composable () -> Unit)? = null,
     onClick: () -> Unit = {}
@@ -87,6 +91,7 @@ fun PostContent(
                 userId = userId,
                 username = username,
                 text = text,
+                onClickEnabled = onClickEnabled,
                 navController = navController,
                 onClick = onClick
             )
@@ -97,6 +102,7 @@ fun PostContent(
             userId = userId,
             username = username,
             text = text,
+            onClickEnabled = onClickEnabled,
             navController = navController,
             onClick = onClick
         )

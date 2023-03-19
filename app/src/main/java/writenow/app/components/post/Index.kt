@@ -25,9 +25,6 @@ fun Post(
 ) {
     var likedPost by remember { mutableStateOf<LikedPost?>(null) }
 
-    val sheetState = UserState.selectedPostState.current
-    val scope = rememberCoroutineScope()
-
     LaunchedEffect(Unit) {
         if (post != null)
             likedPost = LikesAndComments.getLikedPost(UserState.id, post.id)
@@ -53,7 +50,11 @@ fun Post(
                 navController = navController,
                 onClick = {
                     UserState.selectedPost = post
-                    scope.launch { sheetState.show() }
+                    UserState.isPostClicked = true
+                    UserState.isCommentClicked = false
+                    UserState.isEllipsisClicked = false
+
+                    coroutineScope.launch { state.show() }
                 },
             )
             PostActions(

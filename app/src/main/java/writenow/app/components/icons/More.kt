@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import writenow.app.R
 
 @Composable
-fun More(onClick: () -> Unit) {
+fun More(text: String? = null, onClick: () -> Unit) {
     val svg = painterResource(id = R.drawable.outline_more_horiz_24)
     val surfaceColor = MaterialTheme.colorScheme.surface
 
@@ -36,6 +36,6 @@ fun More(onClick: () -> Unit) {
                 }
             }
         },
-        label = { Text(text = "", color = surfaceColor) }
+        label = { if (text != null) Text(text = "", color = surfaceColor) }
     )
 }

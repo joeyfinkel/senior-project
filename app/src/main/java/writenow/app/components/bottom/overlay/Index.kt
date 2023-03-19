@@ -21,30 +21,25 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BottomOverlay(
     sheetContent: @Composable (BoxScope.() -> Unit),
+    modifier: Modifier = Modifier,
     maxHeight: Double = 1.0,
-    fullScreen: Boolean = false,
     sheetState: ModalBottomSheetState,
-    content: @Composable (() -> Unit)
-) {
-    val modifier = if (fullScreen) Modifier.fillMaxSize() else Modifier
-        .fillMaxWidth()
-        .height((LocalConfiguration.current.screenHeightDp * maxHeight).dp)
-
-    ModalBottomSheetLayout(
-        sheetState = sheetState,
-        sheetContent = {
-            Box(
-                modifier = Modifier
-                    .then(modifier)
-            ) {
-                sheetContent()
-            }
-        },
-        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        scrimColor = Color.Black.copy(alpha = 0.5f),
-        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-        sheetContentColor = MaterialTheme.colorScheme.onSurface
-    ) {
-        content()
-    }
-}
+    content: @Composable () -> Unit
+) = ModalBottomSheetLayout(
+    sheetState = sheetState,
+    sheetContent = {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height((LocalConfiguration.current.screenHeightDp * maxHeight).dp)
+        ) {
+            sheetContent()
+        }
+    },
+    sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+    scrimColor = Color.Black.copy(alpha = 0.5f),
+    sheetBackgroundColor = MaterialTheme.colorScheme.surface,
+    sheetContentColor = MaterialTheme.colorScheme.onSurface,
+    content = content,
+    modifier = modifier
+)

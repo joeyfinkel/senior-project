@@ -1,18 +1,21 @@
 package writenow.app.state
 
-import android.annotation.SuppressLint
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.runtime.*
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import writenow.app.dbtables.Post
+import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
+import java.time.LocalDate
 
 /**
  * The global state of the user.
  */
 object UserState {
     var id by mutableStateOf(0)
+
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
     var username by mutableStateOf("")
@@ -20,18 +23,15 @@ object UserState {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var bio by mutableStateOf("")
+
     var isLoggedIn by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
     var clickedFollower by mutableStateOf(false)
+    var isPostClicked by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)
-    var selectedPost by mutableStateOf<Post?>(null)
 
-    @SuppressLint("CompositionLocalNaming")
-    @OptIn(ExperimentalMaterialApi::class)
-    var selectedPostState = compositionLocalOf<ModalBottomSheetState> {
-        error("No ModalBottomSheetState found!")
-    }
+    var selectedPost by mutableStateOf<Post?>(null)
     var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()
 
@@ -46,6 +46,17 @@ object UserState {
         }
     }
 
+    suspend fun getHasPosted(): Boolean {
+        val date = LocalDate.now().dayOfMonth
+        hasPosted = date == Posts.getLastPostDate(username)
+
+        Log.d("UserState", "date->$date, hasPosted->${Posts.getLastPostDate(username)}")
+        return hasPosted
+    }
+
+    /**
+     * Resets the user state.
+     */
     private fun reset() {
         id = 0
         firstName = ""
@@ -62,6 +73,9 @@ object UserState {
         clickedFollower = false
     }
 
+    /**
+     * Logs the user out.
+     */
     fun logout(navController: NavController) {
         navController.navigate(Screens.MainScreen)
         reset()

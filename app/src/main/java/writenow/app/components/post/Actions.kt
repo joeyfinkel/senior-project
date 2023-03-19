@@ -17,7 +17,11 @@ import writenow.app.state.UserState
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PostActions(
-    modifier: Modifier, state: ModalBottomSheetState, coroutineScope: CoroutineScope, postId: Int
+    modifier: Modifier,
+    state: ModalBottomSheetState,
+    coroutineScope: CoroutineScope,
+    postId: Int,
+    hasEllipsis: Boolean = true
 ) {
     Box(
         modifier = Modifier
@@ -31,18 +35,31 @@ fun PostActions(
             horizontalArrangement = Arrangement.spacedBy(50.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Like(postId = postId)
-            Comment {
+            Like(
+                postId = postId,
+                label = "0",
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            )
+            Comment(
+                label = "0",
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 UserState.isCommentClicked = true
                 UserState.isEllipsisClicked = false
+                UserState.isPostClicked = false
 
                 if (UserState.isCommentClicked) coroutineScope.launch { state.show() }
             }
-            More {
-                UserState.isEllipsisClicked = true
-                UserState.isCommentClicked = false
+            if (hasEllipsis) {
+                More(text = "") {
+                    UserState.isEllipsisClicked = true
+                    UserState.isCommentClicked = false
+                    UserState.isPostClicked = false
 
-                if (UserState.isEllipsisClicked) coroutineScope.launch { state.show() }
+                    if (UserState.isEllipsisClicked) coroutineScope.launch { state.show() }
+                }
             }
         }
     }

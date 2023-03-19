@@ -25,7 +25,7 @@ import writenow.app.state.PostState
 import writenow.app.state.UserState
 
 @Composable
-fun Like(postId: Int) {
+private fun Like(postId: Int) {
     val filled = Icons.Default.Favorite
     val border = Icons.Default.FavoriteBorder
     val surfaceColor = MaterialTheme.colorScheme.onSurface
@@ -78,23 +78,44 @@ fun Like(postId: Int) {
 
             // remove the post from the liked posts list if it exists
             PostState.likedPosts.removeIf { it.postId == postId }
-
         }
     }
 
-    IconWithLabel(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        icon = {
-            Box(modifier = Modifier
-                .size(24.dp)
-                .clickable { toggleLike() }
-            ) {
-                IconButton(onClick = { toggleLike() }, modifier = Modifier.padding(bottom = 0.dp)) {
-                    Icon(imageVector = icon, contentDescription = "Like", tint = color)
-                }
-            }
-        },
-        label = { Text(text = "0", color = surfaceColor) }
-    )
+    Box(modifier = Modifier
+        .size(24.dp)
+        .clickable { toggleLike() }) {
+        IconButton(
+            onClick = { toggleLike() }, modifier = Modifier.padding(bottom = 0.dp)
+        ) {
+            Icon(imageVector = icon, contentDescription = "Like", tint = color)
+        }
+    }
 }
+
+@Composable
+fun Like(
+    postId: Int,
+    label: String,
+    modifier: Modifier = Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Center,
+) = IconWithLabel(modifier = modifier,
+    horizontalAlignment = horizontalAlignment,
+    verticalArrangement = verticalArrangement,
+    icon = { Like(postId = postId) },
+    label = { Text(text = label, color = MaterialTheme.colorScheme.onSurface) })
+
+@Composable
+fun Like(
+    postId: Int,
+    label: String,
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
+) = IconWithLabel(modifier = modifier,
+    horizontalArrangement = horizontalArrangement,
+    verticalAlignment = verticalAlignment,
+    icon = { Like(postId = postId) },
+    label = { Text(text = label, color = MaterialTheme.colorScheme.onSurface) },
+    onClick = { })
+
