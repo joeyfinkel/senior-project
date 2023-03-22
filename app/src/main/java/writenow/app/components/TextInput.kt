@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import writenow.app.ui.theme.PersianOrange
-import writenow.app.ui.theme.PlaceholderColor
+import writenow.app.ui.theme.placeholderColor
 
 /**
  * The default text field for the app.
@@ -56,8 +56,8 @@ fun TextInput(
         isError = isError,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.colorScheme.onSurface,
-            placeholderColor = PlaceholderColor(darkMode),
-            unfocusedLabelColor = PlaceholderColor(darkMode),
+            placeholderColor = placeholderColor(darkMode),
+            unfocusedLabelColor = placeholderColor(darkMode),
             focusedBorderColor = PersianOrange,
             unfocusedBorderColor = PersianOrange,
             cursorColor = PersianOrange,

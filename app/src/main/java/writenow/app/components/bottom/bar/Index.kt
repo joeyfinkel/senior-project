@@ -20,7 +20,7 @@ import writenow.app.ui.theme.DefaultRadius
 import writenow.app.ui.theme.PersianOrange
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(modifier: Modifier = Modifier, navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -30,8 +30,9 @@ fun BottomBar(navController: NavController) {
                 shape = RoundedCornerShape(
                     topEnd = DefaultRadius,
                     topStart = DefaultRadius
-                ),
-            ),
+                )
+            )
+            .then(modifier),
         contentAlignment = Alignment.Center
     ) {
         Row(

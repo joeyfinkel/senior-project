@@ -26,7 +26,7 @@ fun <T> Tabs(
     asPills: Boolean = false,
     selectedTabIndex: Int,
     onClick: (index: Int) -> Unit,
-    tabContent: @Composable() (() -> Unit)? = null
+    tabContent: @Composable (() -> Unit)? = null
 ) {
     TabRow(
         selectedTabIndex = selectedTabIndex,

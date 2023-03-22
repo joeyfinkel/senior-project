@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -17,13 +19,13 @@ import kotlinx.coroutines.launch
 import writenow.app.components.TextInput
 import writenow.app.components.registration.RegistrationFooter
 import writenow.app.components.registration.RegistrationLayout
-import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.state.UserState
 import java.time.LocalDate
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Login(navController: NavController) {
     var errorText by remember { mutableStateOf("") }
@@ -33,6 +35,7 @@ fun Login(navController: NavController) {
 
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     suspend fun performLogin(): Boolean {
         return suspendCoroutine { continuation ->
@@ -52,6 +55,7 @@ fun Login(navController: NavController) {
                             UserState.firstName = user.firstName
                             UserState.lastName = user.lastName
                         }
+
                         continuation.resume(true)
                     } else {
                         UserState.isLoggedIn = false
@@ -66,6 +70,8 @@ fun Login(navController: NavController) {
     }
 
     fun login() {
+        keyboardController?.hide()
+
         CoroutineScope(Dispatchers.Main).launch {
             val isNotEmpty = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
             val date = LocalDate.now().dayOfMonth
@@ -75,9 +81,10 @@ fun Login(navController: NavController) {
 
                 if (loggedIn) {
                     navController.navigate(Screens.Posts)
-                    if (date == Posts.getLastPostDate(UserState.username)) {
-                        UserState.hasPosted = true
-                    }
+                    UserState.getHasPosted()
+//                    if (date == Posts.getLastPostDate(UserState.username)) {
+//                        UserState.hasPosted = true
+//                    }
                 }
             } else {
                 isError = true

@@ -9,11 +9,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import writenow.app.ui.theme.PersianOrange
-import writenow.app.ui.theme.PlaceholderColor
+import writenow.app.ui.theme.placeholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Chips(values: List<String>) {
+fun Chips(values: List<String>, onClick: (Int) -> Unit) {
     var selectedChip by remember { mutableStateOf(0) }
 
     val darkMode = isSystemInDarkTheme()
@@ -24,7 +24,10 @@ fun Chips(values: List<String>) {
     ) {
         values.forEachIndexed { index, value ->
             Chip(
-                onClick = { selectedChip = index },
+                onClick = {
+                    selectedChip = index
+                    onClick(index)
+                },
                 enabled = selectedChip != index,
                 colors = ChipDefaults.chipColors(
                     backgroundColor = if (selectedChip == index) {
@@ -37,7 +40,7 @@ fun Chips(values: List<String>) {
                     disabledContentColor = Color.White
                 )
             ) {
-                Text(text = value, color = PlaceholderColor(darkMode))
+                Text(text = value, color = placeholderColor(darkMode))
             }
         }
     }

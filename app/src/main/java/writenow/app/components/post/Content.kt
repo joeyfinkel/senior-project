@@ -1,5 +1,6 @@
 package writenow.app.components.post
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +16,56 @@ import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 import writenow.app.utils.defaultText
 
+@Composable
+private fun PostContent(
+    userId: Int,
+    username: String,
+    text: String? = defaultText,
+    onClickEnabled: Boolean = true,
+    navController: NavController,
+    onClick: () -> Unit
+) = Row(
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 10.dp),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically
+) {
+    AccountCircle(
+        size = 35.dp,
+        modifier = Modifier.align(Alignment.Top)
+    ) {
+        SelectedUserState.userId = userId.toString()
+        SelectedUserState.username = username
+
+        navController.navigate(Screens.UserProfile)
+    }
+    Column(
+        modifier = Modifier
+            .padding(top = 5.dp)
+            .fillMaxWidth()
+            .clickable(enabled = onClickEnabled, onClick = onClick),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = username,
+            maxLines = 1,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        if (text != null) {
+            Text(
+                text = text,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
 /**
  * The content of the post. It will render out the who posted it and what they posted.
  * @param username The username of the user who posted.
@@ -25,44 +76,35 @@ fun PostContent(
     userId: Int,
     username: String,
     text: String? = defaultText,
-    navController: NavController
+    onClickEnabled: Boolean = true,
+    navController: NavController,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    onClick: () -> Unit = {}
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AccountCircle(
-            size = 35.dp,
-            modifier = Modifier.align(Alignment.Top)
+    if (trailingIcon != null) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            SelectedUserState.userId = userId.toString()
-            SelectedUserState.username = username
-
-            navController.navigate(Screens.UserProfile)
-        }
-        Column(
-            modifier = Modifier
-                .padding(top = 5.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = username,
-                maxLines = 1,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
+            PostContent(
+                userId = userId,
+                username = username,
+                text = text,
+                onClickEnabled = onClickEnabled,
+                navController = navController,
+                onClick = onClick
             )
-            Spacer(modifier = Modifier.width(5.dp))
-            if (text != null) {
-                Text(
-                    text = text,
-                    maxLines = 4,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            trailingIcon()
         }
+    } else {
+        PostContent(
+            userId = userId,
+            username = username,
+            text = text,
+            onClickEnabled = onClickEnabled,
+            navController = navController,
+            onClick = onClick
+        )
     }
 }

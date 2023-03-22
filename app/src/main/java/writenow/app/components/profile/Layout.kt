@@ -1,6 +1,6 @@
 package writenow.app.components.profile
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
@@ -11,15 +11,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import writenow.app.components.TopBar
 import writenow.app.components.bottom.overlay.BottomOverlay
+import writenow.app.components.bottom.overlay.BottomOverlayButtonContainer
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
@@ -51,14 +48,7 @@ fun ProfileLayout(
         content = { innerPadding ->
             BottomOverlay(
                 sheetContent = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 15.dp, vertical = 5.dp)
-                            .layoutId("bottomOverlay"),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
+                    BottomOverlayButtonContainer(layoutId = "bottomOverlay") {
                         if (isTheSameUser) {
                             BottomOverlayButton(icon = Icons.Default.Settings, text = "Settings") {
                                 navController.navigate(Screens.Settings)
@@ -68,9 +58,8 @@ fun ProfileLayout(
                     }
                 },
                 maxHeight = if (isTheSameUser) totalChildren.toFloat() * 0.07 else .3,
-                sheetState = sheetState,
-                content = { content(innerPadding, sheetState, scope) }
-            )
+                sheetState = sheetState
+            ) { content(innerPadding, sheetState, scope) }
         }
     )
 }

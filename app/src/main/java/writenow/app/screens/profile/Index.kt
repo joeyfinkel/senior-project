@@ -21,6 +21,8 @@ import writenow.app.components.post.Post
 import writenow.app.components.profile.ProfileButton
 import writenow.app.components.profile.ProfileLayout
 import writenow.app.components.profile.RowData
+import writenow.app.dbtables.Post
+import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import writenow.app.state.FollowersOrFollowingState
 import writenow.app.state.SelectedUserState
@@ -30,8 +32,13 @@ import writenow.app.state.UserState
 @Composable
 fun Profile(navController: NavController) {
     val username = SelectedUserState.username
-//    val posts = PostState.posts.filter { post -> post.username == username }
     var selectedTabIndex by remember { mutableStateOf(0) }
+    val posts = remember { mutableStateListOf<Post>() }
+
+
+    LaunchedEffect(Unit) {
+        posts.addAll(Posts.getByUsername(username))
+    }
 
     ProfileLayout(
         title = SelectedUserState.displayName.ifEmpty { username },
@@ -63,9 +70,9 @@ fun Profile(navController: NavController) {
                     Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
 
                     if (username == UserState.username) {
-                        ProfileButton(navController = navController)
+                        ProfileButton(navController = navController, isEdit = true)
                     } else {
-                        ProfileButton(isEdit = true)
+                        ProfileButton()
                     }
 
                     Column(
@@ -78,36 +85,26 @@ fun Profile(navController: NavController) {
                             horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            RowData(
-                                primaryText = "100",
-                                secondaryText = "Followers",
-                                onClick = {
-                                    FollowersOrFollowingState.selected = "Followers"
-                                    navController.navigate(Screens.FollowersOrFollowingList)
-                                }
-                            )
-                            RowData(
-                                primaryText = "90",
-                                secondaryText = "Following",
-                                onClick = {
-                                    FollowersOrFollowingState.selected = "Following"
-                                    navController.navigate(Screens.FollowersOrFollowingList)
-                                }
-                            )
+                            RowData(primaryText = "100", secondaryText = "Followers", onClick = {
+                                FollowersOrFollowingState.selected = "Followers"
+                                navController.navigate(Screens.FollowersOrFollowingList)
+                            })
+                            RowData(primaryText = "90", secondaryText = "Following", onClick = {
+                                FollowersOrFollowingState.selected = "Following"
+                                navController.navigate(Screens.FollowersOrFollowingList)
+                            })
                             RowData(primaryText = "45", secondaryText = "Likes")
                         }
-                        if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty())
-                            Text(text = UserState.bio)
+                        if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty()) Text(text = UserState.bio)
                     }
                     Spacer(modifier = Modifier.height(15.dp))
                 }
             }
             stickyHeader {
                 Tabs(
-                    tabs = listOf(
-                        painterResource(id = R.drawable.grid_view),
-                        Icons.Default.Favorite
-                    ),
+                    tabs = if (SelectedUserState.username == UserState.username)
+                        listOf(painterResource(id = R.drawable.grid_view), Icons.Default.Favorite)
+                    else listOf(painterResource(id = R.drawable.grid_view)),
                     selectedTabIndex = selectedTabIndex,
                     onClick = { index -> selectedTabIndex = index }
                 )
@@ -118,7 +115,7 @@ fun Profile(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     when (selectedTabIndex) {
-                        0 -> UserState.posts.forEach { post ->
+                        0 -> posts.forEach { post ->
                             Post(
                                 post = post,
                                 navController = navController,

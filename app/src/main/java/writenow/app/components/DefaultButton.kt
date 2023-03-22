@@ -47,7 +47,11 @@ fun DefaultButton(
                 horizontalArrangement = Arrangement.spacedBy(spacedBy),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(imageVector = icon, contentDescription = "")
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
                 Text(btnText)
             }
         } else {

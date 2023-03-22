@@ -5,13 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import writenow.app.dbtables.Post
+import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
+import java.time.LocalDate
 
 /**
  * The global state of the user.
  */
 object UserState {
     var id by mutableStateOf(0)
+
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
     var username by mutableStateOf("")
@@ -19,13 +22,16 @@ object UserState {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var bio by mutableStateOf("")
+
     var isLoggedIn by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
     var clickedFollower by mutableStateOf(false)
+    var isPostClicked by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)
-    val selectedPost by mutableStateOf(false)
+    var hasClickedLogOut by mutableStateOf(false)
 
+    var selectedPost by mutableStateOf<Post?>(null)
     var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()
 
@@ -40,6 +46,16 @@ object UserState {
         }
     }
 
+    suspend fun getHasPosted(): Boolean {
+        val date = LocalDate.now().dayOfMonth
+//        hasPosted = date == Posts.getLastPostDate(username)
+
+        return true
+    }
+
+    /**
+     * Resets the user state.
+     */
     private fun reset() {
         id = 0
         firstName = ""
@@ -56,6 +72,9 @@ object UserState {
         clickedFollower = false
     }
 
+    /**
+     * Navigate to the login screen and resets the user state.
+     */
     fun logout(navController: NavController) {
         navController.navigate(Screens.MainScreen)
         reset()

@@ -4,12 +4,15 @@ import android.util.Log
 import org.json.JSONObject
 
 data class Post(
+    /** The post's id */
     val id: Int,
+    /** The user's id */
     val uuid: Int,
     val username: String,
     val text: String,
     val visible: Int,
-    var createdAt: String
+    var createdAt: String,
+    var isLiked: Boolean = false,
 )
 
 class Posts private constructor() {
@@ -29,12 +32,26 @@ class Posts private constructor() {
             }
         }
 
-        suspend fun getLastPostDate(username: String): Int {
+        suspend fun getByUsername(username: String): List<Post> {
+            return getAll().filter { it.username == username }
+        }
+
+        suspend fun getLastPostDate(username: String): Int? {
+            Log.d("username", username)
+            if (username == "") return null
+
             val posts = getAll()
-            val lastPost = posts.filter { it.username == username }.maxByOrNull { it.createdAt }!!
-            val date = lastPost.createdAt.substringBefore(" ")
-            Log.d("Posts", "getLastPostDate: $date")
-            return date.substring(date.lastIndexOf("-") + 1).toInt()
+
+            if (posts.isNotEmpty()) {
+                val test = posts.filter { it.username == username }
+                val lastPost =
+                    posts.filter { it.username == username }.maxByOrNull { it.createdAt }!!
+                val date = lastPost.createdAt.substringBefore(" ")
+
+                return date.substring(date.lastIndexOf("-") + 1).toInt()
+            }
+
+            return null
         }
 
         fun post(jsonObject: JSONObject, callback: (Boolean) -> Unit) {

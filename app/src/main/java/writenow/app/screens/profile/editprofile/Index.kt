@@ -1,4 +1,4 @@
-package writenow.app.screens.profile
+package writenow.app.screens.profile.editprofile
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -16,7 +16,7 @@ import writenow.app.components.profile.*
 import writenow.app.screens.Screens
 import writenow.app.state.UserState
 import writenow.app.ui.theme.PersianOrange
-import writenow.app.ui.theme.PlaceholderColor
+import writenow.app.ui.theme.placeholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -73,8 +73,8 @@ fun EditProfile(navController: NavController) {
                             onValueChange = { UserState.bio = it },
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 textColor = MaterialTheme.colorScheme.onSurface,
-                                placeholderColor = PlaceholderColor(darkMode),
-                                trailingIconColor = PlaceholderColor(darkMode),
+                                placeholderColor = placeholderColor(darkMode),
+                                trailingIconColor = placeholderColor(darkMode),
                                 unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
                                 focusedBorderColor = PersianOrange,
                                 unfocusedBorderColor = PersianOrange,
@@ -84,51 +84,6 @@ fun EditProfile(navController: NavController) {
                         )
                     }
                 }
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(horizontal = 15.dp),
-//                    horizontalAlignment = Alignment.Start,
-//                    verticalArrangement = Arrangement.spacedBy(5.dp)
-//                ) {
-//                    Text(
-//                        text = "About you",
-//                        style = MaterialTheme.typography.caption,
-//                        color = Color.Gray
-//                    )
-//                    Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-//                        ClickableRow(
-//                            key = "Name",
-//                            value = UserState.displayName
-//                        )
-//                        ClickableRow(key = "Username", value = UserState.username)
-//                        Column(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .height(150.dp)
-//                        ) {
-//                            Text(text = "Bio")
-//                            OutlinedTextField(
-//                                value = bio,
-//                                placeholder = {
-//                                    if (UserState.bio.isEmpty() || UserState.bio.isBlank()) Text(
-//                                        text = "Add some more info about yourself",
-//                                    )
-//                                },
-//                                modifier = Modifier.fillMaxSize(),
-//                                onValueChange = {
-//                                    bio = it
-//                                    UserState.bio = bio
-//                                },
-//                                colors = TextFieldDefaults.outlinedTextFieldColors(
-//                                    focusedBorderColor = Primary,
-//                                    unfocusedBorderColor = Primary,
-//                                    cursorColor = MaterialTheme.colors.primary
-//                                )
-//                            )
-//                        }
-//                    }
-//                }
             }
         }
     }

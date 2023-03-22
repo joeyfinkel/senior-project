@@ -31,12 +31,13 @@ import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import writenow.app.state.UserState
 import writenow.app.ui.theme.PersianOrange
-import writenow.app.ui.theme.PlaceholderColor
+import writenow.app.ui.theme.placeholderColor
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewPost(navController: NavController) {
     var value by remember { mutableStateOf("") }
+    var isPublic by remember { mutableStateOf(true) }
 
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -47,7 +48,7 @@ fun NewPost(navController: NavController) {
             val json = JSONObject().apply {
                 put("userID", UserState.id)
                 put("postContents", value)
-                put("visible", 1)
+                put("visible", if (isPublic) 1 else 0)
             }
 
             Posts.post(json) { Log.d("NewPost", "post: $it") }
@@ -93,7 +94,7 @@ fun NewPost(navController: NavController) {
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Chips(values = listOf("Public", "Private"))
+                    Chips(values = listOf("Public", "Private"), onClick = { isPublic = it == 0 })
                     TextField(
                         value = value,
                         placeholder = { Text(text = "New Post") },
@@ -109,7 +110,7 @@ fun NewPost(navController: NavController) {
                             },
                         colors = TextFieldDefaults.textFieldColors(
                             textColor = MaterialTheme.colorScheme.onSurface,
-                            placeholderColor = PlaceholderColor(darkMode),
+                            placeholderColor = placeholderColor(darkMode),
                             unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
                             backgroundColor = MaterialTheme.colorScheme.surface,
                             focusedIndicatorColor = Color.Transparent,
