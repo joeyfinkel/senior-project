@@ -48,9 +48,9 @@ object UserState {
 
     suspend fun getHasPosted(): Boolean {
         val date = LocalDate.now().dayOfMonth
-        hasPosted = date == Posts.getLastPostDate(username)
+//        hasPosted = date == Posts.getLastPostDate(username)
 
-        return hasPosted
+        return true
     }
 
     /**

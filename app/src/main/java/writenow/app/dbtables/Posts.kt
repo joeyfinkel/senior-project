@@ -13,11 +13,7 @@ data class Post(
     val visible: Int,
     var createdAt: String,
     var isLiked: Boolean = false,
-) {
-    fun toggleLikeState() {
-        isLiked = !isLiked
-    }
-}
+)
 
 class Posts private constructor() {
     companion object {
@@ -47,6 +43,7 @@ class Posts private constructor() {
             val posts = getAll()
 
             if (posts.isNotEmpty()) {
+                val test = posts.filter { it.username == username }
                 val lastPost =
                     posts.filter { it.username == username }.maxByOrNull { it.createdAt }!!
                 val date = lastPost.createdAt.substringBefore(" ")
