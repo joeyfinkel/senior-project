@@ -25,7 +25,7 @@ fun AllPosts(navController: NavController, lazyListState: LazyListState) {
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        Users.saveLoginInfo(context, UserState.username, UserState.password)
+        Users.saveLoginInfo(context, UserState)
 
         if (posts.isEmpty()) posts.addAll(Posts.getAll())
 

@@ -15,22 +15,30 @@ class DBUtils(table: String) {
     private val url = "https://write-now.lesspopmorefizz.com/api/$table"
     private val client = OkHttpClient()
 
-    private suspend fun getJson(): String? = CoroutineScope(Dispatchers.IO).async {
-        val request = Request.Builder().url(url).get().build()
+    /**
+     * Posts data to the table.
+     * @param path The path to the table.
+     * If provided, the first section of the url **must** not include a slash.
+     * @example For example, `user/add` is correct, but `/user/add` is not.
+     */
+    private suspend fun getJson(path: String? = null): String? =
+        CoroutineScope(Dispatchers.IO).async {
+            val url = if (path != null) "$url/$path" else url
+            val request = Request.Builder().url(url).get().build()
 
-        Log.d("URL", url)
+            Log.d("URL", url)
 
-        return@async try {
-            val response = client.newCall(request).execute()
-            val json = response.body?.string()
+            return@async try {
+                val response = client.newCall(request).execute()
+                val json = response.body?.string()
 
-            response.close()
-            json
-        } catch (e: Exception) {
-            Log.e("API Error from `getJson`", e.toString())
-            null
-        }
-    }.await()
+                response.close()
+                json
+            } catch (e: Exception) {
+                Log.e("API Error from `getJson`", e.toString())
+                null
+            }
+        }.await()
 
     private fun requestBuilder(requestType: String, request: Request, callback: (Boolean) -> Unit) {
         client.newCall(request).enqueue(object : Callback {
@@ -70,13 +78,16 @@ class DBUtils(table: String) {
 
     /**
      * Gets all the data from the table and returns a list of the data
+     * @param path The path to the table. If provided, the first section of the url **must**
+     * not include a slash.
      * @param callback A function that takes a JSONObject and returns a T
      * @return A list of T
      */
-    suspend fun <T> getAll(callback: (JSONObject) -> T): List<T> {
-        val json = getJson()
+    suspend fun <T> getAll(path: String? = null, callback: (JSONObject) -> T): List<T> {
+        val json = getJson(path)
 
         return json?.let {
+//            Log.d("it", it)
             try {
                 val jsonArray = JSONArray(it)
 
@@ -85,7 +96,7 @@ class DBUtils(table: String) {
                 }
             } catch (e: Exception) {
                 Log.e("API Error from `getAll`", e.toString())
-                emptyList<T>()
+                emptyList()
             }
         } ?: emptyList()
     }

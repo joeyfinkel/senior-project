@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import writenow.app.ui.theme.PersianOrange
-import writenow.app.ui.theme.PlaceholderColor
+import writenow.app.ui.theme.placeholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -40,7 +40,7 @@ fun Chips(values: List<String>, onClick: (Int) -> Unit) {
                     disabledContentColor = Color.White
                 )
             ) {
-                Text(text = value, color = PlaceholderColor(darkMode))
+                Text(text = value, color = placeholderColor(darkMode))
             }
         }
     }

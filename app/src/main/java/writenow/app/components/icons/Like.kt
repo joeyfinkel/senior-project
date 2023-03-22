@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.json.JSONObject
 import writenow.app.dbtables.LikedPost
-import writenow.app.dbtables.LikesAndComments
+import writenow.app.dbtables.Likes
 import writenow.app.state.PostState
 import writenow.app.state.UserState
 
@@ -51,7 +51,7 @@ private fun Like(postId: Int) {
                 put("isLike", 1)
             }
 
-            LikesAndComments.toggleLikeState(false, jsonObject) { success ->
+            Likes.toggleLikeState(false, jsonObject) { success ->
                 if (success) {
                     color = if (color == Color.Red) surfaceColor else Color.Red
                     icon = if (icon == filled) border else filled
@@ -69,7 +69,7 @@ private fun Like(postId: Int) {
                 put("isLike", 0)
             }
 
-            LikesAndComments.toggleLikeState(true, jsonObject) { success ->
+            Likes.toggleLikeState(true, jsonObject) { success ->
                 if (success) {
                     color = if (color == Color.Red) surfaceColor else Color.Red
                     icon = if (icon == filled) border else filled

@@ -16,7 +16,7 @@ import writenow.app.components.profile.*
 import writenow.app.screens.Screens
 import writenow.app.state.UserState
 import writenow.app.ui.theme.PersianOrange
-import writenow.app.ui.theme.PlaceholderColor
+import writenow.app.ui.theme.placeholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -73,8 +73,8 @@ fun EditProfile(navController: NavController) {
                             onValueChange = { UserState.bio = it },
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 textColor = MaterialTheme.colorScheme.onSurface,
-                                placeholderColor = PlaceholderColor(darkMode),
-                                trailingIconColor = PlaceholderColor(darkMode),
+                                placeholderColor = placeholderColor(darkMode),
+                                trailingIconColor = placeholderColor(darkMode),
                                 unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
                                 focusedBorderColor = PersianOrange,
                                 unfocusedBorderColor = PersianOrange,

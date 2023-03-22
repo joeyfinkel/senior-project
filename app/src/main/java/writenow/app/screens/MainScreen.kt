@@ -5,17 +5,31 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.R
 import writenow.app.components.AnimatedColumn
 import writenow.app.components.DefaultButton
+import writenow.app.dbtables.Users
+import writenow.app.state.UserState
 
 @Composable
 fun MainScreen(navController: NavController) {
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (UserState.hasClickedLogOut) {
+            Users.clearLoginInfo(context)
+
+            UserState.hasClickedLogOut = false
+        }
+    }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier

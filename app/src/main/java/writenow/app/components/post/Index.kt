@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import writenow.app.dbtables.LikedPost
-import writenow.app.dbtables.LikesAndComments
+import writenow.app.dbtables.Likes
 import writenow.app.dbtables.Post
 import writenow.app.state.PostState
 import writenow.app.state.UserState
@@ -27,7 +27,7 @@ fun Post(
 
     LaunchedEffect(Unit) {
         if (post != null)
-            likedPost = LikesAndComments.getLikedPost(UserState.id, post.id)
+            likedPost = Likes.getLikedPost(UserState.id, post.id)
 
         // If the post is liked, add it to the liked posts list
         if (likedPost != null && likedPost?.liked == 1) {

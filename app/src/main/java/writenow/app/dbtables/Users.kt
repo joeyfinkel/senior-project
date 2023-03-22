@@ -1,19 +1,14 @@
 package writenow.app.dbtables
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys.AES256_GCM_SPEC
-import androidx.security.crypto.MasterKeys.getOrCreate
+import androidx.security.crypto.MasterKey
+import androidx.security.crypto.MasterKey.Builder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import writenow.app.state.UserState
@@ -22,7 +17,7 @@ import java.security.InvalidAlgorithmParameterException
 import java.security.NoSuchAlgorithmException
 import javax.crypto.KeyGenerator
 
-data class UserLoginInfo(val username: String, val password: String)
+data class Relationship(val sourceFriend: Int, val targetFriend: Int)
 data class User(
     val id: Int,
     val username: String,
@@ -46,13 +41,7 @@ data class User(
 
 class Users private constructor() {
     companion object {
-        private val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(
-            name = "user_preferences"
-        )
-
         private val utils = DBUtils("user")
-        private val USERNAME = stringPreferencesKey("username")
-        private val PASSWORD = stringPreferencesKey("password")
         private const val SHARED_PREFS_FILENAME = "user_login_info"
         private const val KEY_ALIAS = "user_login_info_key"
 
@@ -90,47 +79,43 @@ class Users private constructor() {
             }
         }
 
-        suspend fun saveLoginInfo(context: Context, username: String, password: String) {
+        private fun getSharedPreferences(context: Context): SharedPreferences {
+            val masterKey = Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
+
+            return EncryptedSharedPreferences.create(
+                context,
+                SHARED_PREFS_FILENAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
+
+        suspend fun saveLoginInfo(context: Context, user: UserState) {
             withContext(Dispatchers.IO) {
                 try {
-                    // Create an instance of MasterKeys using the default constructor, which creates a new
-                    // master key if one does not exist yet.
-                    val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
-
-                    // Create an instance of EncryptedSharedPreferences using the master key alias and
-                    // the filename of the shared preferences file.
-                    val sharedPreferences = EncryptedSharedPreferences.create(
-                        SHARED_PREFS_FILENAME,
-                        masterKeyAlias,
-                        context,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                    )
-
-                    // Generate a new AES key for encrypting the user's login information, and store it
-                    // securely in the Android Keystore system.
+                    val sharedPreferences = getSharedPreferences(context)
                     val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES)
                     val keyGenParameterSpec = KeyGenParameterSpec.Builder(
-                        KEY_ALIAS,
-                        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                        KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
                     ).apply {
                         setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                         setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                         setUserAuthenticationRequired(false)
                         setKeySize(256)
                     }.build()
+
                     keyGenerator.init(keyGenParameterSpec)
                     keyGenerator.generateKey()
 
                     // Encrypt the user's login information using the AES key, and save it to the
                     // encrypted shared preferences file.
                     sharedPreferences.edit().apply {
-                        putString("username", username)
-                        putString("password", password)
+                        putString("username", user.username)
+                        putString("password", user.password)
+                        putString("id", user.id.toString())
                         apply()
                     }
-
-                    Log.d("User", "Saved login info: $username, $password")
                 } catch (e: NoSuchAlgorithmException) {
                     throw RuntimeException(e)
                 } catch (e: InvalidAlgorithmParameterException) {
@@ -141,46 +126,92 @@ class Users private constructor() {
             }
         }
 
-        suspend fun isLoggedIn(context: Context): Boolean =
-            context.userPreferencesDataStore.data.map {
-                val username = it[USERNAME] ?: ""
-                val password = it[PASSWORD] ?: ""
-
-                UserLoginInfo(username, password)
-                username.isNotEmpty() && password.isNotEmpty()
-            }.first()
-
         suspend fun getUserLoginInfo(context: Context) {
             withContext(Dispatchers.IO) {
                 try {
-                    // Create an instance of MasterKeys using the default constructor, which creates a new
-                    // master key if one does not exist yet.
-                    val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
-
-                    // Create an instance of EncryptedSharedPreferences using the master key alias and
-                    // the filename of the shared preferences file.
-                    val sharedPreferences = EncryptedSharedPreferences.create(
-                        SHARED_PREFS_FILENAME,
-                        masterKeyAlias,
-                        context,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                    )
-
-                    // Retrieve the user's login information from the encrypted shared preferences file.
+                    val sharedPreferences = getSharedPreferences(context)
                     val username = sharedPreferences.getString("username", "")
                     val password = sharedPreferences.getString("password", "")
+                    val id = sharedPreferences.getString("id", "")
 
-                    UserState.username = "$username"
-                    UserState.password = "$password"
+                    if (username != null && password != null) {
+                        UserState.username = "$username"
+                        UserState.password = "$password"
+                        UserState.isLoggedIn = true
 
-                    Log.d("User", "Retrieved login info: $username, $password")
+                        if (id != null) {
+                            UserState.id = id.toInt()
+                        }
+
+                        Log.d("User is logged in", "true")
+                        UserState.getHasPosted()
+                    }
+
                 } catch (e: NoSuchAlgorithmException) {
                     throw RuntimeException(e)
                 } catch (e: InvalidAlgorithmParameterException) {
                     throw RuntimeException(e)
                 } catch (e: IOException) {
                     throw RuntimeException(e)
+                }
+            }
+        }
+
+        suspend fun clearLoginInfo(context: Context) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val sharedPreferences = getSharedPreferences(context)
+
+                    sharedPreferences.edit().clear().apply()
+                    Log.d("Cleared login info", "true")
+                } catch (e: NoSuchAlgorithmException) {
+                    throw RuntimeException(e)
+                } catch (e: InvalidAlgorithmParameterException) {
+                    throw RuntimeException(e)
+                } catch (e: IOException) {
+                    throw RuntimeException(e)
+                }
+            }
+        }
+
+        /**
+         * Checks if the current user is following the selected user.
+         * The callback returns true if the current user is following the selected user.
+         *
+         * @param callback The callback function to be called after the database query is complete.
+         * @return Boolean The boolean value of whether the current user is following the selected user.
+         */
+        suspend fun isFollowing(sourceFriend: Int, targetFriend: Int): Boolean {
+            val relationship = utils.getAll("followers") {
+                Relationship(it.getInt("sourceFriend"), it.getInt("targetFriend"))
+            }.find { it.sourceFriend == sourceFriend && it.targetFriend == targetFriend }
+
+            Log.d("isFollowing", relationship.toString())
+
+            return relationship != null
+        }
+
+        fun toggleFollowingState(
+            isFollowing: Boolean,
+            sourceFriend: Int,
+            targetFriend: Int,
+            callback: (String) -> Unit
+        ) {
+            val json = JSONObject().apply {
+                put("sourceFriend", sourceFriend)
+                put("targetFriend", targetFriend)
+            }
+
+            Log.d("toggleFollowingState", json.toString())
+            Log.d("toggleFollowingState (isFollowing)", "$isFollowing")
+
+            if (isFollowing) {
+                utils.post("followers/unfollow", json) {
+                    callback(if (it) "Unfollowed" else "Error")
+                }
+            } else {
+                utils.post("followers/follow", json) {
+                    callback(if (it) "Followed" else "Error")
                 }
             }
         }

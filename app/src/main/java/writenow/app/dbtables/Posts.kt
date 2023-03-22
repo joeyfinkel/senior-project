@@ -1,5 +1,6 @@
 package writenow.app.dbtables
 
+import android.util.Log
 import org.json.JSONObject
 
 data class Post(
@@ -39,12 +40,21 @@ class Posts private constructor() {
             return getAll().filter { it.username == username }
         }
 
-        suspend fun getLastPostDate(username: String): Int {
-            val posts = getAll()
-            val lastPost = posts.filter { it.username == username }.maxByOrNull { it.createdAt }!!
-            val date = lastPost.createdAt.substringBefore(" ")
+        suspend fun getLastPostDate(username: String): Int? {
+            Log.d("username", username)
+            if (username == "") return null
 
-            return date.substring(date.lastIndexOf("-") + 1).toInt()
+            val posts = getAll()
+
+            if (posts.isNotEmpty()) {
+                val lastPost =
+                    posts.filter { it.username == username }.maxByOrNull { it.createdAt }!!
+                val date = lastPost.createdAt.substringBefore(" ")
+
+                return date.substring(date.lastIndexOf("-") + 1).toInt()
+            }
+
+            return null
         }
 
         fun post(jsonObject: JSONObject, callback: (Boolean) -> Unit) {

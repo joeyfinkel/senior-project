@@ -70,9 +70,9 @@ fun Profile(navController: NavController) {
                     Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
 
                     if (username == UserState.username) {
-                        ProfileButton(navController = navController)
+                        ProfileButton(navController = navController, isEdit = true)
                     } else {
-                        ProfileButton(isEdit = true)
+                        ProfileButton()
                     }
 
                     Column(

@@ -43,7 +43,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
             Users.getUserLoginInfo(this@MainActivity)
-            UserState.getHasPosted()
         }
 
         setContent {
@@ -89,11 +88,10 @@ fun Main() {
     val navController = rememberNavController()
     val lazyListState = rememberLazyListState(0)
     val localContext = LocalContext.current
-    val isLoggedIn = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
 
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) Screens.Posts else Screens.MainScreen
+        startDestination = if (UserState.isLoggedIn) Screens.Posts else Screens.MainScreen
     ) {
         //region Main Screen
         composable(Screens.MainScreen) { MainScreen(navController) }

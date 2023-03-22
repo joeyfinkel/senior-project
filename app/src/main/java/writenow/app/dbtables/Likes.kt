@@ -2,16 +2,16 @@ package writenow.app.dbtables
 
 import org.json.JSONObject
 
-data class LikeAndComment(val postId: Int, val userId: Int, val liked: Int, val commentText: String)
+data class Like(val postId: Int, val userId: Int, val liked: Int, val commentText: String)
 data class LikedPost(val postId: Int, val userId: Int, val liked: Int)
 
-class LikesAndComments private constructor() {
+class Likes private constructor() {
     companion object {
         private val utils = DBUtils("likeAndComment")
 
-        suspend fun getAll(): List<LikeAndComment> {
+        private suspend fun getAll(): List<Like> {
             return utils.getAll {
-                LikeAndComment(
+                Like(
                     it.getInt("postID"),
                     it.getInt("userID"),
                     it.getInt("isLike"),
@@ -46,10 +46,6 @@ class LikesAndComments private constructor() {
             } else {
                 utils.post("like", jsonObject, callback)
             }
-        }
-
-        fun comment(jsonObject: JSONObject, callback: (Boolean) -> Unit) {
-            utils.post("comment", jsonObject, callback)
         }
     }
 }

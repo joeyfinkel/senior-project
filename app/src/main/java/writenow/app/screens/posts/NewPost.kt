@@ -31,7 +31,7 @@ import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import writenow.app.state.UserState
 import writenow.app.ui.theme.PersianOrange
-import writenow.app.ui.theme.PlaceholderColor
+import writenow.app.ui.theme.placeholderColor
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -110,7 +110,7 @@ fun NewPost(navController: NavController) {
                             },
                         colors = TextFieldDefaults.textFieldColors(
                             textColor = MaterialTheme.colorScheme.onSurface,
-                            placeholderColor = PlaceholderColor(darkMode),
+                            placeholderColor = placeholderColor(darkMode),
                             unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
                             backgroundColor = MaterialTheme.colorScheme.surface,
                             focusedIndicatorColor = Color.Transparent,

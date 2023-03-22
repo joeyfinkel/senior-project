@@ -16,5 +16,9 @@ fun LogoutButton(
     icon = painterResource(id = R.drawable.logout),
     text = "Logout",
     color = color,
-    onClick = { UserState.logout(navController) }
+    onClick = {
+        UserState.hasClickedLogOut = true
+
+        UserState.logout(navController)
+    }
 )
