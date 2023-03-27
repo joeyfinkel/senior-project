@@ -42,8 +42,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
-            Users.getUserLoginInfo(this@MainActivity)
-            UserState.getHasPosted()
+
+            // BROKEN
+            //Users.getUserLoginInfo(this@MainActivity)
+            //UserState.getHasPosted()
+            // ME MAD
         }
 
         setContent {

@@ -18,11 +18,60 @@ import writenow.app.state.UserState
 import writenow.app.ui.theme.PersianOrange
 import writenow.app.ui.theme.placeholderColor
 
+// Gallery imports
+import android.net.Uri
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+
+/*
+TODO: Update UI to match the version from the figma
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EditProfile(navController: NavController) {
     var bio by remember { mutableStateOf("") }
     val darkMode = isSystemInDarkTheme()
+
+    // Stuff for profile picture
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val context = LocalContext.current
+    val bitmap =  remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+    val launcher = rememberLauncherForActivityResult(contract =
+    ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imageUri = uri
+        Log.d("uri", imageUri.toString())
+
+        // Get bitmap
+        imageUri?.let {
+            if (Build.VERSION.SDK_INT < 28) {
+                bitmap.value = MediaStore.Images
+                    .Media.getBitmap(context.contentResolver,it)
+
+            } else {
+                val source = ImageDecoder
+                    .createSource(context.contentResolver,it)
+                bitmap.value = ImageDecoder.decodeBitmap(source)
+            }
+            // Set pfp to bitmap
+            Log.d("bitmap", bitmap.toString())
+        }
+    }
+    // End of stuff for profile picture
 
     ProfileLayout(
         title = "Edit profile",
@@ -40,7 +89,19 @@ fun EditProfile(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    AccountCircle(size = 75.dp)
+                    bitmap.value?.let {  btm ->
+                        Image(bitmap = btm.asImageBitmap(),
+                            contentDescription =null,
+                            modifier = Modifier.size(400.dp))
+                    }
+                    //
+                    AccountCircle(
+                        size = 75.dp,
+                        onClick = {
+                            // Open Gallery
+                            launcher.launch("image/*")
+                        })
+
                     Text(text = "Change photo", color = MaterialTheme.colorScheme.onSurface)
                 }
             }
@@ -52,10 +113,10 @@ fun EditProfile(navController: NavController) {
                         value = UserState.displayName,
                         onClick = { navController.navigate(Screens.EditName) },
                     )
-                    ClickableRow(
-                        key = "Username",
-                        value = UserState.username,
-                        onClick = { /*TODO*/ })
+                    //ClickableRow(
+                    //    key = "Username",
+                   //     value = UserState.username,
+                    //    onClick = { /*Going to leave this empty since allowing users to change this might cause problems*/ })
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -88,3 +149,4 @@ fun EditProfile(navController: NavController) {
         }
     }
 }
+

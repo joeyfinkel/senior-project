@@ -41,6 +41,7 @@ fun Profile(navController: NavController) {
     }
 
     ProfileLayout(
+        /* Display name at the top*/
         title = SelectedUserState.displayName.ifEmpty { username },
         navController = navController,
         onBackClick = {
@@ -66,6 +67,7 @@ fun Profile(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
+                    // Profile Picture
                     AccountCircle(size = 75.dp)
                     Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
 

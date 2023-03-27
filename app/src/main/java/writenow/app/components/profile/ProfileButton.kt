@@ -61,7 +61,7 @@ fun ProfileButton(
         icon = if (!isEdit) icon else null,
         borderRadius = borderRadius,
         onBtnClick = {
-            if (!isEdit && navController != null) navController.navigate(Screens.EditProfile)
+            if (isEdit && navController != null) navController.navigate(Screens.EditProfile)
             else toggleFollow()
         })
 }
