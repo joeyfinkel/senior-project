@@ -20,19 +20,18 @@ import writenow.app.ui.theme.placeholderColor
 
 // Gallery imports
 import android.net.Uri
+//
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import writenow.app.components.icons.AccountSquare
 
 /*
 TODO: Update UI to match the version from the figma
@@ -65,7 +64,7 @@ fun EditProfile(navController: NavController) {
             } else {
                 val source = ImageDecoder
                     .createSource(context.contentResolver,it)
-                bitmap.value = ImageDecoder.decodeBitmap(source)
+                UserState.bitmap = ImageDecoder.decodeBitmap(source)
             }
             // Set pfp to bitmap
             Log.d("bitmap", bitmap.toString())
@@ -89,18 +88,33 @@ fun EditProfile(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    bitmap.value?.let {  btm ->
+                    /*UserState.bitmap?.let {  btm ->
                         Image(bitmap = btm.asImageBitmap(),
                             contentDescription =null,
-                            modifier = Modifier.size(400.dp))
-                    }
-                    //
-                    AccountCircle(
-                        size = 75.dp,
-                        onClick = {
+                            modifier = Modifier.size(75.dp))
+                    }*/
+
+                    // Account circle stuff
+                    if (UserState.bitmap == null) {
+                        // Account circle with default pfp
+                        Log.d("Account Circle:", "default")
+                        AccountCircle(
+                            size = 75.dp,
+                            onClick = {
+                                // Open Gallery
+                                launcher.launch("image/")
+                            })
+                    } else {
+                        // Account circle with user's pfp
+                        Log.d("Account Circle:", "pfp")
+                        AccountSquare(
+                            bitmap = UserState.bitmap,
+                            size = 90.dp
+                        ) {
                             // Open Gallery
-                            launcher.launch("image/*")
-                        })
+                            launcher.launch("image/")
+                        }
+                    }
 
                     Text(text = "Change photo", color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -141,7 +155,7 @@ fun EditProfile(navController: NavController) {
                                 unfocusedBorderColor = PersianOrange,
                                 cursorColor = PersianOrange
                             ),
-                            trailingIcon = { Text(text = "${UserState.bio.length}/100") }
+                            trailingIcon = { Text(text = "${UserState.bio.length}/500") }
                         )
                     }
                 }
@@ -149,4 +163,5 @@ fun EditProfile(navController: NavController) {
         }
     }
 }
+
 

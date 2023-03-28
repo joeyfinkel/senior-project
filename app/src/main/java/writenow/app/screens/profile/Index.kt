@@ -1,5 +1,6 @@
 package writenow.app.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +18,7 @@ import androidx.navigation.NavController
 import writenow.app.R
 import writenow.app.components.Tabs
 import writenow.app.components.icons.AccountCircle
+import writenow.app.components.icons.AccountSquare
 import writenow.app.components.post.Post
 import writenow.app.components.profile.ProfileButton
 import writenow.app.components.profile.ProfileLayout
@@ -68,7 +70,22 @@ fun Profile(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     // Profile Picture
-                    AccountCircle(size = 75.dp)
+                    //AccountCircle(size = 75.dp)
+
+                    // Account Square stuff
+                    if (UserState.bitmap == null) {
+                        // Account circle with default pfp
+                        Log.d("Account Circle:", "default")
+                        AccountCircle(size = 75.dp)
+                    } else {
+                        // Account square with user's pfp
+                        Log.d("Account Circle:", "pfp")
+                        AccountSquare(
+                            bitmap = UserState.bitmap,
+                            size = 90.dp
+                        )
+                    }
+
                     Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
 
                     if (username == UserState.username) {

@@ -1,5 +1,6 @@
 package writenow.app.state
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,6 +23,7 @@ object UserState {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var bio by mutableStateOf("")
+    var bitmap by mutableStateOf<Bitmap?>(null)
 
     var isLoggedIn by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
