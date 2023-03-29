@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import writenow.app.components.icons.Comment
 import writenow.app.components.icons.Like
 import writenow.app.state.UserState
+import writenow.app.utils.getPostedDate
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -42,9 +43,9 @@ fun SelectedPost(
                     PostContent(
                         userId = UserState.selectedPost!!.uuid,
                         username = UserState.selectedPost!!.username,
-                        navController = navController,
                         text = UserState.selectedPost!!.text,
-                        onClickEnabled = false,
+                        datePosted = getPostedDate(UserState.selectedPost!!.createdAt),
+                        navController = navController,
                     )
                 }
                 item {
@@ -53,12 +54,11 @@ fun SelectedPost(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Like(
-                                postId = UserState.selectedPost!!.id,
+                            Like(isLiked = false,
                                 label = "Like",
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            )
+                                verticalAlignment = Alignment.CenterVertically,
+                                toggleLike = {})
                             Comment(
                                 label = "Comment",
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),

@@ -10,8 +10,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +30,9 @@ import writenow.app.components.bottom.overlay.comments.Comments
 import writenow.app.components.icons.AccountCircle
 import writenow.app.components.post.SelectedPost
 import writenow.app.components.profile.BottomOverlayButton
+import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
+import writenow.app.state.PostState
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
 import writenow.app.ui.theme.DefaultRadius
@@ -56,7 +57,9 @@ private fun TopBar(
         },
         actions = {
             AccountCircle(size = 50.dp) {
+                SelectedUserState.id = UserState.id
                 SelectedUserState.username = UserState.username
+
                 navController.navigate(Screens.UserProfile)
             }
         },
@@ -70,37 +73,73 @@ private fun TopBar(
 @Composable
 private fun Layout(
     navController: NavController,
+    lazyListState: LazyListState? = null,
     topBar: @Composable (scope: CoroutineScope) -> Unit,
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
 ) {
+    var deletedPost by remember { mutableStateOf(false) }
+
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
-    val totalChildren = 2
+    val totalChildren = if (UserState.selectedPost?.uuid == UserState.id) 2 else 1
+    val maxHeight = when {
+        UserState.isEllipsisClicked -> totalChildren.toFloat() * 0.07
+        UserState.isCommentClicked -> 0.5
+        UserState.isPostClicked -> 1.5
+        else -> 1.0
+    }
 
-    var maxHeight = 1.0
+    LaunchedEffect(deletedPost) {
+        if (deletedPost) {
+            Posts.update(PostState.allPosts)
+            scope.launch { sheetState.hide() }
+        }
 
-    if (UserState.isEllipsisClicked) maxHeight = totalChildren.toFloat() * 0.07
-    else if (UserState.isCommentClicked) maxHeight = 0.5
-    else if (UserState.isPostClicked) maxHeight = 1.5
+        deletedPost = false
+    }
 
     Scaffold(topBar = { topBar(scope) }, bottomBar = {
-        BottomBar(navController = navController, modifier = Modifier.zIndex(1f))
+        BottomBar(
+            navController = navController,
+            modifier = Modifier.zIndex(1f),
+            scope = scope,
+            lazyListState = lazyListState
+        )
     }, contentColor = MaterialTheme.colorScheme.onSurface, content = { innerPadding ->
         BottomOverlay(sheetContent = {
             if (UserState.isCommentClicked) {
                 Comments(navController)
             } else if (UserState.isEllipsisClicked) {
                 BottomOverlayButtonContainer(layoutId = "postOverlay") {
-                    BottomOverlayButton(
-                        icon = painterResource(id = R.drawable.report),
-                        text = "Report",
-                    ) {
+                    if (UserState.selectedPost?.uuid == UserState.id) {
+                        BottomOverlayButton(
+                            icon = painterResource(id = R.drawable.outline_edit),
+                            text = "Edit post"
+                        ) {}
+                        BottomOverlayButton(
+                            icon = Icons.Default.Delete, text = "Delete", color = Color.Red
+                        ) {
+                            if (UserState.selectedPost?.id != null) {
+                                val id = UserState.selectedPost?.id!!
 
-                    }
-                    BottomOverlayButton(
-                        icon = Icons.Default.Delete, text = "Delete", color = Color.Red
-                    ) {
+                                Posts.delete(id) {
+                                    if (it) {
+                                        deletedPost = true
 
+                                        PostState.allPosts.removeAt(PostState.allPosts.indexOfFirst { post -> post.id == id })
+
+                                    }
+                                }
+                            }
+
+                        }
+                    } else {
+                        BottomOverlayButton(
+                            icon = painterResource(id = R.drawable.report),
+                            text = "Report",
+                        ) {
+
+                        }
                     }
                 }
             } else if (UserState.isPostClicked) {
@@ -149,7 +188,10 @@ fun Layout(
 ) = Layout(
     navController = navController, topBar = {
         TopBar(
-            title = title, navController = navController, lazyListState = lazyListState, scope = it
+            title = title,
+            navController = navController,
+            lazyListState = lazyListState,
+            scope = it,
         )
     }, content = content
 )

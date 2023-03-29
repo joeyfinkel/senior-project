@@ -33,12 +33,12 @@ class Likes private constructor() {
             }[0]
         }
 
-        suspend fun didUserLikePost(postId: Int, userId: Int): Boolean {
-            val likesAndComments = getAll()
-            val filtered = likesAndComments.filter { it.postId == postId && it.userId == userId }
-
-            return filtered.isNotEmpty() && filtered[0].liked == 1
-        }
+//        suspend fun didUserLikePost(postId: Int, userId: Int): Boolean {
+//            val likesAndComments = getAll()
+//            val filtered = likesAndComments.filter { it.postId == postId && it.userId == userId }
+//
+//            return filtered.isNotEmpty() && filtered[0].liked == 1
+//        }
 
         fun toggleLikeState(isLiked: Boolean, jsonObject: JSONObject, callback: (Boolean) -> Unit) {
             if (isLiked) {

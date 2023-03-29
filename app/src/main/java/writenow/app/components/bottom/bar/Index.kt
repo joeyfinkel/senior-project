@@ -1,7 +1,9 @@
 package writenow.app.components.bottom.bar
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -15,12 +17,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import writenow.app.screens.Screens
 import writenow.app.ui.theme.DefaultRadius
 import writenow.app.ui.theme.PersianOrange
 
 @Composable
-fun BottomBar(modifier: Modifier = Modifier, navController: NavController) {
+fun BottomBar(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    lazyListState: LazyListState? = null,
+    scope: CoroutineScope
+) {
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -44,7 +55,13 @@ fun BottomBar(modifier: Modifier = Modifier, navController: NavController) {
                 navController = navController,
                 defaultIcon = Icons.Outlined.Home,
                 selectedIcon = Icons.Filled.Home,
-                screen = Screens.Posts
+                screen = Screens.Posts,
+                onClick = {
+                    Log.d("BottomBar", "currentRoute: $currentRoute")
+                    if (currentRoute == "posts") {
+                        scope.launch { lazyListState?.scrollToItem(0) }
+                    }
+                }
             )
             BaseIcon(
                 navController = navController,

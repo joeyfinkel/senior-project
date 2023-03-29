@@ -8,15 +8,19 @@ import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import androidx.security.crypto.MasterKey.Builder
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import writenow.app.state.PostState
+import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
 import java.io.IOException
 import java.security.InvalidAlgorithmParameterException
 import java.security.NoSuchAlgorithmException
 import javax.crypto.KeyGenerator
 
+data class Follower(val id: Int, val isFollowing: Boolean = false)
 data class Relationship(val sourceFriend: Int, val targetFriend: Int)
 data class User(
     val id: Int,
@@ -25,6 +29,7 @@ data class User(
     val lastName: String,
     val email: String,
     val passwordHash: String,
+    val followingList: MutableList<Int> = mutableListOf(),
 ) {
     operator fun get(s: String): Any? {
         return when (s) {
@@ -55,6 +60,55 @@ class Users private constructor() {
                     it.getString("email"),
                     it.getString("passwordHash"),
                 )
+            }
+        }
+
+        /**
+         * Gets a list of user ids that the user with the given id is following.
+         *
+         * @param id The id of the user to get the list of users that they are following.
+         * @return A list of user ids that the user with the given [id] is following.
+         */
+        private suspend fun getFollowing(id: Int): List<Follower> {
+            return utils.getAll("relationship/following?sourceFriend=$id") {
+                Follower(it.getInt("targetFriend"))
+            }
+        }
+
+        /**
+         * Gets a list of user ids that are following the current user.
+         *
+         * @param id The id of the user to get the list of users that are following them.
+         * @return A list of user ids that are following the user with the given [id].
+         */
+        private suspend fun getFollowers(id: Int): List<Follower> {
+            return utils.getAll("relationship/followers?targetFriend=$id") {
+                Follower(it.getInt("sourceFriend"))
+            }
+        }
+
+        /**
+         * Uses the [getFollowing] function to get a list of users that the user is following and
+         * adds them to [list] if they are not already in the list.
+         *
+         * @param list The list to update with the new followers.
+         * **This should be [UserState.followers]**.
+         * @param getFollowers If true, the function will get the followers of the user
+         * instead of the users that the user is following.
+         */
+        suspend fun updateRelationList(list: MutableList<Follower>, getFollowers: Boolean = true) {
+            if (SelectedUserState.id != null) {
+                val id =
+                    if (UserState.id == SelectedUserState.id) UserState.id else SelectedUserState.id
+                Log.d("updateRelationList", "id: $id, getFollowers: $getFollowers")
+                val followers = if (getFollowers) getFollowers(id!!).map {
+                    Follower(it.id, isFollowing = isFollowing(id, it.id))
+                } else getFollowing(UserState.id).map {
+                    Follower(it.id, isFollowing = isFollowing(UserState.id, it.id))
+                }
+                val newFollowers = followers.toSet() - list.toSet()
+
+                list.addAll(newFollowers)
             }
         }
 
@@ -91,7 +145,7 @@ class Users private constructor() {
             )
         }
 
-        suspend fun saveLoginInfo(context: Context, user: UserState) {
+        suspend fun saveInfo(context: Context, user: UserState) {
             withContext(Dispatchers.IO) {
                 try {
                     val sharedPreferences = getSharedPreferences(context)
@@ -114,6 +168,7 @@ class Users private constructor() {
                         putString("username", user.username)
                         putString("password", user.password)
                         putString("id", user.id.toString())
+                        putString("allPosts", Gson().toJson(PostState.allPosts))
                         apply()
                     }
                 } catch (e: NoSuchAlgorithmException) {
@@ -126,18 +181,27 @@ class Users private constructor() {
             }
         }
 
-        suspend fun getUserLoginInfo(context: Context) {
+        suspend fun getInfo(context: Context) {
             withContext(Dispatchers.IO) {
                 try {
                     val sharedPreferences = getSharedPreferences(context)
+                    val id = sharedPreferences.getString("id", "")
                     val username = sharedPreferences.getString("username", "")
                     val password = sharedPreferences.getString("password", "")
-                    val id = sharedPreferences.getString("id", "")
+                    val allPosts = sharedPreferences.getString("allPosts", "")
+
+                    Log.d("Username", "$username")
 
                     if (username != null && password != null) {
                         UserState.username = "$username"
                         UserState.password = "$password"
                         UserState.isLoggedIn = true
+
+                        Log.d("allPosts", allPosts.toString())
+
+//                        if (allPosts != null) PostState.allPosts =
+//                            Gson().fromJson(allPosts, Array<Post>::class.java).toMutableList()
+
 
                         if (id != null) {
                             UserState.id = id.toInt()
@@ -157,7 +221,7 @@ class Users private constructor() {
             }
         }
 
-        suspend fun clearLoginInfo(context: Context) {
+        suspend fun clearInfo(context: Context) {
             withContext(Dispatchers.IO) {
                 try {
                     val sharedPreferences = getSharedPreferences(context)
@@ -175,10 +239,10 @@ class Users private constructor() {
         }
 
         /**
-         * Checks if the current user is following the selected user.
-         * The callback returns true if the current user is following the selected user.
+         * Checks if [sourceFriend] is following [targetFriend].
          *
-         * @param callback The callback function to be called after the database query is complete.
+         * @param sourceFriend The current user's ID.
+         * @param targetFriend The selected user's ID.
          * @return Boolean The boolean value of whether the current user is following the selected user.
          */
         suspend fun isFollowing(sourceFriend: Int, targetFriend: Int): Boolean {
@@ -188,29 +252,32 @@ class Users private constructor() {
 
             Log.d("isFollowing", relationship.toString())
 
+            if (relationship != null) {
+                Log.d("isFollowing", "true")
+            } else {
+                Log.d("isFollowing", "false")
+            }
+
             return relationship != null
         }
 
         fun toggleFollowingState(
-            isFollowing: Boolean,
-            sourceFriend: Int,
-            targetFriend: Int,
-            callback: (String) -> Unit
+            isFollowing: Boolean, relationship: Relationship, callback: (String) -> Unit
         ) {
             val json = JSONObject().apply {
-                put("sourceFriend", sourceFriend)
-                put("targetFriend", targetFriend)
+                put("sourceFriend", relationship.sourceFriend)
+                put("targetFriend", relationship.targetFriend)
             }
 
             Log.d("toggleFollowingState", json.toString())
             Log.d("toggleFollowingState (isFollowing)", "$isFollowing")
 
             if (isFollowing) {
-                utils.post("followers/unfollow", json) {
+                utils.delete("relationship/unfollow", json) {
                     callback(if (it) "Unfollowed" else "Error")
                 }
             } else {
-                utils.post("followers/follow", json) {
+                utils.post("relationship/follow", json) {
                     callback(if (it) "Followed" else "Error")
                 }
             }

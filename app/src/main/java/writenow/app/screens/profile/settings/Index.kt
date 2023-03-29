@@ -1,4 +1,4 @@
-package writenow.app.screens.profile
+package writenow.app.screens.profile.settings
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,11 +24,9 @@ import writenow.app.screens.Screens
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Settings(navController: NavController) {
-    ProfileLayout(
-        title = "Settings",
+    ProfileLayout(title = "Settings",
         navController = navController,
-        onBackClick = { navController.navigate(Screens.UserProfile) }
-    ) { innerPadding, _, _ ->
+        onBackClick = { navController.navigate(Screens.UserProfile) }) { innerPadding, _, _ ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
@@ -38,50 +36,49 @@ fun Settings(navController: NavController) {
             item {
                 Spacer(modifier = Modifier.height(25.dp))
                 Section(title = "Account") {
-                    ClickableRow(
-                        key = "Account",
+                    ClickableRow(key = "Account",
                         trailingText = false,
                         leadingIcon = Icons.Filled.Person,
-                        onClick = {}
-                    )
-                    ClickableRow(
-                        key = "Privacy",
+                        onClick = {})
+                    ClickableRow(key = "Privacy",
                         trailingText = false,
                         leadingIcon = painterResource(id = R.drawable.shield),
-                        onClick = {}
-                    )
+                        onClick = {})
                 }
             }
+
+            // Posts section
+            item {
+                Spacer(modifier = Modifier.height(25.dp))
+                Section(title = "Posts") {
+                    ClickableRow(key = "Deleted posts",
+                        trailingText = false,
+                        leadingIcon = painterResource(id = R.drawable.outline_archive),
+                        onClick = { navController.navigate(Screens.DeletedPosts) })
+                }
+            }
+
             // Support section
             item {
                 Spacer(modifier = Modifier.height(25.dp))
                 Section(title = "Support") {
-                    ClickableRow(
-                        key = "Help",
+                    ClickableRow(key = "Help",
                         leadingIcon = painterResource(id = R.drawable.help),
-                        onClick = {}
-                    )
-                    ClickableRow(
-                        key = "About",
-                        leadingIcon = Icons.Filled.Info,
-                        onClick = {}
-                    )
-                    ClickableRow(
-                        key = "Report a problem",
+                        onClick = {})
+                    ClickableRow(key = "About", leadingIcon = Icons.Filled.Info, onClick = {})
+                    ClickableRow(key = "Report a problem",
                         leadingIcon = painterResource(id = R.drawable.report),
-                        onClick = {}
-                    )
+                        onClick = {})
                 }
             }
+
             // Login section
             item {
                 Spacer(modifier = Modifier.height(25.dp))
                 Section(title = "Login") {
-                    ClickableRow(
-                        key = "Switch account",
+                    ClickableRow(key = "Switch account",
                         leadingIcon = painterResource(id = R.drawable.switch_account),
-                        onClick = {}
-                    )
+                        onClick = {})
                     LogoutButton(navController = navController)
                 }
             }

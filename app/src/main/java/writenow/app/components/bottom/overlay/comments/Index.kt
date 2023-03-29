@@ -16,26 +16,60 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.json.JSONObject
 import writenow.app.components.TextInput
 import writenow.app.components.icons.AccountCircle
 import writenow.app.components.icons.Send
+import writenow.app.dbtables.Comment
+import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
-import writenow.app.utils.defaultContentCreator
+import writenow.app.state.PostState
+import writenow.app.state.UserState
 
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Comments(navController: NavController) {
-    var newComment by remember { mutableStateOf("") }
-    val comments by remember { mutableStateOf(defaultContentCreator(2).toList()) }
+    var text by remember { mutableStateOf("") }
+    var commented by remember { mutableStateOf(false) }
+    var current by remember { mutableStateOf(UserState.selectedPost) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    fun postComment() {
-        comments.plus(newComment)
-        keyboardController?.hide()
+    LaunchedEffect(commented) {
+        if (commented) {
+            current = UserState.selectedPost
 
-        newComment = ""
+            Posts.update(PostState.allPosts)
+        }
+
+        commented = false
+    }
+
+    fun postComment() {
+        val json = JSONObject().apply {
+            put("postID", UserState.selectedPost?.id)
+            put("userID", UserState.id)
+            put("commentText", text)
+        }
+
+        Posts.comment(json) {
+            if (it) {
+                commented = true
+                current?.comments = listOf(
+                    Comment(
+                        userId = UserState.id,
+                        postId = UserState.selectedPost?.id!!,
+                        text = text,
+                        username = UserState.username
+                    )
+                ) + current?.comments!!
+                keyboardController?.hide()
+
+                text = ""
+            }
+        }
+
     }
 
     Column(
@@ -44,7 +78,7 @@ fun Comments(navController: NavController) {
             .fillMaxWidth()
     ) {
         Text(
-            text = "${comments.size} comments",
+            text = "${UserState.selectedPost?.comments?.size} comments",
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(vertical = 16.dp)
@@ -61,28 +95,26 @@ fun Comments(navController: NavController) {
                 contentPadding = PaddingValues(vertical = 8.dp),
                 state = LazyListState(0)
             ) {
-                itemsIndexed(comments) { idx, comment ->
-                    Comment(
-                        userId = idx,
-                        username = "User ${idx + 1}",
-                        comment = comment,
-                        navController = navController
-                    )
+                current?.let {
+                    itemsIndexed(it.comments.sortedByDescending { comment -> comment.dateCommented }) { _, comment ->
+                        Comment(comment = comment, navController = navController)
+                    }
                 }
             }
         }
+
         // The text box that allows users to comment
         TextInput(
-            value = newComment,
+            value = text,
             label = "Comment",
-            onValueChange = { newComment = it },
+            onValueChange = { text = it },
             leadingIcon = {
                 AccountCircle(size = 35.dp) {
                     navController.navigate(Screens.UserProfile)
                 }
             },
             trailingIcon = {
-                Send(enabled = newComment.isNotEmpty(), onClick = { postComment() })
+                Send(enabled = text.isNotEmpty(), onClick = { postComment() })
             },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

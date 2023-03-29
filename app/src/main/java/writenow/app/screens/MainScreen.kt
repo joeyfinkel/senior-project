@@ -24,7 +24,7 @@ fun MainScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         if (UserState.hasClickedLogOut) {
-            Users.clearLoginInfo(context)
+            Users.clearInfo(context)
 
             UserState.hasClickedLogOut = false
         }

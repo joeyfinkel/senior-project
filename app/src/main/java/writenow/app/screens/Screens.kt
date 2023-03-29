@@ -23,19 +23,23 @@ package writenow.app.screens
 
 object Screens {
     const val MainScreen = "main"
+
     const val NameRegistration = "nameRegistration"
     const val InformationRegistration = "informationRegistration"
     const val UsernameRegistration = "usernameRegistration"
+
     const val Login = "login"
+
     const val Posts = "posts"
-    const val UserProfile = "userProfile"
-    const val FollowersOrFollowingList = "followersOrFollowingList"
+    const val NewPost = "newPost"
     const val Search = "search"
     const val Notifications = "notifications"
-    const val NewPost = "newPost"
+
+    const val UserProfile = "userProfile"
     const val EditProfile = "editProfile"
+    const val FollowersOrFollowingList = "followersOrFollowingList"
     const val Settings = "settings"
     const val EditName = "editName"
     const val EditUsername = "editUsername"
-    const val SpecificPost = "specificPost"
+    const val DeletedPosts = "deletedPosts"
 }

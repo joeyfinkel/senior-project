@@ -17,7 +17,8 @@ internal fun BaseIcon(
     navController: NavController,
     defaultIcon: ImageVector,
     selectedIcon: ImageVector,
-    screen: String
+    screen: String,
+    onClick: () -> Unit = {}
 ) {
     val currentScreen by remember { mutableStateOf(navController.currentDestination?.route) }
     var selected by remember { mutableStateOf(false) }
@@ -32,7 +33,7 @@ internal fun BaseIcon(
         if (currentScreen == screen) selected = true
     }
 
-    IconButton(onClick = { if (currentScreen != screen) navController.navigate(screen) }) {
+    IconButton(onClick = { if (currentScreen != screen) navController.navigate(screen) else onClick() }) {
         Icon(
             imageVector = if (selected) selectedIcon else defaultIcon,
             contentDescription = screen,

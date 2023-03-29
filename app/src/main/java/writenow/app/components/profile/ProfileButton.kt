@@ -5,40 +5,46 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.components.DefaultButton
+import writenow.app.dbtables.Follower
+import writenow.app.dbtables.Relationship
 import writenow.app.dbtables.Users
 import writenow.app.screens.Screens
-import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
+import writenow.app.utils.LaunchedEffectOnce
+
+private var borderRadius = 20.dp
 
 @Composable
-fun ProfileButton(
-    modifier: Modifier = Modifier,
-    isEdit: Boolean = false,
-    borderRadius: Dp = 20.dp,
-    navController: NavController? = null
-) {
-    var buttonText by remember { mutableStateOf("Follow") }
+fun EditProfile(navController: NavController) = DefaultButton(width = 100.dp,
+    spacedBy = 25.dp,
+    btnText = "Edit profile",
+    borderRadius = borderRadius,
+    onBtnClick = { navController.navigate(Screens.EditProfile) })
+
+@Composable
+fun FollowOrUnFollow(follower: Follower) {
+    Log.d("ProfileButton", "follower: $follower")
+    Log.d("ProfileButton", if (follower.isFollowing) "Following" else "Follow")
+
+    var buttonText by remember { mutableStateOf("") }
     var isFollowing by remember { mutableStateOf(false) }
     var icon by remember { mutableStateOf<ImageVector?>(null) }
 
-    LaunchedEffect(Unit) {
-        Log.d("isEdit", "$isEdit")
-        if (!isEdit) {
-            isFollowing = Users.isFollowing(UserState.id, SelectedUserState.userId.toInt())
-            Log.d("isFollowing", "$isFollowing")
-            buttonText = if (isFollowing) "Following" else "Follow"
-            icon = if (isFollowing) Icons.Default.Check else Icons.Default.Add
-        }
+    LaunchedEffectOnce {
+        isFollowing = follower.isFollowing
+        buttonText = if (follower.isFollowing) "Following" else "Follow"
+        icon = if (follower.isFollowing) Icons.Default.Check else Icons.Default.Add
     }
 
     fun toggleFollow() {
-        Users.toggleFollowingState(isFollowing, UserState.id, SelectedUserState.userId.toInt()) {
+        Users.toggleFollowingState(
+            isFollowing = isFollowing,
+            relationship = Relationship(sourceFriend = UserState.id, targetFriend = follower.id),
+        ) {
             when (it) {
                 "Unfollowed" -> {
                     isFollowing = false
@@ -54,14 +60,10 @@ fun ProfileButton(
         }
     }
 
-    DefaultButton(modifier = modifier,
-        width = 100.dp,
+    DefaultButton(width = 100.dp,
         spacedBy = 25.dp,
-        btnText = if (!isEdit) buttonText else "Edit profile",
-        icon = if (!isEdit) icon else null,
+        btnText = buttonText,
+        icon = icon,
         borderRadius = borderRadius,
-        onBtnClick = {
-            if (!isEdit && navController != null) navController.navigate(Screens.EditProfile)
-            else toggleFollow()
-        })
+        onBtnClick = { toggleFollow() })
 }

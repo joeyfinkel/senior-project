@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -22,36 +23,48 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import writenow.app.components.*
+import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
 import writenow.app.screens.posts.NewPost
 import writenow.app.screens.profile.FollowersOrFollowing
 import writenow.app.screens.profile.Profile
-import writenow.app.screens.profile.Settings
 import writenow.app.screens.profile.editprofile.EditName
 import writenow.app.screens.profile.editprofile.EditProfile
 import writenow.app.screens.profile.editprofile.EditUsername
+import writenow.app.screens.profile.settings.Settings
 import writenow.app.screens.registration.Information
 import writenow.app.screens.registration.Names
 import writenow.app.screens.registration.Username
+import writenow.app.state.PostState
 import writenow.app.state.UserState
-import writenow.app.ui.theme.MyApplicationTheme
+import writenow.app.ui.theme.WriteNowTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
-            Users.getUserLoginInfo(this@MainActivity)
+            Users.getInfo(this@MainActivity)
             UserState.getHasPosted()
+
+            if (PostState.allPosts.isEmpty()) {
+                PostState.isLoading = true
+                PostState.allPosts = Posts.getToDisplay()
+                Log.d("MainActivity", "onCreate: ${UserState.id}")
+                UserState.posts = Posts.getByUser(UserState.id).toMutableList()
+                PostState.isLoading = false
+
+                Log.d("MainActivity", "onCreate: ${UserState.posts}")
+
+            }
         }
 
         setContent {
-            MyApplicationTheme(dynamicColor = false) {
+            WriteNowTheme(dynamicColor = false) {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     Main()
                 }
@@ -128,15 +141,13 @@ fun Main() {
         composable(Screens.Search) {
             Layout(navController = navController) { _, _ ->
                 Text(text = "Search screen")
-
             }
         }
         //endregion
         //region Notifications
         composable(Screens.Notifications) {
             Layout(navController = navController) { _, _ ->
-                Text(text = "Search screen")
-
+                Text(text = "Notifications will be here")
             }
         }
         //endregion

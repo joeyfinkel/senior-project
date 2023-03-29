@@ -23,10 +23,8 @@ class DBUtils(table: String) {
      */
     private suspend fun getJson(path: String? = null): String? =
         CoroutineScope(Dispatchers.IO).async {
-            val url = if (path != null) "$url/$path" else url
-            val request = Request.Builder().url(url).get().build()
-
-            Log.d("URL", url)
+            val link = if (path != null) "$url/$path" else url
+            val request = Request.Builder().url(link).get().build()
 
             return@async try {
                 val response = client.newCall(request).execute()
@@ -86,8 +84,11 @@ class DBUtils(table: String) {
     suspend fun <T> getAll(path: String? = null, callback: (JSONObject) -> T): List<T> {
         val json = getJson(path)
 
+        if (json.equals("No results found")) {
+            return emptyList()
+        }
+
         return json?.let {
-//            Log.d("it", it)
             try {
                 val jsonArray = JSONArray(it)
 
@@ -95,18 +96,33 @@ class DBUtils(table: String) {
                     callback(jsonArray.getJSONObject(i))
                 }
             } catch (e: Exception) {
-                Log.e("API Error from `getAll`", e.toString())
+                Log.e("API Error from `getAll` ($path)", e.toString())
                 emptyList()
             }
         } ?: emptyList()
     }
 
     /**
-     * Posts data to the table
-     * @param section The section of the API to post to (e.g. "add")
-     * @param json The data to post
-     * @param callback A function that takes a Boolean and returns Unit
-     * @return Unit
+     * Posts data to the table.
+     *
+     * @param section The section of the API to post to (e.g. "add").
+     * @param callback A function that takes a Boolean and returns Unit.
+     * @return Unit.
+     */
+    fun post(section: String, callback: (Boolean) -> Unit) {
+        val body = JSONObject().toString().toRequestBody("application/json".toMediaTypeOrNull())
+        val req = Request.Builder().url("$url/$section").post(body).build()
+
+        requestBuilder("post", req, callback)
+    }
+
+    /**
+     * Posts data to the table.
+     *
+     * @param section The section of the API to post to (e.g. "add").
+     * @param json The data to post.
+     * @param callback A function that takes a Boolean and returns Unit.
+     * @return Unit.
      */
     fun post(section: String, json: JSONObject, callback: (Boolean) -> Unit) {
         val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
@@ -115,10 +131,33 @@ class DBUtils(table: String) {
         requestBuilder("post", req, callback)
     }
 
+    /**
+     * Puts data to the table.
+     *
+     * @param section The section of the API to put to (e.g. "update").
+     * @param json The data to put.
+     * @param callback A function that takes a Boolean and returns Unit.
+     * @return Unit.
+     */
     fun put(section: String, json: JSONObject, callback: (Boolean) -> Unit) {
         val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
         val req = Request.Builder().url("$url/$section").put(body).build()
 
         requestBuilder("put", req, callback)
+    }
+
+    /**
+     * Deletes data from the table.
+     *
+     * @param section The section of the API to delete from (e.g. "delete").
+     * @param json The data to delete.
+     * @param callback A function that takes a Boolean and returns Unit.
+     * @return Unit.
+     */
+    fun delete(section: String, json: JSONObject, callback: (Boolean) -> Unit) {
+        val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
+        val req = Request.Builder().url("$url/$section").delete(body).build()
+
+        requestBuilder("delete", req, callback)
     }
 }

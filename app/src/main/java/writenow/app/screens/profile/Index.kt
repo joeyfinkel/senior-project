@@ -1,5 +1,6 @@
 package writenow.app.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,26 +19,41 @@ import writenow.app.R
 import writenow.app.components.Tabs
 import writenow.app.components.icons.AccountCircle
 import writenow.app.components.post.Post
-import writenow.app.components.profile.ProfileButton
+import writenow.app.components.profile.EditProfile
+import writenow.app.components.profile.FollowOrUnFollow
 import writenow.app.components.profile.ProfileLayout
 import writenow.app.components.profile.RowData
-import writenow.app.dbtables.Post
+import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Posts
+import writenow.app.dbtables.Users
 import writenow.app.screens.Screens
-import writenow.app.state.FollowersOrFollowingState
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
+import writenow.app.utils.LaunchedEffectOnce
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun Profile(navController: NavController) {
-    val username = SelectedUserState.username
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val posts = remember { mutableStateListOf<Post>() }
+    var isFollowing by remember { mutableStateOf(false) }
 
+    val username = SelectedUserState.username
+    val posts = remember { UserState.posts.filter { it.visible == 1 }.toMutableList() }
 
-    LaunchedEffect(Unit) {
-        posts.addAll(Posts.getByUsername(username))
+    LaunchedEffectOnce {
+        isFollowing = Users.isFollowing(UserState.id, SelectedUserState.id!!)
+
+        Log.d("Profile", "isFollowing: $isFollowing")
+
+//        if (SelectedUserState.id != UserState.id)
+        posts.addAll(Posts.getByUser(SelectedUserState.id!!))
+    }
+
+    LaunchedEffect(UserState.id != SelectedUserState.id) {
+        isFollowing = Users.isFollowing(SelectedUserState.id!!, UserState.id)
+
+        Users.updateRelationList(SelectedUserState.followers)
+        Users.updateRelationList(SelectedUserState.following, false)
     }
 
     ProfileLayout(
@@ -70,9 +86,15 @@ fun Profile(navController: NavController) {
                     Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
 
                     if (username == UserState.username) {
-                        ProfileButton(navController = navController, isEdit = true)
+                        // This is the current user's profile
+                        EditProfile(navController = navController)
                     } else {
-                        ProfileButton()
+                        // This is the selected user's profile
+                        FollowOrUnFollow(
+                            follower = Follower(
+                                id = SelectedUserState.id!!, isFollowing = isFollowing
+                            )
+                        )
                     }
 
                     Column(
@@ -85,14 +107,18 @@ fun Profile(navController: NavController) {
                             horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            RowData(primaryText = "100", secondaryText = "Followers", onClick = {
-                                FollowersOrFollowingState.selected = "Followers"
-                                navController.navigate(Screens.FollowersOrFollowingList)
-                            })
-                            RowData(primaryText = "90", secondaryText = "Following", onClick = {
-                                FollowersOrFollowingState.selected = "Following"
-                                navController.navigate(Screens.FollowersOrFollowingList)
-                            })
+                            RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.followers.size.toString() else SelectedUserState.followers.size.toString(),
+                                secondaryText = "Followers",
+                                onClick = {
+                                    UserState.followingOrFollower = "Followers"
+                                    navController.navigate(Screens.FollowersOrFollowingList)
+                                })
+                            RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.following.size.toString() else SelectedUserState.following.size.toString(),
+                                secondaryText = "Following",
+                                onClick = {
+                                    UserState.followingOrFollower = "Following"
+                                    navController.navigate(Screens.FollowersOrFollowingList)
+                                })
                             RowData(primaryText = "45", secondaryText = "Likes")
                         }
                         if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty()) Text(text = UserState.bio)
@@ -101,13 +127,12 @@ fun Profile(navController: NavController) {
                 }
             }
             stickyHeader {
-                Tabs(
-                    tabs = if (SelectedUserState.username == UserState.username)
-                        listOf(painterResource(id = R.drawable.grid_view), Icons.Default.Favorite)
-                    else listOf(painterResource(id = R.drawable.grid_view)),
-                    selectedTabIndex = selectedTabIndex,
-                    onClick = { index -> selectedTabIndex = index }
+                Tabs(tabs = if (SelectedUserState.username == UserState.username) listOf(
+                    painterResource(id = R.drawable.grid_view), Icons.Default.Favorite
                 )
+                else listOf(painterResource(id = R.drawable.grid_view)),
+                    selectedTabIndex = selectedTabIndex,
+                    onClick = { index -> selectedTabIndex = index })
             }
             item {
                 Column(
