@@ -22,6 +22,7 @@ import writenow.app.components.Layout
 import writenow.app.components.post.LoadingPostContent
 import writenow.app.components.post.Post
 import writenow.app.components.post.PostContainer
+import writenow.app.components.post.PostProtector
 import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.state.PostState
@@ -63,68 +64,45 @@ fun AllPosts(navController: NavController, lazyListState: LazyListState) {
                 }
             }
         } else {
-            SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = refreshing),
-                onRefresh = { refresh() },
-                indicator = { pullState, _ ->
-                    PullRefreshIndicator(
-                        refreshing = pullState.isRefreshing,
-                        state = refreshState,
-                        contentColor = MaterialTheme.colorScheme.primary,
-                        backgroundColor = Color.Transparent,
-                    )
-                },
-            ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .pullRefresh(refreshState)
-                        .padding(if (refreshing) 70.dp else 0.dp),
-                    verticalArrangement = Arrangement.spacedBy(25.dp),
-                    state = lazyListState
+            if (UserState.hasPosted) {
+                SwipeRefresh(
+                    state = rememberSwipeRefreshState(isRefreshing = refreshing),
+                    onRefresh = { refresh() },
+                    indicator = { pullState, _ ->
+                        PullRefreshIndicator(
+                            refreshing = pullState.isRefreshing,
+                            state = refreshState,
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            backgroundColor = Color.Transparent,
+                        )
+                    },
                 ) {
-                    if (!refreshing) {
-                        itemsIndexed(PostState.allPosts) { _, item ->
-                            Post(
-                                post = item,
-                                navController = navController,
-                                state = state,
-                                coroutineScope = scope
-                            )
-                        }
-                        item {
-                            Spacer(modifier = Modifier.height(2.dp))
+                    LazyColumn(
+                        modifier = Modifier
+                            .pullRefresh(refreshState)
+                            .padding(if (refreshing) 70.dp else 0.dp),
+                        verticalArrangement = Arrangement.spacedBy(25.dp),
+                        state = lazyListState
+                    ) {
+                        if (!refreshing) {
+                            itemsIndexed(PostState.allPosts) { _, item ->
+                                Post(
+                                    post = item,
+                                    navController = navController,
+                                    state = state,
+                                    coroutineScope = scope
+                                )
+                            }
+                            item {
+                                Spacer(modifier = Modifier.height(2.dp))
+                            }
                         }
                     }
                 }
+            } else {
+                PostProtector(navController = navController)
             }
-//            Column(modifier = Modifier.pullRefresh(refreshState)) {
-//                PullRefreshIndicator(
-//                    refreshing = refreshing,
-//                    state = refreshState,
-//                    modifier = Modifier.align(Alignment.CenterHorizontally),
-//                    contentColor = MaterialTheme.colorScheme.primary,
-//                    backgroundColor = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-////                    scale = true
-//                )
-//
-//            }
         }
-//        if (UserState.hasPosted) {
-//            LazyColumn(verticalArrangement = Arrangement.spacedBy(25.dp), state = lazyListState) {
-//                itemsIndexed(posts) { _, item ->
-//                    Post(
-//                        post = item,
-//                        navController = navController,
-//                        state = state,
-//                        coroutineScope = scope
-//                    )
-//                }
-//                item {
-//                    Spacer(modifier = Modifier.height(2.dp))
-//                }
-//            }
-//        } else {
-//            PostProtector(navController = navController)
-//        }
+
     }
 }
