@@ -96,8 +96,7 @@ fun Profile(navController: NavController) {
                         // Account square with user's pfp
                         Log.d("Account Circle:", "pfp")
                         AccountSquare(
-                            bitmap = UserState.bitmap,
-                            size = 90.dp
+                            bitmap = UserState.bitmap, size = 90.dp
                         )
                     }
 

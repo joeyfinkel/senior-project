@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
+import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Post
 import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
@@ -23,6 +24,8 @@ object UserState {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var bio by mutableStateOf("")
+    var followingOrFollower by mutableStateOf("")
+
     var bitmap by mutableStateOf<Bitmap?>(null)
 
     var isLoggedIn by mutableStateOf(false)
@@ -34,8 +37,11 @@ object UserState {
     var hasClickedLogOut by mutableStateOf(false)
 
     var selectedPost by mutableStateOf<Post?>(null)
+
     var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()
+    var followers = mutableListOf<Follower>()
+    var following = mutableListOf<Follower>()
 
     operator fun get(username: String): Any {
         return when (username) {

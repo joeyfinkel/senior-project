@@ -203,7 +203,7 @@ class Users private constructor() {
 //                            Gson().fromJson(allPosts, Array<Post>::class.java).toMutableList()
 
 
-                        if (id != null) {
+                        if (id != null && id.isNotBlank()) {
                             UserState.id = id.toInt()
                         }
 
