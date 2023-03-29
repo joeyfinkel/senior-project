@@ -1,19 +1,19 @@
 package writenow.app.state
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
-import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Post
+import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import java.time.LocalDate
 
 /**
- * The global state of the user who is logged in.
+ * The global state of the user.
  */
 object UserState {
-    /** The id of the user that is logged in. */
     var id by mutableStateOf(0)
 
     var firstName by mutableStateOf("")
@@ -23,7 +23,7 @@ object UserState {
     var email by mutableStateOf("")
     var password by mutableStateOf("")
     var bio by mutableStateOf("")
-    var followingOrFollower by mutableStateOf("Followers")
+    var bitmap by mutableStateOf<Bitmap?>(null)
 
     var isLoggedIn by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
@@ -34,11 +34,8 @@ object UserState {
     var hasClickedLogOut by mutableStateOf(false)
 
     var selectedPost by mutableStateOf<Post?>(null)
-
     var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()
-    var followers = mutableListOf<Follower>()
-    var following = mutableListOf<Follower>()
 
     operator fun get(username: String): Any {
         return when (username) {

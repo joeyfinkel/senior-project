@@ -87,6 +87,7 @@ fun NewPost(navController: NavController) {
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
+                //
                 AccountCircle(size = 35.dp, modifier = Modifier.align(Alignment.Top))
                 Column(
                     modifier = Modifier

@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import writenow.app.R
 import writenow.app.components.Tabs
 import writenow.app.components.icons.AccountCircle
+import writenow.app.components.icons.AccountSquare
 import writenow.app.components.post.Post
 import writenow.app.components.profile.EditProfile
 import writenow.app.components.profile.FollowOrUnFollow
@@ -57,6 +58,7 @@ fun Profile(navController: NavController) {
     }
 
     ProfileLayout(
+        /* Display name at the top*/
         title = SelectedUserState.displayName.ifEmpty { username },
         navController = navController,
         onBackClick = {
@@ -82,7 +84,23 @@ fun Profile(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
-                    AccountCircle(size = 75.dp)
+                    // Profile Picture
+                    //AccountCircle(size = 75.dp)
+
+                    // Account Square stuff
+                    if (UserState.bitmap == null) {
+                        // Account circle with default pfp
+                        Log.d("Account Circle:", "default")
+                        AccountCircle(size = 75.dp)
+                    } else {
+                        // Account square with user's pfp
+                        Log.d("Account Circle:", "pfp")
+                        AccountSquare(
+                            bitmap = UserState.bitmap,
+                            size = 90.dp
+                        )
+                    }
+
                     Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
 
                     if (username == UserState.username) {

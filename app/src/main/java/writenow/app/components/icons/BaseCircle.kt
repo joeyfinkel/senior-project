@@ -18,7 +18,7 @@ import writenow.app.ui.theme.PersianOrange
 internal fun BaseCircle(
     modifier: Modifier = Modifier,
     border: Modifier? = null,
-    size: Dp = 50.dp,
+    size: Dp,
     icon: @Composable () -> Unit,
     onClick: (() -> Unit)? = null
 ) {
