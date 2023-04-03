@@ -19,7 +19,9 @@ import kotlinx.coroutines.launch
 import writenow.app.components.TextInput
 import writenow.app.components.registration.RegistrationFooter
 import writenow.app.components.registration.RegistrationLayout
+import writenow.app.data.entity.User
 import writenow.app.dbtables.Users
+import writenow.app.state.GlobalState
 import writenow.app.state.UserState
 import java.time.LocalDate
 import kotlin.coroutines.resume
@@ -81,6 +83,19 @@ fun Login(navController: NavController) {
 
                 if (loggedIn) {
                     navController.navigate(Screens.Posts)
+                    GlobalState.userRepository.addUser(
+                        User(
+                            uuid = UserState.id,
+                            firstName = UserState.firstName,
+                            lastName = UserState.lastName,
+                            email = UserState.email,
+                            password = UserState.password,
+                            username = UserState.username,
+                            displayName = UserState.displayName,
+                            bio = UserState.bio,
+//                            bitmap = null,
+                        )
+                    )
                     UserState.getHasPosted()
 //                    if (date == Posts.getLastPostDate(UserState.username)) {
 //                        UserState.hasPosted = true

@@ -71,3 +71,4 @@ fun openPostMenu(currentPost: Post?, scope: CoroutineScope, state: ModalBottomSh
 
     if (UserState.isEllipsisClicked) scope.launch { state.show() }
 }
+

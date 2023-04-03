@@ -25,6 +25,7 @@ import writenow.app.components.post.PostContainer
 import writenow.app.components.post.PostProtector
 import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
+import writenow.app.state.GlobalState
 import writenow.app.state.PostState
 import writenow.app.state.UserState
 import writenow.app.ui.theme.DefaultWidth
@@ -41,7 +42,12 @@ fun AllPosts(navController: NavController, lazyListState: LazyListState) {
     LaunchedEffectOnce {
         Users.updateRelationList(UserState.followers)
         Users.updateRelationList(UserState.following, false)
-        Users.saveInfo(context, UserState)
+
+        if (GlobalState.user == null) {
+            GlobalState.user = GlobalState.userRepository.getUser()
+
+            GlobalState.userRepository.addUser(GlobalState.user!!)
+        }
     }
 
     fun refresh() = refreshScope.launch {

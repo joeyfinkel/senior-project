@@ -1,8 +1,6 @@
 package writenow.app.screens.profile.editprofile
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,15 +15,12 @@ import writenow.app.state.UserState
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EditName(navController: NavController) {
-    ProfileLayout(
-        title = "Edit name",
+    ProfileLayout(title = "Edit name",
         navController = navController,
-        onBackClick = { navController.popBackStack() }
-    ) { innerPadding, _, _ ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        onBackClick = { navController.popBackStack() }) { _, _ ->
+        item {
             Section(columnSpacing = 0.dp) {
-                TextInput(
-                    value = UserState.displayName,
+                TextInput(value = UserState.displayName,
                     label = "Display name",
                     hint = "This is how your name will appear to others",
                     spacer = false,
@@ -33,8 +28,7 @@ fun EditName(navController: NavController) {
                     onValueChange = {
                         UserState.displayName = it
                         SelectedUserState.displayName = it
-                    }
-                )
+                    })
             }
         }
     }

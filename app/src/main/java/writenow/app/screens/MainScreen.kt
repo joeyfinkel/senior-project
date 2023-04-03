@@ -8,23 +8,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.R
 import writenow.app.components.AnimatedColumn
 import writenow.app.components.DefaultButton
-import writenow.app.dbtables.Users
+import writenow.app.state.GlobalState
 import writenow.app.state.UserState
 
 @Composable
 fun MainScreen(navController: NavController) {
-    val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(UserState.hasClickedLogOut) {
         if (UserState.hasClickedLogOut) {
-            Users.clearInfo(context)
+            GlobalState.userRepository.deleteUser(GlobalState.user!!)
 
             UserState.hasClickedLogOut = false
         }

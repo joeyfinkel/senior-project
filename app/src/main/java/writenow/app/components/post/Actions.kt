@@ -18,6 +18,7 @@ import writenow.app.dbtables.PostLikes
 import writenow.app.dbtables.Posts
 import writenow.app.state.PostState
 import writenow.app.state.UserState
+import writenow.app.utils.LaunchedEffectOnce
 import writenow.app.utils.openPostMenu
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -32,7 +33,11 @@ fun PostActions(
     var isLiked by remember { mutableStateOf(PostState.allPosts.find { it.id == postId }?.isLiked == true) }
     var currentPost by remember { mutableStateOf(PostState.allPosts.find { it.id == postId }) }
     var commentsSize by remember { mutableStateOf(PostState.allPosts.find { it.id == postId }?.comments?.size) }
-    var likesSize by remember { mutableStateOf(PostState.allPosts.find { it.id == postId }?.likes?.filter { it.isUnliked == 0 }?.size) }
+    var likesSize by remember { mutableStateOf(0) }
+
+    LaunchedEffectOnce {
+        likesSize = Posts.getLikesPerPost(postId)
+    }
 
     LaunchedEffect(commentsSize) {
         if (commentsSize == null) {
@@ -61,7 +66,7 @@ fun PostActions(
                             postId = postId, userId = UserState.id, isUnliked = 1
                         )
                     ) + (currentPost?.likes ?: emptyList())
-                    likesSize = likesSize?.plus(1)
+//                    likesSize = likesSize?.plus(1)
 
                     updateLike()
                 }
@@ -71,7 +76,7 @@ fun PostActions(
                         ?.remove(currentPost?.likes?.find { post -> post.postId == postId && post.userId == UserState.id })
 
                     if (removed == true) {
-                        likesSize = likesSize?.minus(1)
+//                        likesSize = likesSize?.minus(1)
                     }
 
                     updateLike()
@@ -104,14 +109,21 @@ fun PostActions(
                 verticalArrangement = Arrangement.Center
             ) {
                 UserState.isCommentClicked = true
-                UserState.isEllipsisClicked = false
-                UserState.isPostClicked = false
-                UserState.selectedPost = currentPost
 
-                if (UserState.isCommentClicked) coroutineScope.launch { state.show() }
+                if (UserState.isCommentClicked) coroutineScope.launch {
+                    state.show()
+
+                    UserState.isEllipsisClicked = false
+                    UserState.isPostClicked = false
+                    UserState.selectedPost = currentPost
+                }
             }
             if (hasEllipsis) {
-                More(text = "") { openPostMenu(currentPost, coroutineScope, state) }
+                More(text = "") {
+                    UserState.selectedPost = currentPost
+
+                    openPostMenu(currentPost, coroutineScope, state)
+                }
             }
         }
     }

@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Post
-import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import java.time.LocalDate
 
@@ -16,6 +15,9 @@ import java.time.LocalDate
  */
 object UserState {
     var id by mutableStateOf(0)
+    var bitmapWidth by mutableStateOf(0)
+    var bitmapHeight by mutableStateOf(0)
+
 
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
@@ -26,8 +28,6 @@ object UserState {
     var bio by mutableStateOf("")
     var followingOrFollower by mutableStateOf("")
 
-    var bitmap by mutableStateOf<Bitmap?>(null)
-
     var isLoggedIn by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
@@ -37,6 +37,7 @@ object UserState {
     var hasClickedLogOut by mutableStateOf(false)
 
     var selectedPost by mutableStateOf<Post?>(null)
+    var bitmap by mutableStateOf<Bitmap?>(null)
 
     var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()
@@ -56,9 +57,9 @@ object UserState {
 
     suspend fun getHasPosted(): Boolean {
         val date = LocalDate.now().dayOfMonth
-//        hasPosted = date == Posts.getLastPostDate(username)
+//        hasPosted = date == Posts.getLastPostDate(userId = id)
 
-        return true
+        return hasPosted
     }
 
     /**

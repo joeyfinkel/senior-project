@@ -31,6 +31,7 @@ object Screens {
     const val Login = "login"
 
     const val Posts = "posts"
+    const val EditPost = "editPost"
     const val NewPost = "newPost"
     const val Search = "search"
     const val Notifications = "notifications"
@@ -41,5 +42,7 @@ object Screens {
     const val Settings = "settings"
     const val EditName = "editName"
     const val EditUsername = "editUsername"
+    const val AccountSettings = "accountSettings"
+    const val Privacy = "privacy"
     const val DeletedPosts = "deletedPosts"
 }

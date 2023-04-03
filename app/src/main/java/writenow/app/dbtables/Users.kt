@@ -1,24 +1,9 @@
 package writenow.app.dbtables
 
-import android.content.Context
-import android.content.SharedPreferences
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Log
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
-import androidx.security.crypto.MasterKey.Builder
-import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import writenow.app.state.PostState
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
-import java.io.IOException
-import java.security.InvalidAlgorithmParameterException
-import java.security.NoSuchAlgorithmException
-import javax.crypto.KeyGenerator
 
 data class Follower(val id: Int, val isFollowing: Boolean = false)
 data class Relationship(val sourceFriend: Int, val targetFriend: Int)
@@ -130,111 +115,6 @@ class Users private constructor() {
             utils.post("login", json) {
                 if (it && user != null) callback(true, user)
                 else callback(false, null)
-            }
-        }
-
-        private fun getSharedPreferences(context: Context): SharedPreferences {
-            val masterKey = Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
-
-            return EncryptedSharedPreferences.create(
-                context,
-                SHARED_PREFS_FILENAME,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        }
-
-        suspend fun saveInfo(context: Context, user: UserState) {
-            withContext(Dispatchers.IO) {
-                try {
-                    val sharedPreferences = getSharedPreferences(context)
-                    val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES)
-                    val keyGenParameterSpec = KeyGenParameterSpec.Builder(
-                        KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-                    ).apply {
-                        setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                        setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                        setUserAuthenticationRequired(false)
-                        setKeySize(256)
-                    }.build()
-
-                    keyGenerator.init(keyGenParameterSpec)
-                    keyGenerator.generateKey()
-
-                    // Encrypt the user's login information using the AES key, and save it to the
-                    // encrypted shared preferences file.
-                    sharedPreferences.edit().apply {
-                        putString("username", user.username)
-                        putString("password", user.password)
-                        putString("id", user.id.toString())
-                        putString("allPosts", Gson().toJson(PostState.allPosts))
-                        apply()
-                    }
-                } catch (e: NoSuchAlgorithmException) {
-                    throw RuntimeException(e)
-                } catch (e: InvalidAlgorithmParameterException) {
-                    throw RuntimeException(e)
-                } catch (e: IOException) {
-                    throw RuntimeException(e)
-                }
-            }
-        }
-
-        suspend fun getInfo(context: Context) {
-            withContext(Dispatchers.IO) {
-                try {
-                    val sharedPreferences = getSharedPreferences(context)
-                    val id = sharedPreferences.getString("id", "")
-                    val username = sharedPreferences.getString("username", "")
-                    val password = sharedPreferences.getString("password", "")
-                    val allPosts = sharedPreferences.getString("allPosts", "")
-
-                    Log.d("Username", "$username")
-
-                    if (username != null && password != null) {
-                        UserState.username = "$username"
-                        UserState.password = "$password"
-                        UserState.isLoggedIn = true
-
-                        Log.d("allPosts", allPosts.toString())
-
-//                        if (allPosts != null) PostState.allPosts =
-//                            Gson().fromJson(allPosts, Array<Post>::class.java).toMutableList()
-
-
-                        if (id != null && id.isNotBlank()) {
-                            UserState.id = id.toInt()
-                        }
-
-                        Log.d("User is logged in", "true")
-                        UserState.getHasPosted()
-                    }
-
-                } catch (e: NoSuchAlgorithmException) {
-                    throw RuntimeException(e)
-                } catch (e: InvalidAlgorithmParameterException) {
-                    throw RuntimeException(e)
-                } catch (e: IOException) {
-                    throw RuntimeException(e)
-                }
-            }
-        }
-
-        suspend fun clearInfo(context: Context) {
-            withContext(Dispatchers.IO) {
-                try {
-                    val sharedPreferences = getSharedPreferences(context)
-
-                    sharedPreferences.edit().clear().apply()
-                    Log.d("Cleared login info", "true")
-                } catch (e: NoSuchAlgorithmException) {
-                    throw RuntimeException(e)
-                } catch (e: InvalidAlgorithmParameterException) {
-                    throw RuntimeException(e)
-                } catch (e: IOException) {
-                    throw RuntimeException(e)
-                }
             }
         }
 

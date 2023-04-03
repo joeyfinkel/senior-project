@@ -56,7 +56,7 @@ private fun TopBar(
                 onClick = { scope.launch { lazyListState.scrollToItem(0) } })
         },
         actions = {
-            AccountCircle(size = 50.dp) {
+            AccountCircle(size = 50.dp, bitmap = UserState.bitmap) {
                 SelectedUserState.id = UserState.id
                 SelectedUserState.username = UserState.username
 
@@ -112,27 +112,35 @@ private fun Layout(
             } else if (UserState.isEllipsisClicked) {
                 BottomOverlayButtonContainer(layoutId = "postOverlay") {
                     if (UserState.selectedPost?.uuid == UserState.id) {
-                        BottomOverlayButton(
-                            icon = painterResource(id = R.drawable.outline_edit),
-                            text = "Edit post"
-                        ) {}
-                        BottomOverlayButton(
-                            icon = Icons.Default.Delete, text = "Delete", color = Color.Red
-                        ) {
-                            if (UserState.selectedPost?.id != null) {
-                                val id = UserState.selectedPost?.id!!
+                        BottomOverlayButton(icon = painterResource(id = R.drawable.outline_edit),
+                            text = "Edit post",
+                            onClick = {
+                                navController.navigate(Screens.EditPost)
+                                scope.launch {
+                                    sheetState.hide()
 
-                                Posts.delete(id) {
-                                    if (it) {
-                                        deletedPost = true
+                                    UserState.isEllipsisClicked = false
+                                    UserState.isCommentClicked = false
+                                    UserState.isPostClicked = false
+                                }
+                            })
+                        BottomOverlayButton(icon = Icons.Default.Delete,
+                            text = "Delete",
+                            color = Color.Red,
+                            onClick = {
+                                if (UserState.selectedPost?.id != null) {
+                                    val id = UserState.selectedPost?.id!!
 
-                                        PostState.allPosts.removeAt(PostState.allPosts.indexOfFirst { post -> post.id == id })
+                                    Posts.delete(id) {
+                                        if (it) {
+                                            deletedPost = true
 
+                                            PostState.allPosts.removeAt(PostState.allPosts.indexOfFirst { post -> post.id == id })
+
+                                        }
                                     }
                                 }
-                            }
-
-                        }
+                            })
                     } else {
                         BottomOverlayButton(
                             icon = painterResource(id = R.drawable.report),

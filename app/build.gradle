@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
 }
 
 ext {
@@ -69,6 +70,13 @@ dependencies {
     implementation "androidx.security:security-crypto:1.1.0-alpha05"
     implementation "com.google.code.gson:gson:2.8.9"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.24.13-rc"
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
+
+    // Room
+    implementation "androidx.room:room-common:2.5.1"
+    implementation "androidx.room:room-runtime:2.5.1"
+    implementation "androidx.room:room-ktx:2.5.1"
+    kapt "androidx.room:room-compiler:2.5.1"
 
     testImplementation 'junit:junit:4.13.2'
 

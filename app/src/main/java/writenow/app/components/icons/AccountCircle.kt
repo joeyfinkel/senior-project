@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -18,7 +19,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 private fun BaseAccountCircle(size: Dp) = Icon(
     Icons.Outlined.Person,
-    contentDescription = "Test",
+    contentDescription = "Profile picture",
     modifier = Modifier.size(size),
     tint = MaterialTheme.colorScheme.onSurface
 )
@@ -28,30 +29,26 @@ private fun BaseAccountCircle(size: Dp) = Icon(
 fun AccountCircle(
     modifier: Modifier = Modifier,
     size: Dp = 50.dp,
+    bitmap: Bitmap? = null,
     onClick: (() -> Unit)? = null
 ) = BaseCircle(
     modifier = modifier,
     border = Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape),
     size = size,
-    icon = { BaseAccountCircle(size) },
+    icon = {
+        if (bitmap == null) {
+            BaseAccountCircle(size)
+        } else {
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = "Profile picture",
+                modifier = Modifier
+                    .size(size)
+                    .clip(CircleShape),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            )
+        }
+    },
     onClick = onClick
 )
 
-// Account circle that uses bitmaps
-@Composable
-fun AccountSquare(
-    bitmap: Bitmap?,
-    modifier: Modifier = Modifier,
-    size: Dp,
-    onClick: (() -> Unit)? = null
-) = BaseCircle(
-    modifier = modifier,
-    border = Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape),
-    size = size,
-    icon = {bitmap?.let {  btm ->
-        Image(bitmap = btm.asImageBitmap(),
-            contentDescription =null,
-            modifier = Modifier.size(size))
-    }},
-    onClick = onClick
-)

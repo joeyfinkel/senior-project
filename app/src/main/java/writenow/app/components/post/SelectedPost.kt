@@ -6,7 +6,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import writenow.app.components.icons.Comment
 import writenow.app.components.icons.Like
+import writenow.app.dbtables.Posts
 import writenow.app.state.UserState
 import writenow.app.utils.getPostedDate
 
@@ -23,6 +24,13 @@ import writenow.app.utils.getPostedDate
 fun SelectedPost(
     scope: CoroutineScope, sheetState: ModalBottomSheetState, navController: NavController
 ) {
+    var isEdited by remember { mutableStateOf(false) }
+
+    LaunchedEffect(UserState.selectedPost) {
+        if (UserState.selectedPost != null) isEdited =
+            Posts.isPostEdited(UserState.selectedPost?.id!!)
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
@@ -44,6 +52,7 @@ fun SelectedPost(
                         userId = UserState.selectedPost!!.uuid,
                         username = UserState.selectedPost!!.username,
                         text = UserState.selectedPost!!.text,
+                        isEdited = isEdited,
                         datePosted = getPostedDate(UserState.selectedPost!!.createdAt),
                         navController = navController,
                     )

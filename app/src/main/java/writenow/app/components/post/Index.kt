@@ -8,10 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import writenow.app.dbtables.LikedPost
 import writenow.app.dbtables.Post
+import writenow.app.dbtables.Posts
 import writenow.app.state.UserState
 import writenow.app.ui.theme.DefaultWidth
+import writenow.app.utils.LaunchedEffectOnce
 import writenow.app.utils.getPostedDate
 import writenow.app.utils.openPostMenu
 
@@ -23,12 +24,19 @@ fun Post(
     state: ModalBottomSheetState,
     coroutineScope: CoroutineScope,
 ) {
-    var likedPost by remember { mutableStateOf<LikedPost?>(null) }
+    var isEdited by remember { mutableStateOf(false) }
 
-    var dateText by remember { mutableStateOf("") }
+    LaunchedEffectOnce {
+        isEdited = Posts.isPostEdited(post?.id ?: 0)
+    }
 
-    LaunchedEffect(post?.createdAt) {
-        dateText = post?.createdAt?.let { getPostedDate(it) }.toString()
+    LaunchedEffect(state) {
+        if (!state.isVisible) {
+            UserState.selectedPost = null
+            UserState.isPostClicked = false
+            UserState.isCommentClicked = false
+            UserState.isEllipsisClicked = false
+        }
     }
 
 //    LaunchedEffect(Unit) {
@@ -48,12 +56,13 @@ fun Post(
 //    }
 
     fun openMenu() {
-        UserState.selectedPost = post
-        UserState.isPostClicked = true
-        UserState.isCommentClicked = false
-        UserState.isEllipsisClicked = false
-
-        coroutineScope.launch { state.show() }
+        coroutineScope.launch {
+            UserState.selectedPost = post
+            UserState.isPostClicked = true
+            UserState.isCommentClicked = false
+            UserState.isEllipsisClicked = false
+            state.show()
+        }
     }
 
     if (post != null) {
@@ -61,7 +70,8 @@ fun Post(
             PostContent(userId = post.uuid,
                 username = post.username,
                 text = post.text,
-                datePosted = dateText,
+                isEdited = isEdited,
+                datePosted = getPostedDate(post.createdAt),
                 navController = navController,
                 onLongPress = { openPostMenu(post, coroutineScope, state) },
                 onClick = { openMenu() })

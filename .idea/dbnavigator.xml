@@ -12,8 +12,8 @@
     <loaded-nodes />
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
-    <connection id="20df6a5a-d3a6-44ff-8284-c5396f311035">
-      <console name="WriteNow DB" type="STANDARD" schema="mysql" session="Main" />
+    <connection id="7d42aa59-9d98-4a55-972b-51ef0f7fffd2">
+      <console name="WriteNow" type="STANDARD" schema="writenow" session="Main" />
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -25,26 +25,34 @@
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
   </component>
+  <component name="DBNavigator.Project.MethodExecutionManager">
+    <method-browser />
+    <execution-history>
+      <group-entries value="true" />
+      <execution-inputs />
+    </execution-history>
+    <argument-values-cache />
+  </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
     <filters />
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
-      <connection id="20df6a5a-d3a6-44ff-8284-c5396f311035" active="true" signed="true">
+      <connection id="7d42aa59-9d98-4a55-972b-51ef0f7fffd2" active="true" signed="true">
         <database>
-          <name value="WriteNow DB" />
+          <name value="WriteNow" />
           <description value="" />
           <database-type value="MYSQL" />
           <config-type value="BASIC" />
-          <database-version value="9999.0" />
+          <database-version value="8.0" />
           <driver-source value="BUILTIN" />
           <driver-library value="" />
           <driver value="" />
           <url-type value="DATABASE" />
           <host value="writenow.lesspopmorefizz.com" />
-          <port value="22" />
-          <database value="mysql" />
+          <port value="3306" />
+          <database value="writenow" />
           <type value="USER_PASSWORD" />
           <user value="430team" />
           <deprecated-pwd value="RzB0ZWFtRzAh" />

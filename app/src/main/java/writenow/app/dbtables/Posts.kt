@@ -1,6 +1,5 @@
 package writenow.app.dbtables
 
-import android.util.Log
 import org.json.JSONObject
 import writenow.app.state.UserState
 
@@ -20,6 +19,7 @@ data class Post(
     val text: String,
     val visible: Int,
     var createdAt: String,
+    var isEdited: Boolean = false,
     var isLiked: Boolean = false,
     var comments: List<Comment> = emptyList(),
     var likes: List<PostLikes> = emptyList()
@@ -67,14 +67,14 @@ class Posts private constructor() {
             return postsWithComments.groupBy { it.id to it.uuid }.map { (id, list) ->
                 val comments = list.map { it.comment!! }
                 Post(
-                    id.first,
-                    id.second,
-                    list.first().username,
-                    list.first().text,
-                    list.first().visible,
-                    list.first().createdAt,
-                    list.first().isLiked,
-                    comments
+                    id = id.first,
+                    uuid = id.second,
+                    username = list.first().username,
+                    text = list.first().text,
+                    visible = list.first().visible,
+                    createdAt = list.first().createdAt,
+                    isEdited = list.first().isLiked,
+                    comments = comments
                 )
             }
         }
@@ -100,7 +100,8 @@ class Posts private constructor() {
             val postsWithComments = getAllWithComments()
             val allLikes = getLikes()
             val allPosts = utils.getAll(url) {
-                Post(id = it.getInt("postID"),
+                Post(
+                    id = it.getInt("postID"),
                     uuid = it.getInt("uuid"),
                     username = it.getString("username"),
                     text = it.getString("postContents"),
@@ -108,7 +109,9 @@ class Posts private constructor() {
                     createdAt = it.getString("created"),
                     isLiked = allLikes.any { like ->
                         like.postId == it.getInt("postID") && like.userId == UserState.id && like.isUnliked == 0
-                    })
+                    },
+                    isEdited = it.getInt("isEdited") == 1
+                )
             }
 
             // Merge the posts with their comments and likes.
@@ -117,6 +120,26 @@ class Posts private constructor() {
 
                 post.copy(likes = likes)
             }
+        }
+
+        suspend fun getLikesPerPost(postId: Int): Int {
+            val likes = utils.getAll("?totalLikes=true&postID=$postId") {
+                return@getAll it.getInt("totalLikes")
+            }
+
+            if (likes.isEmpty()) return 0
+
+            return likes[0]
+        }
+
+        suspend fun isPostEdited(postId: Int): Boolean {
+            val posts = utils.getAll("?postID=$postId") {
+                return@getAll it.getInt("isEdited") == 1
+            }
+
+            if (posts.isEmpty()) return false
+
+            return posts[0]
         }
 
         suspend fun getToDisplay() =
@@ -132,16 +155,11 @@ class Posts private constructor() {
             return postLikes.any { it.userId == userId }
         }
 
-        suspend fun getLastPostDate(username: String): Int? {
-            Log.d("username", username)
-            if (username == "") return null
-
-            val posts = getAll()
+        suspend fun getLastPostDate(userId: Int): Int? {
+            val posts = getAll().sortedByDescending { it.createdAt }
 
             if (posts.isNotEmpty()) {
-                val test = posts.filter { it.username == username }
-                val lastPost =
-                    posts.filter { it.username == username }.maxByOrNull { it.createdAt }!!
+                val lastPost = posts.filter { it.uuid == userId }[0]
                 val date = lastPost.createdAt.substringBefore(" ")
 
                 return date.substring(date.lastIndexOf("-") + 1).toInt()
@@ -167,14 +185,14 @@ class Posts private constructor() {
             utils.post("add", jsonObject, callback)
         }
 
-        fun toggleLike(isLiked: Boolean, jsonObject: JSONObject, callback: (Boolean) -> Unit) {
-            Log.d("toggleLike", if (!isLiked) "unlike" else "like")
-            utils.post(if (isLiked) "unlike" else "like", jsonObject, callback)
+        fun edit(postId: Int, text: String, callback: (Boolean) -> Unit) {
+            val json = JSONObject().put("postContents", text)
 
+            utils.post("edit?postID=$postId", json, callback)
         }
 
         fun toggleLike(postId: Int, userId: Int, callback: (Boolean) -> Unit) {
-            utils.post("toggleLike?postID=$postId&userID=$userId", callback)
+            utils.post("like?postID=$postId&userID=$userId", callback)
 
         }
 

@@ -1,124 +1,83 @@
 package writenow.app.screens.profile.editprofile
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import writenow.app.components.ClickableRow
-import writenow.app.components.icons.AccountCircle
 import writenow.app.components.profile.*
 import writenow.app.screens.Screens
 import writenow.app.state.UserState
 import writenow.app.ui.theme.PersianOrange
 import writenow.app.ui.theme.placeholderColor
+import java.io.File
+import java.io.FileOutputStream
 
-// Gallery imports
-import android.net.Uri
-//
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
-import android.os.Build
-import android.provider.MediaStore
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import writenow.app.components.icons.AccountSquare
-
-/*
-TODO: Update UI to match the version from the figma
- */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EditProfile(navController: NavController) {
     var bio by remember { mutableStateOf("") }
+    var uploadedImage by remember { mutableStateOf(false) }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+
     val darkMode = isSystemInDarkTheme()
-
-    // Stuff for profile picture
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
     val context = LocalContext.current
-    val bitmap =  remember {
-        mutableStateOf<Bitmap?>(null)
-    }
-    val launcher = rememberLauncherForActivityResult(contract =
-    ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
-        Log.d("uri", imageUri.toString())
-
-        // Get bitmap
-        imageUri?.let {
-            if (Build.VERSION.SDK_INT < 28) {
-                bitmap.value = MediaStore.Images
-                    .Media.getBitmap(context.contentResolver,it)
-
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            bitmap = if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
             } else {
-                val source = ImageDecoder
-                    .createSource(context.contentResolver,it)
-                UserState.bitmap = ImageDecoder.decodeBitmap(source)
+                val inputStream = context.contentResolver.openInputStream(it)
+                BitmapFactory.decodeStream(inputStream)
             }
-            // Set pfp to bitmap
-            Log.d("bitmap", bitmap.toString())
+            val width = (bitmap!!.width * 0.5).toInt()
+            val height = (bitmap!!.height * 0.5).toInt()
+
+            UserState.bitmap = Bitmap.createScaledBitmap(bitmap!!, width, height, true)
+            uploadedImage = true
         }
     }
     // End of stuff for profile picture
 
-    ProfileLayout(
-        title = "Edit profile",
-        navController = navController,
-        onBackClick = { navController.navigate(Screens.UserProfile) }
-    ) { innerPadding, _, _ ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(innerPadding)
-        ) {
-            item {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    /*UserState.bitmap?.let {  btm ->
-                        Image(bitmap = btm.asImageBitmap(),
-                            contentDescription =null,
-                            modifier = Modifier.size(75.dp))
-                    }*/
 
-                    // Account circle stuff
-                    if (UserState.bitmap == null) {
-                        // Account circle with default pfp
-                        Log.d("Account Circle:", "default")
-                        AccountCircle(
-                            size = 75.dp,
-                            onClick = {
-                                // Open Gallery
-                                launcher.launch("image/")
-                            })
-                    } else {
-                        // Account circle with user's pfp
-                        Log.d("Account Circle:", "pfp")
-                        AccountSquare(
-                            bitmap = UserState.bitmap,
-                            size = 90.dp
-                        ) {
-                            // Open Gallery
-                            launcher.launch("image/")
-                        }
-                    }
+    LaunchedEffect(uploadedImage) {
+        // Saves the image to the internal storage
+        if (uploadedImage) {
+            val directory = context.filesDir
+            val file = File(directory, "${UserState.id}_profile_picture.png")
+            val stream = withContext(Dispatchers.IO) { FileOutputStream(file) }
 
-                    Text(text = "Change photo", color = MaterialTheme.colorScheme.onSurface)
-                }
+            bitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+            withContext(Dispatchers.IO) {
+                stream.flush()
+                stream.close()
             }
+        }
+    }
+
+    ProfileLayout(title = "Edit profile",
+        topText = "Change photo",
+        navController = navController,
+        onBackClick = { navController.navigate(Screens.UserProfile) },
+        accountIconAction = { launcher.launch("image/*") },
+        content = { _, _ ->
             item { Spacer(modifier = Modifier.height(25.dp)) }
             item {
                 Section(title = "About you") {
@@ -127,10 +86,9 @@ fun EditProfile(navController: NavController) {
                         value = UserState.displayName,
                         onClick = { navController.navigate(Screens.EditName) },
                     )
-                    //ClickableRow(
-                    //    key = "Username",
-                   //     value = UserState.username,
-                    //    onClick = { /*Going to leave this empty since allowing users to change this might cause problems*/ })
+                    ClickableRow(key = "Username",
+                        value = UserState.username,
+                        onClick = { navController.navigate(Screens.EditUsername) })
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -138,11 +96,9 @@ fun EditProfile(navController: NavController) {
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(text = "Bio", color = MaterialTheme.colorScheme.onSurface)
-                        OutlinedTextField(
-                            value = UserState.bio,
+                        OutlinedTextField(value = UserState.bio,
                             placeholder = {
-                                if (UserState.bio.isEmpty() || UserState.bio.isBlank())
-                                    Text(text = "Add some more info about yourself")
+                                if (UserState.bio.isEmpty() || UserState.bio.isBlank()) Text(text = "Add some more info about yourself")
                             },
                             modifier = Modifier.fillMaxSize(),
                             onValueChange = { UserState.bio = it },
@@ -155,13 +111,12 @@ fun EditProfile(navController: NavController) {
                                 unfocusedBorderColor = PersianOrange,
                                 cursorColor = PersianOrange
                             ),
-                            trailingIcon = { Text(text = "${UserState.bio.length}/500") }
-                        )
+                            trailingIcon = { Text(text = "${UserState.bio.length}/500") })
                     }
                 }
             }
-        }
-    }
+        })
+
 }
 
 

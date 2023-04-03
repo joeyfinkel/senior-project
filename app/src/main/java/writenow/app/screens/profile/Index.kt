@@ -3,12 +3,10 @@ package writenow.app.screens.profile
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,8 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.R
 import writenow.app.components.Tabs
-import writenow.app.components.icons.AccountCircle
-import writenow.app.components.icons.AccountSquare
 import writenow.app.components.post.Post
 import writenow.app.components.profile.EditProfile
 import writenow.app.components.profile.FollowOrUnFollow
@@ -57,9 +53,10 @@ fun Profile(navController: NavController) {
         Users.updateRelationList(SelectedUserState.following, false)
     }
 
-    ProfileLayout(
-        /* Display name at the top*/
-        title = SelectedUserState.displayName.ifEmpty { username },
+    ProfileLayout(title = SelectedUserState.displayName.ifEmpty { username },
+        topText = "@${username.trim()}",
+        topVerticalArrangement = Arrangement.spacedBy(10.dp),
+        hasEllipsis = true,
         navController = navController,
         onBackClick = {
             if (UserState.clickedFollower) {
@@ -69,80 +66,48 @@ fun Profile(navController: NavController) {
                 navController.navigate(Screens.Posts)
             }
         },
-        hasEllipsis = true
-    ) { innerPadding, state, scope ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(15.dp)
-                ) {
-                    // Profile Picture
-                    //AccountCircle(size = 75.dp)
-
-                    // Account Square stuff
-                    if (UserState.bitmap == null) {
-                        // Account circle with default pfp
-                        Log.d("Account Circle:", "default")
-                        AccountCircle(size = 75.dp)
-                    } else {
-                        // Account square with user's pfp
-                        Log.d("Account Circle:", "pfp")
-                        AccountSquare(
-                            bitmap = UserState.bitmap, size = 90.dp
-                        )
-                    }
-
-                    Text(text = "@${username.trim()}", color = MaterialTheme.colorScheme.onSurface)
-
-                    if (username == UserState.username) {
-                        // This is the current user's profile
-                        EditProfile(navController = navController)
-                    } else {
-                        // This is the selected user's profile
-                        FollowOrUnFollow(
-                            follower = Follower(
-                                id = SelectedUserState.id!!, isFollowing = isFollowing
-                            )
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth(0.75f),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.followers.size.toString() else SelectedUserState.followers.size.toString(),
-                                secondaryText = "Followers",
-                                onClick = {
-                                    UserState.followingOrFollower = "Followers"
-                                    navController.navigate(Screens.FollowersOrFollowingList)
-                                })
-                            RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.following.size.toString() else SelectedUserState.following.size.toString(),
-                                secondaryText = "Following",
-                                onClick = {
-                                    UserState.followingOrFollower = "Following"
-                                    navController.navigate(Screens.FollowersOrFollowingList)
-                                })
-                            RowData(primaryText = "45", secondaryText = "Likes")
-                        }
-                        if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty()) Text(text = UserState.bio)
-                    }
-                    Spacer(modifier = Modifier.height(15.dp))
-                }
+        additionalTopContent = {
+            if (username == UserState.username) {
+                // This is the current user's profile
+                EditProfile(navController = navController)
+            } else {
+                // This is the selected user's profile
+                FollowOrUnFollow(
+                    follower = Follower(
+                        id = SelectedUserState.id!!, isFollowing = isFollowing
+                    )
+                )
             }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(0.75f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.followers.size.toString() else SelectedUserState.followers.size.toString(),
+                        secondaryText = "Followers",
+                        onClick = {
+                            UserState.followingOrFollower = "Followers"
+                            navController.navigate(Screens.FollowersOrFollowingList)
+                        })
+                    RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.following.size.toString() else SelectedUserState.following.size.toString(),
+                        secondaryText = "Following",
+                        onClick = {
+                            UserState.followingOrFollower = "Following"
+                            navController.navigate(Screens.FollowersOrFollowingList)
+                        })
+                    RowData(primaryText = "45", secondaryText = "Likes")
+                }
+                if (UserState.bio.isNotBlank() || UserState.bio.isNotEmpty()) Text(text = UserState.bio)
+            }
+            Spacer(modifier = Modifier.height(15.dp))
+        },
+        content = { state, scope ->
             stickyHeader {
                 Tabs(tabs = if (SelectedUserState.username == UserState.username) listOf(
                     painterResource(id = R.drawable.grid_view), Icons.Default.Favorite
@@ -176,6 +141,6 @@ fun Profile(navController: NavController) {
                     }
                 }
             }
-        }
-    }
+        })
 }
+

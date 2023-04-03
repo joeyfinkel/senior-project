@@ -3,11 +3,13 @@ package writenow.app.activities
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -16,18 +18,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.work.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import writenow.app.components.*
 import writenow.app.dbtables.Posts
-import writenow.app.dbtables.Users
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
+import writenow.app.screens.posts.EditPost
 import writenow.app.screens.posts.NewPost
 import writenow.app.screens.profile.FollowersOrFollowing
 import writenow.app.screens.profile.Profile
@@ -35,35 +39,77 @@ import writenow.app.screens.profile.editprofile.EditName
 import writenow.app.screens.profile.editprofile.EditProfile
 import writenow.app.screens.profile.editprofile.EditUsername
 import writenow.app.screens.profile.settings.Settings
+import writenow.app.screens.profile.settings.account.AccountSettings
+import writenow.app.screens.profile.settings.account.Privacy
+import writenow.app.screens.profile.settings.posts.DeletedPosts
 import writenow.app.screens.registration.Information
 import writenow.app.screens.registration.Names
 import writenow.app.screens.registration.Username
+import writenow.app.state.GlobalState
 import writenow.app.state.PostState
 import writenow.app.state.UserState
 import writenow.app.ui.theme.WriteNowTheme
+import writenow.app.utils.createNotificationChannel
+import writenow.app.utils.sendNotification
+import java.io.File
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @SuppressLint("UnspecifiedImmutableFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         lifecycleScope.launch {
-            Users.getInfo(this@MainActivity)
+            val context = this@MainActivity
+
+            GlobalState.provide(context)
+
+            if (GlobalState.user != null) {
+                val directory = context.filesDir
+                val user = GlobalState.user!!
+                val file = File(directory, "${user.uuid}_profile_picture.png")
+                val options = BitmapFactory.Options()
+
+                BitmapFactory.decodeFile(file.absolutePath, options)
+
+                var scaleFactory = 1
+
+                if (options.outWidth > 1024) {
+                    scaleFactory = options.outWidth / 1024
+                }
+
+                options.inJustDecodeBounds = false
+                options.inSampleSize = scaleFactory
+
+                val stream = file.inputStream()
+
+                UserState.isLoggedIn = true
+                UserState.id = user.uuid
+                UserState.firstName = user.firstName
+                UserState.username = user.username
+                UserState.bio = user.bio.toString()
+                UserState.bitmap = BitmapFactory.decodeStream(stream, null, options)
+
+                withContext(Dispatchers.IO) {
+                    stream.close()
+                }
+            }
+
             UserState.getHasPosted()
+            createNotificationChannel(context)
+            sendNotification(context)
 
             if (PostState.allPosts.isEmpty()) {
                 PostState.isLoading = true
                 PostState.allPosts = Posts.getToDisplay()
-                Log.d("MainActivity", "onCreate: ${UserState.id}")
                 UserState.posts = Posts.getByUser(UserState.id).toMutableList()
                 PostState.isLoading = false
-
-                Log.d("MainActivity", "onCreate: ${UserState.posts}")
-
             }
         }
 
         setContent {
             WriteNowTheme(dynamicColor = false) {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
@@ -103,7 +149,6 @@ fun Main() {
     val navController = rememberNavController()
     val lazyListState = rememberLazyListState(0)
     val localContext = LocalContext.current
-//    val isLoggedIn = UserState.username.isNotEmpty() && UserState.password.isNotEmpty()
 
     NavHost(
         navController = navController,
@@ -120,9 +165,10 @@ fun Main() {
         //region Login
         composable(Screens.Login) { Login(navController) }
         //endregion
-        //region Posts - Home & New Post
+        //region Posts - Home & New Post & Edit Post
         composable(Screens.Posts) { AllPosts(navController, lazyListState) }
         composable(Screens.NewPost) { NewPost(navController) }
+        composable(Screens.EditPost) { EditPost(navController) }
         //endregion
         //region User Profile
         composable(Screens.UserProfile) { Profile(navController) }
@@ -136,6 +182,9 @@ fun Main() {
         //endregion
         //region Settings
         composable(Screens.Settings) { Settings(navController) }
+        composable(Screens.AccountSettings) { AccountSettings(navController) }
+        composable(Screens.Privacy) { Privacy(navController) }
+        composable(Screens.DeletedPosts) { DeletedPosts(navController) }
         //endregion
         //endregion
         //region Search
@@ -160,9 +209,3 @@ fun Main() {
     }
 
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    MyApplicationTheme { Main() }
-//}
