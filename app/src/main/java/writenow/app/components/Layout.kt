@@ -107,12 +107,12 @@ private fun Layout(
         )
     }, contentColor = MaterialTheme.colorScheme.onSurface, content = { innerPadding ->
         BottomOverlay(sheetContent = {
-            if (UserState.isCommentClicked) {
-                Comments(navController)
-            } else if (UserState.isEllipsisClicked) {
-                BottomOverlayButtonContainer(layoutId = "postOverlay") {
+            when {
+                UserState.isCommentClicked -> Comments(navController)
+                UserState.isEllipsisClicked -> BottomOverlayButtonContainer(layoutId = "postOverlay") {
                     if (UserState.selectedPost?.uuid == UserState.id) {
-                        BottomOverlayButton(icon = painterResource(id = R.drawable.outline_edit),
+                        BottomOverlayButton(
+                            icon = painterResource(id = R.drawable.outline_edit),
                             text = "Edit post",
                             onClick = {
                                 navController.navigate(Screens.EditPost)
@@ -150,8 +150,7 @@ private fun Layout(
                         }
                     }
                 }
-            } else if (UserState.isPostClicked) {
-                SelectedPost(
+                UserState.isPostClicked -> SelectedPost(
                     scope = scope, sheetState = sheetState, navController = navController
                 )
             }

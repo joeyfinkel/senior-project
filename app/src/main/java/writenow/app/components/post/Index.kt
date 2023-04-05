@@ -39,22 +39,6 @@ fun Post(
         }
     }
 
-//    LaunchedEffect(Unit) {
-//        if (post != null)
-//            likedPost = Likes.getLikedPost(UserState.id, post.id)
-//
-//        // If the post is liked, add it to the liked posts list
-//        if (likedPost != null && likedPost?.liked == 1) {
-//            PostState.likedPosts.add(likedPost!!)
-//            PostState.allPosts.filter { it.id == likedPost?.postId }
-//                .forEach { post ->
-//                    // add the post to the liked posts list if it's not already there
-//                    if (!UserState.likedPosts.contains(post))
-//                        UserState.likedPosts.add(post)
-//                }
-//        }
-//    }
-
     fun openMenu() {
         coroutineScope.launch {
             UserState.selectedPost = post
@@ -69,12 +53,12 @@ fun Post(
         PostContainer(height = DefaultWidth / 2) {
             PostContent(userId = post.uuid,
                 username = post.username,
-                text = post.text,
                 isEdited = isEdited,
+                text = post.text,
                 datePosted = getPostedDate(post.createdAt),
                 navController = navController,
-                onLongPress = { openPostMenu(post, coroutineScope, state) },
-                onClick = { openMenu() })
+                onLongPress = { openPostMenu(post, coroutineScope, state) }
+            ) { openMenu() }
             PostActions(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 state = state,

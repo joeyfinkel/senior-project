@@ -35,15 +35,18 @@ fun Profile(navController: NavController) {
     var isFollowing by remember { mutableStateOf(false) }
 
     val username = SelectedUserState.username
-    val posts = remember { UserState.posts.filter { it.visible == 1 }.toMutableList() }
+    val allPosts = remember { UserState.posts.filter { it.visible == 1 }.toMutableList() }
+    val likedPosts = remember { UserState.likedPosts.filter { it.visible == 1 }.toMutableList() }
 
     LaunchedEffectOnce {
         isFollowing = Users.isFollowing(UserState.id, SelectedUserState.id!!)
 
         Log.d("Profile", "isFollowing: $isFollowing")
 
-//        if (SelectedUserState.id != UserState.id)
-        posts.addAll(Posts.getByUser(SelectedUserState.id!!))
+        if (UserState.id == SelectedUserState.id) {
+            allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
+            likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
+        }
     }
 
     LaunchedEffect(UserState.id != SelectedUserState.id) {
@@ -122,7 +125,7 @@ fun Profile(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     when (selectedTabIndex) {
-                        0 -> posts.forEach { post ->
+                        0 -> allPosts.forEach { post ->
                             Post(
                                 post = post,
                                 navController = navController,
@@ -130,7 +133,7 @@ fun Profile(navController: NavController) {
                                 coroutineScope = scope
                             )
                         }
-                        1 -> UserState.likedPosts.forEach { post ->
+                        1 -> likedPosts.forEach { post ->
                             Post(
                                 post = post,
                                 navController = navController,

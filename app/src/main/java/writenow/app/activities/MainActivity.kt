@@ -3,7 +3,6 @@ package writenow.app.activities
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,9 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import writenow.app.components.*
 import writenow.app.dbtables.Posts
 import writenow.app.screens.*
@@ -50,8 +47,8 @@ import writenow.app.state.PostState
 import writenow.app.state.UserState
 import writenow.app.ui.theme.WriteNowTheme
 import writenow.app.utils.createNotificationChannel
+import writenow.app.utils.getProfilePicture
 import writenow.app.utils.sendNotification
-import java.io.File
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -59,41 +56,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         lifecycleScope.launch {
             val context = this@MainActivity
 
             GlobalState.provide(context)
 
             if (GlobalState.user != null) {
-                val directory = context.filesDir
                 val user = GlobalState.user!!
-                val file = File(directory, "${user.uuid}_profile_picture.png")
-                val options = BitmapFactory.Options()
-
-                BitmapFactory.decodeFile(file.absolutePath, options)
-
-                var scaleFactory = 1
-
-                if (options.outWidth > 1024) {
-                    scaleFactory = options.outWidth / 1024
-                }
-
-                options.inJustDecodeBounds = false
-                options.inSampleSize = scaleFactory
-
-                val stream = file.inputStream()
 
                 UserState.isLoggedIn = true
                 UserState.id = user.uuid
                 UserState.firstName = user.firstName
                 UserState.username = user.username
                 UserState.bio = user.bio.toString()
-                UserState.bitmap = BitmapFactory.decodeStream(stream, null, options)
-
-                withContext(Dispatchers.IO) {
-                    stream.close()
-                }
+                UserState.bitmap = getProfilePicture(context, user.uuid)
             }
 
             UserState.getHasPosted()
@@ -103,8 +79,19 @@ class MainActivity : ComponentActivity() {
             if (PostState.allPosts.isEmpty()) {
                 PostState.isLoading = true
                 PostState.allPosts = Posts.getToDisplay()
-                UserState.posts = Posts.getByUser(UserState.id).toMutableList()
                 PostState.isLoading = false
+            }
+
+            if (UserState.posts.isEmpty()) {
+                UserState.posts = Posts.getByUser(UserState.id).toMutableList()
+            }
+
+            if (UserState.likedPosts.isEmpty()) {
+                UserState.likedPosts = Posts.getLikedPosts(UserState.id).toMutableList()
+            }
+
+            if (PostState.deletedPosts.isEmpty()) {
+                PostState.deletedPosts = Posts.getDeleted(UserState.id).toMutableList()
             }
         }
 
@@ -184,7 +171,7 @@ fun Main() {
         composable(Screens.Settings) { Settings(navController) }
         composable(Screens.AccountSettings) { AccountSettings(navController) }
         composable(Screens.Privacy) { Privacy(navController) }
-        composable(Screens.DeletedPosts) { DeletedPosts(navController) }
+        composable(Screens.DeletedPosts) { DeletedPosts(navController, lazyListState) }
         //endregion
         //endregion
         //region Search

@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Post
+import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import java.time.LocalDate
 
@@ -57,7 +58,7 @@ object UserState {
 
     suspend fun getHasPosted(): Boolean {
         val date = LocalDate.now().dayOfMonth
-//        hasPosted = date == Posts.getLastPostDate(userId = id)
+        hasPosted = date == Posts.getLastPostDate(userId = id)
 
         return hasPosted
     }

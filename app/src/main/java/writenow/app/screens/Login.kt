@@ -20,6 +20,7 @@ import writenow.app.components.TextInput
 import writenow.app.components.registration.RegistrationFooter
 import writenow.app.components.registration.RegistrationLayout
 import writenow.app.data.entity.User
+import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.state.GlobalState
 import writenow.app.state.UserState
@@ -93,13 +94,12 @@ fun Login(navController: NavController) {
                             username = UserState.username,
                             displayName = UserState.displayName,
                             bio = UserState.bio,
-//                            bitmap = null,
                         )
                     )
                     UserState.getHasPosted()
-//                    if (date == Posts.getLastPostDate(UserState.username)) {
-//                        UserState.hasPosted = true
-//                    }
+                    if (date == Posts.getLastPostDate(UserState.id)) {
+                        UserState.hasPosted = true
+                    }
                 }
             } else {
                 isError = true

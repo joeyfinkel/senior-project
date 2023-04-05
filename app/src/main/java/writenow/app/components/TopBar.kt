@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
@@ -17,8 +18,8 @@ import writenow.app.components.icons.More
 
 @Composable
 fun TopBar(
-    title: @Composable() (() -> Unit)? = null,
-    leadingIcon: @Composable() (() -> Unit)? = null,
+    title: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) = Row(
     modifier = Modifier
@@ -43,11 +44,11 @@ fun TopBar(
     onBackClick: () -> Unit,
 ) = TopBar(
     leadingIcon = {
-        IconButton(onClick = onBackClick) {
+        IconButton(onClick = onBackClick, modifier = Modifier.size(24.dp)) {
             Icon(
                 painterResource(id = R.drawable.chevron_left),
                 contentDescription = "Back",
-                modifier = Modifier.size(35.dp),
+                modifier = Modifier.size(24.dp),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -65,5 +66,18 @@ fun TopBar(
         else Box(modifier = Modifier.width(40.dp), content = {})
     }
 )
+
+@OptIn(ExperimentalMaterialApi::class)
+@Preview
+@Composable
+fun TopBarPreview() {
+    TopBar(
+        title = "Title",
+        hasEllipsis = true,
+        onBackClick = { },
+        state = null,
+        coroutineScope = null,
+    )
+}
 
 

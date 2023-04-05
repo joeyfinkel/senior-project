@@ -1,5 +1,6 @@
 package writenow.app.components.post
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -8,11 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,7 +26,10 @@ import writenow.app.R
 import writenow.app.components.icons.AccountCircle
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
+import writenow.app.state.UserState
+import writenow.app.utils.LaunchedEffectOnce
 import writenow.app.utils.defaultText
+import writenow.app.utils.getProfilePicture
 import writenow.app.utils.skeletonEffect
 
 @Composable
@@ -108,46 +113,73 @@ fun PostContent(
     navController: NavController,
     onLongPress: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null
-) = ContentRow(isLoading = false, circle = {
-    AccountCircle(
-        size = 35.dp, modifier = Modifier.align(Alignment.Top)
-    ) {
-        SelectedUserState.id = userId
-        SelectedUserState.username = username
+) {
+    val context = LocalContext.current
 
-        navController.navigate(Screens.UserProfile)
+    var isLoading by remember { mutableStateOf(false) }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffectOnce {
+        if (bitmap == null) {
+            isLoading = true
+            bitmap = getProfilePicture(context, userId)
+            isLoading = false
+        }
     }
-}, column = {
-    TextColumn(isClickable = true,
-        isLoading = false,
-        isEdited = isEdited,
-        onClick = { if (onClick != null) onClick() },
-        onLongPress = { if (onLongPress != null) onLongPress() },
-        username = {
-            Text(
-                text = username,
-                maxLines = 1,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
+
+    ContentRow(isLoading = false, circle = {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .size(it)
+                    .clip(CircleShape)
+                    .skeletonEffect()
             )
-        },
-        postContents = {
-            if (text != null) {
+        } else {
+            AccountCircle(size = it,
+                modifier = Modifier.align(Alignment.Top),
+                bitmap = bitmap,
+                onClick = if (SelectedUserState.id == UserState.id) null else {
+                    {
+                        SelectedUserState.id = userId
+                        SelectedUserState.username = username
+
+                        navController.navigate(Screens.UserProfile)
+                    }
+                })
+        }
+    }, column = {
+        TextColumn(isClickable = true,
+            isLoading = false,
+            isEdited = isEdited,
+            onClick = { if (onClick != null) onClick() },
+            onLongPress = { if (onLongPress != null) onLongPress() },
+            username = {
                 Text(
-                    text = text,
-                    maxLines = 4,
-                    overflow = TextOverflow.Ellipsis,
+                    text = username,
+                    maxLines = 1,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-            }
-        },
-        datePosted = {
-            Text(
-                text = datePosted, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurface
-            )
-        })
-})
+            },
+            postContents = {
+                if (text != null) {
+                    Text(
+                        text = text,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
+            datePosted = {
+                Text(
+                    text = datePosted, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurface
+                )
+            })
+    })
+}
 
 @Composable
 fun LoadingPostContent() = ContentRow(isLoading = true, circle = {

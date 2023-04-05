@@ -4,10 +4,7 @@ import org.json.JSONObject
 import writenow.app.state.UserState
 
 data class PostLikes(
-    val postId: Int,
-    val userId: Int,
-    val dateLiked: String = "",
-    val isUnliked: Int
+    val postId: Int, val userId: Int, val dateLiked: String = "", val isUnliked: Int
 )
 
 data class Post(
@@ -143,10 +140,13 @@ class Posts private constructor() {
         }
 
         suspend fun getToDisplay() =
-            getAll().filter { it.visible == 1 }.sortedByDescending { it.createdAt }
-                .toMutableList()
+            getAll().filter { it.visible == 1 }.sortedByDescending { it.createdAt }.toMutableList()
 
-        suspend fun getByUser(id: Int) = getAll("?userID=$id")
+        suspend fun getByUser(id: Int) = getAll().filter { it.uuid == id }
+
+        suspend fun getDeleted(id: Int) = getByUser(id).filter { it.visible == 0 }
+
+        suspend fun getLikedPosts(id: Int) = getByUser(id).filter { it.isLiked }
 
         suspend fun isLikedByUser(postId: Int, userId: Int): Boolean {
             val likes = getLikes()

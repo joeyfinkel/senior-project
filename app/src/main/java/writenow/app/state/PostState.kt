@@ -12,6 +12,9 @@ object PostState {
     /** The list of all posts. */
     var allPosts = mutableListOf<Post>()
 
+    /** The list of all deleted posts. */
+    var deletedPosts = mutableListOf<Post>()
+
     /** The list of all liked posts. */
     var likedPosts = mutableListOf<Post>()
 }

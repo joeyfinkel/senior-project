@@ -1,5 +1,8 @@
 package writenow.app.utils
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -7,9 +10,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import writenow.app.dbtables.Post
 import writenow.app.state.UserState
+import java.io.File
 import java.util.*
 
 var defaultText =
@@ -17,16 +23,6 @@ var defaultText =
 
 fun capitalizeFirstLetter(string: String): String {
     return string.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-}
-
-fun defaultContentCreator(total: Int): MutableList<String> {
-    val list = mutableListOf<String>()
-
-    for (i in 0..total) {
-        list.add(defaultText)
-    }
-
-    return list
 }
 
 /**
@@ -70,5 +66,42 @@ fun openPostMenu(currentPost: Post?, scope: CoroutineScope, state: ModalBottomSh
     UserState.selectedPost = currentPost
 
     if (UserState.isEllipsisClicked) scope.launch { state.show() }
+}
+
+/**
+ * This function gets the profile picture of the user from the internal storage.
+ *
+ * @param context The context of the application.
+ * @param userId The id of the user.
+ * @return The profile picture of the user. Will return null if the user does not have a profile picture.
+ */
+suspend fun getProfilePicture(context: Context, userId: Int): Bitmap? {
+    val directory = context.filesDir
+    val file = File(directory, "${userId}_profile_picture.png")
+    val bitmap = mutableStateOf<Bitmap?>(null)
+
+    if (file.exists()) {
+        withContext(Dispatchers.IO) {
+            val options = BitmapFactory.Options()
+
+            BitmapFactory.decodeFile(file.absolutePath, options)
+
+            var scaleFactory = 1
+
+            if (options.outWidth > 1024) {
+                scaleFactory = options.outWidth / 1024
+            }
+
+            options.inJustDecodeBounds = false
+            options.inSampleSize = scaleFactory
+
+            val stream = file.inputStream()
+            bitmap.value = BitmapFactory.decodeStream(stream, null, options)
+
+            stream.close()
+        }
+    }
+
+    return bitmap.value
 }
 
