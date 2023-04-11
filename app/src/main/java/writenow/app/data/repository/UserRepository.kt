@@ -34,6 +34,9 @@ class UserRepository(private val userDao: UserDao) {
                 username = user.username,
                 displayName = user.displayName,
                 bio = user.bio,
+                activeDays = user.activeDays,
+                activeHoursStart = user.activeHoursStart,
+                activeHoursEnd = user.activeHoursEnd,
             )
         }
 
@@ -58,6 +61,9 @@ class UserRepository(private val userDao: UserDao) {
                 username = user.username,
                 displayName = user.displayName,
                 bio = user.bio,
+                activeDays = user.activeDays,
+                activeHoursStart = user.activeHoursStart,
+                activeHoursEnd = user.activeHoursEnd,
             )
         )
     }

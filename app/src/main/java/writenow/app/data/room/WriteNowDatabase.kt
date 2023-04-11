@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import writenow.app.data.entity.User
 
 @Database(
-    entities = [User::class], version = 1, exportSchema = false
+    entities = [User::class], version = 2, exportSchema = false
 )
 abstract class WriteNowDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao

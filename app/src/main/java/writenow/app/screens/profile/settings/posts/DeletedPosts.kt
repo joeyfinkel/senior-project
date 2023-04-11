@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.components.post.Post
 import writenow.app.components.post.PostList
-import writenow.app.components.profile.ProfileLayout
+import writenow.app.components.settings.SettingsLayout
 import writenow.app.dbtables.Posts
 import writenow.app.state.PostState
 import writenow.app.state.UserState
@@ -20,10 +20,9 @@ import writenow.app.state.UserState
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DeletedPosts(navController: NavController, lazyListState: LazyListState) {
-
-    ProfileLayout(title = "Deleted Posts",
+    SettingsLayout(
+        title = "Deleted Posts",
         navController = navController,
-        onBackClick = { navController.popBackStack() },
         content = { innerPadding, state, scope ->
             Column(
                 modifier = Modifier

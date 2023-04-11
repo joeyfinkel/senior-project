@@ -20,11 +20,10 @@ import writenow.app.R
 private fun ClickableRow(
     key: String,
     value: String? = null,
-    trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,
-    leadingIcon: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable() (() -> Unit)? = null,
     onClick: () -> Unit
 ) = Row(
     horizontalArrangement = Arrangement.SpaceBetween,
@@ -47,7 +46,7 @@ private fun ClickableRow(
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (trailingText && value != null) Text(text = value, color = color)
+        if (value != null) Text(text = value, color = color)
         if (chevron) Icon(
             painter = painterResource(id = R.drawable.chevron_right),
             contentDescription = "Right",
@@ -61,7 +60,6 @@ private fun ClickableRow(
 fun ClickableRow(
     key: String,
     value: String? = null,
-    trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,
@@ -69,7 +67,6 @@ fun ClickableRow(
 ) = ClickableRow(
     key = key,
     value = value,
-    trailingText = trailingText,
     chevron = chevron,
     height = height,
     color = color,
@@ -81,7 +78,6 @@ fun ClickableRow(
 fun ClickableRow(
     key: String,
     value: String? = null,
-    trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,
@@ -90,7 +86,6 @@ fun ClickableRow(
 ) = ClickableRow(
     key = key,
     value = value,
-    trailingText = trailingText,
     chevron = chevron,
     height = height,
     color = color,
@@ -109,7 +104,6 @@ fun ClickableRow(
 fun ClickableRow(
     key: String,
     value: String? = null,
-    trailingText: Boolean = true,
     chevron: Boolean = true,
     height: Dp = 50.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,
@@ -118,7 +112,6 @@ fun ClickableRow(
 ) = ClickableRow(
     key = key,
     value = value,
-    trailingText = trailingText,
     chevron = chevron,
     height = height,
     color = color,

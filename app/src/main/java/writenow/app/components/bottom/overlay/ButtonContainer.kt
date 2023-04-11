@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -16,14 +15,12 @@ fun BottomOverlayButtonContainer(
     horizontalPadding: Dp = 15.dp,
     verticalPadding: Dp = 5.dp,
     verticalSpacing: Dp = 10.dp,
-    layoutId: String,
     content: @Composable () -> Unit
 ) =
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding)
-            .layoutId(layoutId),
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         verticalArrangement = Arrangement.spacedBy(verticalSpacing),
         horizontalAlignment = Alignment.Start
     ) {

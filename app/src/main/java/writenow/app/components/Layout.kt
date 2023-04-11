@@ -109,7 +109,7 @@ private fun Layout(
         BottomOverlay(sheetContent = {
             when {
                 UserState.isCommentClicked -> Comments(navController)
-                UserState.isEllipsisClicked -> BottomOverlayButtonContainer(layoutId = "postOverlay") {
+                UserState.isEllipsisClicked -> BottomOverlayButtonContainer {
                     if (UserState.selectedPost?.uuid == UserState.id) {
                         BottomOverlayButton(
                             icon = painterResource(id = R.drawable.outline_edit),

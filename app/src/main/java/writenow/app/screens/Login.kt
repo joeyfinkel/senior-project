@@ -94,6 +94,9 @@ fun Login(navController: NavController) {
                             username = UserState.username,
                             displayName = UserState.displayName,
                             bio = UserState.bio,
+                            activeDays = UserState.selectedDays.joinToString(","),
+                            activeHoursStart = UserState.activeHours.start,
+                            activeHoursEnd = UserState.activeHours.end
                         )
                     )
                     UserState.getHasPosted()

@@ -29,7 +29,6 @@ import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
 import writenow.app.utils.LaunchedEffectOnce
 import writenow.app.utils.defaultText
-import writenow.app.utils.getProfilePicture
 import writenow.app.utils.skeletonEffect
 
 @Composable
@@ -120,9 +119,9 @@ fun PostContent(
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffectOnce {
-        if (bitmap == null) {
+        if (userId == SelectedUserState.id) {
             isLoading = true
-            bitmap = getProfilePicture(context, userId)
+            bitmap = UserState.bitmap
             isLoading = false
         }
     }

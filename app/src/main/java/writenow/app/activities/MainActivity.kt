@@ -35,6 +35,7 @@ import writenow.app.screens.profile.Profile
 import writenow.app.screens.profile.editprofile.EditName
 import writenow.app.screens.profile.editprofile.EditProfile
 import writenow.app.screens.profile.editprofile.EditUsername
+import writenow.app.screens.profile.settings.Notifications
 import writenow.app.screens.profile.settings.Settings
 import writenow.app.screens.profile.settings.account.AccountSettings
 import writenow.app.screens.profile.settings.account.Privacy
@@ -70,11 +71,17 @@ class MainActivity : ComponentActivity() {
                 UserState.username = user.username
                 UserState.bio = user.bio.toString()
                 UserState.bitmap = getProfilePicture(context, user.uuid)
+                UserState.selectedDays =
+                    if (user.activeDays != null) user.activeDays.split(',').toSet() else setOf()
+                UserState.activeHours.start =
+                    if (user.activeHoursStart != null) user.activeHoursStart.toString() else ""
+                UserState.activeHours.end =
+                    if (user.activeHoursEnd != null) user.activeHoursEnd.toString() else ""
             }
 
             UserState.getHasPosted()
             createNotificationChannel(context)
-            sendNotification(context)
+            sendNotification(context, UserState.activeHours, UserState.selectedDays)
 
             if (PostState.allPosts.isEmpty()) {
                 PostState.isLoading = true
@@ -172,6 +179,7 @@ fun Main() {
         composable(Screens.AccountSettings) { AccountSettings(navController) }
         composable(Screens.Privacy) { Privacy(navController) }
         composable(Screens.DeletedPosts) { DeletedPosts(navController, lazyListState) }
+        composable(Screens.NotificationsSettings) { Notifications(navController) }
         //endregion
         //endregion
         //region Search

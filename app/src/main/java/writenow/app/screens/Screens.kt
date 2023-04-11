@@ -45,4 +45,5 @@ object Screens {
     const val AccountSettings = "accountSettings"
     const val Privacy = "privacy"
     const val DeletedPosts = "deletedPosts"
+    const val NotificationsSettings = "notificationsSettings"
 }

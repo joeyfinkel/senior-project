@@ -14,4 +14,7 @@ data class User(
     @ColumnInfo(name = "username") val username: String,
     @ColumnInfo(name = "displayName") val displayName: String?,
     @ColumnInfo(name = "bio") val bio: String?,
+    @ColumnInfo(name = "active_days") val activeDays: String?,
+    @ColumnInfo(name = "active_hours_start") val activeHoursStart: String?,
+    @ColumnInfo(name = "active_hours_end") val activeHoursEnd: String?,
 )

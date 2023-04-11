@@ -11,6 +11,8 @@ import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import java.time.LocalDate
 
+data class ActiveHours(var start: String, var end: String)
+
 /**
  * The global state of the user.
  */
@@ -18,7 +20,6 @@ object UserState {
     var id by mutableStateOf(0)
     var bitmapWidth by mutableStateOf(0)
     var bitmapHeight by mutableStateOf(0)
-
 
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
@@ -39,6 +40,9 @@ object UserState {
 
     var selectedPost by mutableStateOf<Post?>(null)
     var bitmap by mutableStateOf<Bitmap?>(null)
+
+    var selectedDays by mutableStateOf(setOf<String>())
+    var activeHours by mutableStateOf(ActiveHours("", ""))
 
     var posts = mutableListOf<Post>()
     var likedPosts = mutableListOf<Post>()

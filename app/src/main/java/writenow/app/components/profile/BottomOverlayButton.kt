@@ -15,10 +15,10 @@ internal fun BottomOverlayButton(
     onClick: () -> Unit
 ) = ClickableRow(
     key = text,
-    leadingIcon = icon,
-    onClick = onClick,
+    chevron = false,
     color = color,
-    chevron = false
+    leadingIcon = icon,
+    onClick = onClick
 )
 
 @Composable
@@ -29,8 +29,8 @@ internal fun BottomOverlayButton(
     onClick: () -> Unit
 ) = ClickableRow(
     key = text,
-    leadingIcon = icon,
-    onClick = onClick,
+    chevron = false,
     color = color,
-    chevron = false
+    leadingIcon = icon,
+    onClick = onClick
 )
