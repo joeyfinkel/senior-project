@@ -84,11 +84,11 @@ fun EditProfile(navController: NavController) {
                     ClickableRow(
                         key = "Name",
                         value = UserState.displayName,
-                    ) { navController.navigate(Screens.EditName) }
-                    ClickableRow(
-                        key = "Username",
-                        value = UserState.username
-                    ) { navController.navigate(Screens.EditUsername) }
+                        onClick = { navController.navigate(Screens.EditName) },
+                    )
+                    ClickableRow(key = "Username",
+                        value = UserState.username,
+                        onClick = { navController.navigate(Screens.EditUsername) })
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -96,8 +96,7 @@ fun EditProfile(navController: NavController) {
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(text = "Bio", color = MaterialTheme.colorScheme.onSurface)
-                        OutlinedTextField(
-                            value = UserState.bio,
+                        OutlinedTextField(value = UserState.bio,
                             placeholder = {
                                 if (UserState.bio.isEmpty() || UserState.bio.isBlank()) Text(text = "Add some more info about yourself")
                             },

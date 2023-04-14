@@ -57,6 +57,7 @@ fun Login(navController: NavController) {
                             UserState.email = user.email
                             UserState.firstName = user.firstName
                             UserState.lastName = user.lastName
+                            /*UserState.bitmap = user.lastName*/
                         }
 
                         continuation.resume(true)

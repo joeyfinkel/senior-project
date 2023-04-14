@@ -155,16 +155,24 @@ class Posts private constructor() {
             return postLikes.any { it.userId == userId }
         }
 
+        /**
+         * getLastPostDate
+         * Returns the date of the most recent post made by the logged in user
+         * Returns null if there are no posts made by the logged in user
+         */
         suspend fun getLastPostDate(userId: Int): Int? {
             val posts = getAll().sortedByDescending { it.createdAt }
-
-            if (posts.isNotEmpty()) {
+            //Log.d("Posts", posts.toString())
+            // Check to see if there are posts from the user that is logged in
+            if (!posts.filter { it.uuid == userId }.isNullOrEmpty()) {
+                // Save the user's most recent post
                 val lastPost = posts.filter { it.uuid == userId }[0]
+                // Get the date of the user's last post
                 val date = lastPost.createdAt.substringBefore(" ")
-
+                // Return the date of the user's most recent post
                 return date.substring(date.lastIndexOf("-") + 1).toInt()
             }
-
+            // No posts from the logged in user, return null
             return null
         }
 
