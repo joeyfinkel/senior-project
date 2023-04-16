@@ -24,6 +24,7 @@ object UserState {
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
     var username by mutableStateOf("")
+    var birthday by mutableStateOf("")
     var displayName by mutableStateOf("")
     var email by mutableStateOf("")
     var password by mutableStateOf("")
