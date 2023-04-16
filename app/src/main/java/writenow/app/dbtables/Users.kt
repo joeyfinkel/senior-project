@@ -1,12 +1,15 @@
 package writenow.app.dbtables
 
+import android.graphics.Bitmap
 import android.util.Log
 import org.json.JSONObject
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
+import writenow.app.utils.ActiveHours
 
 data class Follower(val id: Int, val isFollowing: Boolean = false)
 data class Relationship(val sourceFriend: Int, val targetFriend: Int)
+data class Preferences(val userId: Int, val activeHours: ActiveHours)
 data class User(
     val id: Int,
     val username: String,
@@ -14,7 +17,12 @@ data class User(
     val lastName: String,
     val email: String,
     val passwordHash: String,
+    val activeDays: String = "",
+    val bio: String = "",
+    val displayName: String = "",
     val followingList: MutableList<Int> = mutableListOf(),
+    val activeHours: ActiveHours = ActiveHours("", ""),
+    val profilePicture: Bitmap? = null,
 ) {
     operator fun get(s: String): Any? {
         return when (s) {
@@ -32,20 +40,47 @@ data class User(
 class Users private constructor() {
     companion object {
         private val utils = DBUtils("user")
-        private const val SHARED_PREFS_FILENAME = "user_login_info"
-        private const val KEY_ALIAS = "user_login_info_key"
+        private val pfp = DBUtils("assets/profilePictures")
 
-        suspend fun getAll(): List<User> {
-            return utils.getAll {
-                User(
-                    it.getInt("uuid"),
-                    it.getString("username"),
-                    it.getString("firstName"),
-                    it.getString("lastName"),
-                    it.getString("email"),
-                    it.getString("passwordHash"),
+        suspend fun getPrefs(userId: Int? = null): List<Preferences> {
+            return utils.getAll("preference?uuid=${userId}") {
+                Preferences(
+                    it.getInt("UUID"), ActiveHours(
+                        it.getString("ActiveHourStart"), it.getString("ActiveHourEnd")
+                    )
                 )
             }
+        }
+
+        /**
+         * Gets a list of all users in the database.
+         *
+         * @return A list of all users in the database with their active hours.
+         */
+        suspend fun getAll(): List<User> {
+            val users = utils.getAll {
+                User(
+                    id = it.getInt("uuid"),
+                    username = it.getString("username"),
+                    firstName = it.getString("firstName"),
+                    lastName = it.getString("lastName"),
+                    email = it.getString("email"),
+                    passwordHash = it.getString("passwordHash"),
+                )
+            }
+            val prefs =
+                getPrefs().distinctBy { it.userId }.groupBy({ it.userId }) { it.activeHours }
+
+            return users.map { user ->
+                user.copy(
+                    activeHours = prefs[user.id]?.first() ?: ActiveHours("", ""),
+                    profilePicture = pfp.getImage(user.id.toString())
+                )
+            }
+        }
+
+        suspend fun getCurrent(id: Int): User {
+            return getAll().first { it.id == id }
         }
 
         /**
@@ -94,6 +129,28 @@ class Users private constructor() {
                 val newFollowers = followers.toSet() - list.toSet()
 
                 list.addAll(newFollowers)
+            }
+        }
+
+        fun uploadPFP(id: Int, bitmap: Bitmap) {
+            pfp.post(id.toString(), bitmap) {
+                Log.d(
+                    "uploadPFP",
+                    if (it) "Successfully uploaded profile picture." else "Failed to upload profile picture."
+                )
+
+            }
+        }
+
+        fun updateActiveHours(userID: Int, activeHours: ActiveHours) {
+            val json = JSONObject().apply {
+                put("uuid", userID)
+                put("startTime", activeHours.start)
+                put("endTime", activeHours.end)
+            }
+
+            utils.post("preference/update", json) {
+                return@post
             }
         }
 

@@ -25,7 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.work.*
 import kotlinx.coroutines.launch
 import writenow.app.components.*
-import writenow.app.dbtables.Posts
+import writenow.app.dbtables.Users
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
 import writenow.app.screens.posts.EditPost
@@ -53,53 +53,56 @@ import writenow.app.utils.sendNotification
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun fetchUser(context: Context) {
+        if (GlobalState.user != null) {
+            val user = GlobalState.user!!
+
+            UserState.isLoggedIn = true
+            UserState.id = user.uuid
+            UserState.firstName = user.firstName
+            UserState.username = user.username
+            UserState.bio = user.bio.toString()
+            UserState.bitmap = getProfilePicture(context, user.uuid)
+            UserState.selectedDays =
+                if (user.activeDays != null) user.activeDays.split(',').toSet() else setOf()
+            UserState.activeHours.start =
+                if (user.activeHoursStart != null) user.activeHoursStart.toString() else ""
+            UserState.activeHours.end =
+                if (user.activeHoursEnd != null) user.activeHoursEnd.toString() else ""
+        }
+
+        createNotificationChannel(context)
+        sendNotification(context, UserState.activeHours, UserState.selectedDays)
+
+        PostState.fetchNewPosts(UserState.getHasPosted()).updateAll()
+        if (GlobalState.user?.uuid != null) UserState.updateActiveHours(GlobalState.user?.uuid!!)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("UnspecifiedImmutableFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
             val context = this@MainActivity
+            val fetchedUser = GlobalState.user?.uuid?.let { Users.getCurrent(it) }
 
             GlobalState.provide(context)
+            fetchUser(context)
 
-            if (GlobalState.user != null) {
-                val user = GlobalState.user!!
-
-                UserState.isLoggedIn = true
-                UserState.id = user.uuid
-                UserState.firstName = user.firstName
-                UserState.username = user.username
-                UserState.bio = user.bio.toString()
-                UserState.bitmap = getProfilePicture(context, user.uuid)
-                UserState.selectedDays =
-                    if (user.activeDays != null) user.activeDays.split(',').toSet() else setOf()
-                UserState.activeHours.start =
-                    if (user.activeHoursStart != null) user.activeHoursStart.toString() else ""
-                UserState.activeHours.end =
-                    if (user.activeHoursEnd != null) user.activeHoursEnd.toString() else ""
-            }
-
-            UserState.getHasPosted()
-            createNotificationChannel(context)
-            sendNotification(context, UserState.activeHours, UserState.selectedDays)
-
-            if (PostState.allPosts.isEmpty()) {
-                PostState.isLoading = true
-                PostState.allPosts = Posts.getToDisplay()
-                PostState.isLoading = false
-            }
-
-            if (UserState.posts.isEmpty()) {
-                UserState.posts = Posts.getByUser(UserState.id).toMutableList()
-            }
-
-            if (UserState.likedPosts.isEmpty()) {
-                UserState.likedPosts = Posts.getLikedPosts(UserState.id).toMutableList()
-            }
-
-            if (PostState.deletedPosts.isEmpty()) {
-                PostState.deletedPosts = Posts.getDeleted(UserState.id).toMutableList()
-            }
+            if (fetchedUser != null) GlobalState.user = GlobalState.user?.copy(
+                uuid = if (GlobalState.user!!.uuid != fetchedUser.id) fetchedUser.id else GlobalState.user!!.uuid,
+                firstName = if (GlobalState.user!!.firstName != fetchedUser.firstName) fetchedUser.firstName else GlobalState.user!!.firstName,
+                lastName = if (GlobalState.user!!.lastName != fetchedUser.lastName) fetchedUser.lastName else GlobalState.user!!.lastName,
+                email = if (GlobalState.user!!.email != fetchedUser.email) fetchedUser.email else GlobalState.user!!.email,
+                password = if (GlobalState.user!!.password != fetchedUser.passwordHash) fetchedUser.passwordHash else GlobalState.user!!.password,
+                username = if (GlobalState.user!!.username != fetchedUser.username) fetchedUser.username else GlobalState.user!!.username,
+                displayName = if (GlobalState.user!!.displayName != fetchedUser.displayName) fetchedUser.displayName else GlobalState.user!!.displayName,
+                bio = if (GlobalState.user!!.bio != fetchedUser.bio) fetchedUser.bio else GlobalState.user!!.bio,
+                activeDays = if (GlobalState.user!!.activeDays != fetchedUser.activeDays) fetchedUser.activeDays else GlobalState.user!!.activeDays,
+                activeHoursStart = if (GlobalState.user!!.activeHoursStart != fetchedUser.activeHours.start) fetchedUser.activeHours.start else GlobalState.user!!.activeHoursStart,
+                activeHoursEnd = if (GlobalState.user!!.activeHoursEnd != fetchedUser.activeHours.end) fetchedUser.activeHours.end else GlobalState.user!!.activeHoursEnd,
+            )
         }
 
         setContent {

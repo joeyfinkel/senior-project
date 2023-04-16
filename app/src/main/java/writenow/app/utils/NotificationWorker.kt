@@ -14,7 +14,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.*
 import writenow.app.R
-import writenow.app.state.ActiveHours
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -26,10 +25,6 @@ class NotificationWorker(context: Context, userParams: WorkerParameters) :
     Worker(context, userParams) {
     override fun doWork(): Result {
         return try {
-            for (i in 0..10) {
-                Log.i("NotificationWorker:", "$i")
-            }
-
             Result.success()
         } catch (e: Exception) {
             Result.failure()

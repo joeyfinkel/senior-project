@@ -57,6 +57,8 @@ fun Login(navController: NavController) {
                             UserState.email = user.email
                             UserState.firstName = user.firstName
                             UserState.lastName = user.lastName
+                            UserState.activeHours.start = user.activeHours.start
+                            UserState.activeHours.end = user.activeHours.end
                         }
 
                         continuation.resume(true)

@@ -1,6 +1,5 @@
 package writenow.app.screens.profile
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
@@ -13,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import writenow.app.R
 import writenow.app.components.Tabs
 import writenow.app.components.post.Post
@@ -26,7 +27,6 @@ import writenow.app.dbtables.Users
 import writenow.app.screens.Screens
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
-import writenow.app.utils.LaunchedEffectOnce
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -38,14 +38,28 @@ fun Profile(navController: NavController) {
     val allPosts = remember { UserState.posts.filter { it.visible == 1 }.toMutableList() }
     val likedPosts = remember { UserState.likedPosts.filter { it.visible == 1 }.toMutableList() }
 
-    LaunchedEffectOnce {
-        isFollowing = Users.isFollowing(UserState.id, SelectedUserState.id!!)
+//    LaunchedEffectOnce {
+//        isFollowing = Users.isFollowing(UserState.id, SelectedUserState.id!!)
+//
+//        Log.d("Profile", "isFollowing: $isFollowing")
+//
+//        if (UserState.id == SelectedUserState.id) {
+//            allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
+//            likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
+//        }
+//    }
 
-        Log.d("Profile", "isFollowing: $isFollowing")
+    LaunchedEffect(UserState.posts, UserState.likedPosts) {
+        withContext(Dispatchers.IO) {
+            if (UserState.id == SelectedUserState.id) {
+                if (UserState.posts != Posts.getByUser(SelectedUserState.id!!)) {
+                    allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
+                }
 
-        if (UserState.id == SelectedUserState.id) {
-            allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
-            likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
+                if (UserState.likedPosts != Posts.getLikedPosts(SelectedUserState.id!!)) {
+                    likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
+                }
+            }
         }
     }
 
@@ -110,6 +124,7 @@ fun Profile(navController: NavController) {
             }
             Spacer(modifier = Modifier.height(15.dp))
         },
+        accountIconAction = null,
         content = { state, scope ->
             stickyHeader {
                 Tabs(tabs = if (SelectedUserState.username == UserState.username) listOf(

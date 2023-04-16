@@ -1,5 +1,7 @@
 package writenow.app.dbtables
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -9,6 +11,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 class DBUtils(table: String) {
@@ -38,10 +41,26 @@ class DBUtils(table: String) {
             }
         }.await()
 
+    suspend fun getImage(path: String): Bitmap? = CoroutineScope(Dispatchers.IO).async {
+        val link = "$url/$path"
+        val request = Request.Builder().url(link).get().build()
+
+        return@async try {
+            val response = client.newCall(request).execute()
+            val image = response.body?.byteStream()
+
+            response.close()
+            BitmapFactory.decodeStream(image)
+        } catch (e: Exception) {
+            Log.e("API Error from `getImage`", e.toString())
+            null
+        }
+    }.await()
+
     private fun requestBuilder(requestType: String, request: Request, callback: (Boolean) -> Unit) {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e("API Error from `post#onFailure`", e.toString())
+                Log.e("API Error from `$requestType#onFailure`", e.toString())
 
                 callback(false)
             }
@@ -116,6 +135,7 @@ class DBUtils(table: String) {
         requestBuilder("post", req, callback)
     }
 
+
     /**
      * Posts data to the table.
      *
@@ -128,7 +148,25 @@ class DBUtils(table: String) {
         val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
         val req = Request.Builder().url("$url/$section").post(body).build()
 
-        requestBuilder("post", req, callback)
+        requestBuilder("postWithCallback", req, callback)
+    }
+
+    /**
+     * Posts an image to the endpoint.
+     *
+     * @param section The section of the API to post to (e.g. "add").
+     * @param bitmap The data to post.
+     * @param callback A function that takes a Boolean and returns Unit.
+     * @return Unit.
+     */
+    fun post(section: String, bitmap: Bitmap, callback: (Boolean) -> Unit) {
+        val byteArray = ByteArrayOutputStream().apply {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, this)
+        }.toByteArray()
+        val body = byteArray.toRequestBody("image/png".toMediaTypeOrNull(), 0, byteArray.size)
+        val req = Request.Builder().url("$url/$section").post(body).build()
+
+        requestBuilder("imagePosting", req, callback)
     }
 
     /**

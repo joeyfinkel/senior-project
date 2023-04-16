@@ -22,8 +22,10 @@ import writenow.app.components.dialogs.ActiveHoursDialog
 import writenow.app.components.dialogs.activeday.ActiveDayDialog
 import writenow.app.components.profile.Section
 import writenow.app.components.settings.SettingsLayout
+import writenow.app.dbtables.Users
 import writenow.app.state.GlobalState
 import writenow.app.state.UserState
+import writenow.app.utils.ActiveHours
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -66,15 +68,19 @@ fun Notifications(navController: NavController) {
 
     fun updateActiveTimes() {
         lifecycle.lifecycleScope.launch {
+            val start = UserState.activeHours.start.ifEmpty { "" }
+            val end = UserState.activeHours.end.ifEmpty { "" }
+
             GlobalState.userRepository.updateUser(
                 GlobalState.user!!.copy(
-                    activeHoursEnd = UserState.activeHours.end.ifEmpty { "" },
-                    activeHoursStart = UserState.activeHours.start.ifEmpty { "" },
+                    activeHoursEnd = end,
+                    activeHoursStart = start,
                     activeDays = if (UserState.selectedDays.isNotEmpty()) UserState.selectedDays.joinToString(
                         ","
                     ) else ""
                 )
             )
+            Users.updateActiveHours(UserState.id, ActiveHours(start, end))
         }
     }
 
@@ -113,9 +119,9 @@ fun Notifications(navController: NavController) {
                     Text(
                         text = when {
                             UserState.activeHours.start.isNotEmpty() && UserState.activeHours.end.isNotEmpty() -> "You will receive notifications for ${selectedDays.ifEmpty { "all days" }} from ${UserState.activeHours.start} to ${UserState.activeHours.end}"
-                            UserState.activeHours.start.isNotEmpty() -> "You will receive notifications for all days from ${UserState.activeHours.start}"
-                            UserState.activeHours.end.isNotEmpty() -> "You will receive notifications for all days until ${UserState.activeHours.end}"
-                            else -> "You will receive notifications for all days and times"
+                            UserState.activeHours.start.isNotEmpty() -> "You will receive notifications to post for all days from ${UserState.activeHours.start}"
+                            UserState.activeHours.end.isNotEmpty() -> "You will receive notifications to post for all days until ${UserState.activeHours.end}"
+                            else -> "You will receive notifications to post at a random time every day"
                         }, color = MaterialTheme.colorScheme.onSurface
                     )
                 }

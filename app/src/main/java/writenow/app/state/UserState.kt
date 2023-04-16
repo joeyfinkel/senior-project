@@ -1,6 +1,7 @@
 package writenow.app.state
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,18 +9,17 @@ import androidx.navigation.NavController
 import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Post
 import writenow.app.dbtables.Posts
+import writenow.app.dbtables.Users
 import writenow.app.screens.Screens
+import writenow.app.utils.ActiveHours
 import java.time.LocalDate
 
-data class ActiveHours(var start: String, var end: String)
 
 /**
  * The global state of the user.
  */
 object UserState {
     var id by mutableStateOf(0)
-    var bitmapWidth by mutableStateOf(0)
-    var bitmapHeight by mutableStateOf(0)
 
     var firstName by mutableStateOf("")
     var lastName by mutableStateOf("")
@@ -65,6 +65,12 @@ object UserState {
         hasPosted = date == Posts.getLastPostDate(userId = id)
 
         return hasPosted
+    }
+
+    suspend fun updateActiveHours(userId: Int) {
+        val prefs = Users.getPrefs(userId)
+        Log.d("UserState", "updateActiveHours: $prefs")
+        activeHours = prefs[0].activeHours
     }
 
     /**
