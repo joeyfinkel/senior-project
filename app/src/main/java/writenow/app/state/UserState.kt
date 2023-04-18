@@ -6,10 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
-import writenow.app.dbtables.Follower
-import writenow.app.dbtables.Post
-import writenow.app.dbtables.Posts
-import writenow.app.dbtables.Users
+import writenow.app.dbtables.*
 import writenow.app.screens.Screens
 import writenow.app.utils.ActiveHours
 import java.time.LocalDate
@@ -31,16 +28,18 @@ object UserState {
     var bio by mutableStateOf("")
     var followingOrFollower by mutableStateOf("")
 
+    var isPostPrivate by mutableStateOf(false)
     var isLoggedIn by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
-    var clickedFollower by mutableStateOf(false)
     var isPostClicked by mutableStateOf(false)
+    var clickedFollower by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)
     var hasClickedLogOut by mutableStateOf(false)
 
     var selectedPost by mutableStateOf<Post?>(null)
     var bitmap by mutableStateOf<Bitmap?>(null)
+    var currentQuestion by mutableStateOf<Question?>(null)
 
     var selectedDays by mutableStateOf(setOf<String>())
     var activeHours by mutableStateOf(ActiveHours("", ""))

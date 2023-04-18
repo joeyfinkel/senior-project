@@ -9,7 +9,16 @@ import writenow.app.utils.ActiveHours
 
 data class Follower(val id: Int, val isFollowing: Boolean = false)
 data class Relationship(val sourceFriend: Int, val targetFriend: Int)
-data class Preferences(val userId: Int, val activeHours: ActiveHours)
+data class Preferences(
+    val userId: Int, val activeHours: ActiveHours,
+    /**
+     * Determines if posts are private by default.
+     * - Public if 0
+     * - Private if 1
+     */
+    val isPrivate: Int
+)
+
 data class User(
     val id: Int,
     val username: String,
@@ -22,6 +31,7 @@ data class User(
     val displayName: String = "",
     val followingList: MutableList<Int> = mutableListOf(),
     val activeHours: ActiveHours = ActiveHours("", ""),
+    val preferences: Preferences? = null,
     val profilePicture: Bitmap? = null,
 ) {
     operator fun get(s: String): Any? {
@@ -45,9 +55,10 @@ class Users private constructor() {
         suspend fun getPrefs(userId: Int? = null): List<Preferences> {
             return utils.getAll("preference?uuid=${userId}") {
                 Preferences(
-                    it.getInt("UUID"), ActiveHours(
-                        it.getString("ActiveHourStart"), it.getString("ActiveHourEnd")
-                    )
+                    userId = it.getInt("UUID"), activeHours = ActiveHours(
+                        it.getString("ActiveHourStart"),
+                        it.getString("ActiveHourEnd"),
+                    ), isPrivate = it.getInt("Private")
                 )
             }
         }
@@ -69,11 +80,11 @@ class Users private constructor() {
                 )
             }
             val prefs =
-                getPrefs().distinctBy { it.userId }.groupBy({ it.userId }) { it.activeHours }
+                getPrefs().distinctBy { it.userId }.groupBy { it.userId }
 
             return users.map { user ->
                 user.copy(
-                    activeHours = prefs[user.id]?.first() ?: ActiveHours("", ""),
+                    preferences = prefs[user.id]?.first(),
                     profilePicture = pfp.getImage(user.id.toString())
                 )
             }
@@ -138,19 +149,6 @@ class Users private constructor() {
                     "uploadPFP",
                     if (it) "Successfully uploaded profile picture." else "Failed to upload profile picture."
                 )
-
-            }
-        }
-
-        fun updateActiveHours(userID: Int, activeHours: ActiveHours) {
-            val json = JSONObject().apply {
-                put("uuid", userID)
-                put("startTime", activeHours.start)
-                put("endTime", activeHours.end)
-            }
-
-            utils.post("preference/update", json) {
-                return@post
             }
         }
 
@@ -217,6 +215,29 @@ class Users private constructor() {
                 utils.post("relationship/follow", json) {
                     callback(if (it) "Followed" else "Error")
                 }
+            }
+        }
+
+        fun updateActiveHours(userID: Int, activeHours: ActiveHours) {
+            val json = JSONObject().apply {
+                put("UUID", userID)
+                put("startTime", activeHours.start)
+                put("endTime", activeHours.end)
+            }
+
+            utils.post("preference/update", json) {
+                return@post
+            }
+        }
+
+        fun toggleDefaultPostVisibility(userId: Int, visibility: Int) {
+            val json = JSONObject().apply {
+                put("userID", userId)
+                put("isPrivate", visibility)
+            }
+
+            utils.post("preference/update", json) {
+                return@post
             }
         }
     }

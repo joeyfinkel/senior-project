@@ -37,6 +37,8 @@ class UserRepository(private val userDao: UserDao) {
                 activeDays = user.activeDays,
                 activeHoursStart = user.activeHoursStart,
                 activeHoursEnd = user.activeHoursEnd,
+                hasPosted = user.hasPosted,
+                isPostPrivate = user.isPostPrivate
             )
         }
 
@@ -64,6 +66,8 @@ class UserRepository(private val userDao: UserDao) {
                 activeDays = user.activeDays,
                 activeHoursStart = user.activeHoursStart,
                 activeHoursEnd = user.activeHoursEnd,
+                hasPosted = user.hasPosted,
+                isPostPrivate = user.isPostPrivate
             )
         )
     }

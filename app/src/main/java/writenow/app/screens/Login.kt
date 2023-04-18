@@ -31,10 +31,9 @@ import kotlin.coroutines.suspendCoroutine
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Login(navController: NavController) {
-    var errorText by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-
-    val isClicked by remember { mutableStateOf(false) }
+    val (errorText, setErrorText) = remember { mutableStateOf("") }
+    val (isError, setIsError) = remember { mutableStateOf(false) }
+    val (isClicked, _) = remember { mutableStateOf(false) }
 
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
@@ -48,8 +47,9 @@ fun Login(navController: NavController) {
                 Users.login(UserState.username, UserState.password) { loggedIn, user ->
                     if (isNotEmpty && loggedIn) {
                         UserState.isLoggedIn = true
-                        errorText = ""
-                        isError = false
+
+                        setErrorText("")
+                        setIsError(false)
 
                         if (user != null) {
                             UserState.id = user.id
@@ -64,8 +64,9 @@ fun Login(navController: NavController) {
                         continuation.resume(true)
                     } else {
                         UserState.isLoggedIn = false
-                        errorText = "Incorrect username or password"
-                        isError = true
+
+                        setErrorText("Incorrect username or password")
+                        setIsError(true)
                         Log.e("Logged in", "False")
                         continuation.resume(false)
                     }
@@ -86,6 +87,12 @@ fun Login(navController: NavController) {
 
                 if (loggedIn) {
                     navController.navigate(Screens.Posts)
+                    UserState.getHasPosted()
+
+                    if (date == Posts.getLastPostDate(UserState.id)) {
+                        UserState.hasPosted = true
+                    }
+
                     GlobalState.userRepository.addUser(
                         User(
                             uuid = UserState.id,
@@ -98,17 +105,15 @@ fun Login(navController: NavController) {
                             bio = UserState.bio,
                             activeDays = UserState.selectedDays.joinToString(","),
                             activeHoursStart = UserState.activeHours.start,
-                            activeHoursEnd = UserState.activeHours.end
+                            activeHoursEnd = UserState.activeHours.end,
+                            hasPosted = if (UserState.hasPosted) 1 else 0,
+                            isPostPrivate = if (UserState.isPostPrivate) 1 else 0,
                         )
                     )
-                    UserState.getHasPosted()
-                    if (date == Posts.getLastPostDate(UserState.id)) {
-                        UserState.hasPosted = true
-                    }
                 }
             } else {
-                isError = true
-                errorText = "Please enter your username and password"
+                setIsError(true)
+                setErrorText("Please enter your username and password")
             }
         }
     }

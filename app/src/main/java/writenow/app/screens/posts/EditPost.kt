@@ -23,9 +23,8 @@ fun EditPost(navController: NavController) {
     }
 
     PostBox(navController = navController,
-        buttonText = "Edit",
         placeholder = UserState.selectedPost?.text ?: "",
         onBtnClick = { edit() },
-        onValueChange = { value = it },
-        onChipClick = { isPublic = it })
+        onValueChange = { value = it }
+    ) { isPublic = it }
 }

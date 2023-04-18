@@ -24,6 +24,7 @@ private fun ClickableRow(
     height: Dp = 50.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,
     leadingIcon: @Composable() (() -> Unit)? = null,
+    trailingIcon: @Composable() (() -> Unit)? = null,
     onClick: () -> Unit
 ) = Row(
     horizontalArrangement = Arrangement.SpaceBetween,
@@ -47,12 +48,13 @@ private fun ClickableRow(
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (value != null) Text(text = value, color = color)
-        if (chevron) Icon(
+        if (chevron && trailingIcon == null) Icon(
             painter = painterResource(id = R.drawable.chevron_right),
             contentDescription = "Right",
             modifier = Modifier.size(25.dp),
             tint = MaterialTheme.colorScheme.onSurface
         )
+        if (trailingIcon != null) trailingIcon()
     }
 }
 
@@ -82,6 +84,7 @@ fun ClickableRow(
     height: Dp = 50.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,
     leadingIcon: ImageVector,
+    trailingIcon: ImageVector? = null,
     onClick: () -> Unit
 ) = ClickableRow(
     key = key,
@@ -97,6 +100,15 @@ fun ClickableRow(
             tint = color
         )
     },
+    trailingIcon = {
+        if (trailingIcon != null)
+            Icon(
+                imageVector = trailingIcon,
+                contentDescription = null,
+                modifier = Modifier.size(25.dp),
+                tint = color
+            )
+    },
     onClick = onClick
 )
 
@@ -108,6 +120,7 @@ fun ClickableRow(
     height: Dp = 50.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,
     leadingIcon: Painter,
+    trailingIcon: ImageVector? = null,
     onClick: () -> Unit
 ) = ClickableRow(
     key = key,
@@ -123,5 +136,59 @@ fun ClickableRow(
             tint = color
         )
     },
+    onClick = onClick
+)
+
+@Composable
+fun ClickableRow(
+    key: String,
+    value: String? = null,
+    height: Dp = 50.dp,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    leadingIcon: Painter,
+    trailingIcon: @Composable() (() -> Unit)? = null,
+    onClick: () -> Unit
+) = ClickableRow(
+    key = key,
+    value = value,
+    chevron = false,
+    height = height,
+    color = color,
+    leadingIcon = {
+        Icon(
+            painter = leadingIcon,
+            contentDescription = key,
+            modifier = Modifier.size(25.dp),
+            tint = color
+        )
+    },
+    trailingIcon = trailingIcon,
+    onClick = onClick
+)
+
+@Composable
+fun ClickableRow(
+    key: String,
+    value: String? = null,
+    height: Dp = 50.dp,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    leadingIcon: ImageVector,
+    trailingIcon: @Composable() (() -> Unit)? = null,
+    onClick: () -> Unit
+) = ClickableRow(
+    key = key,
+    value = value,
+    chevron = false,
+    height = height,
+    color = color,
+    leadingIcon = {
+        Icon(
+            imageVector = leadingIcon,
+            contentDescription = key,
+            modifier = Modifier.size(25.dp),
+            tint = color
+        )
+    },
+    trailingIcon = trailingIcon,
     onClick = onClick
 )

@@ -17,4 +17,6 @@ data class User(
     @ColumnInfo(name = "active_days") val activeDays: String?,
     @ColumnInfo(name = "active_hours_start") val activeHoursStart: String?,
     @ColumnInfo(name = "active_hours_end") val activeHoursEnd: String?,
+    @ColumnInfo(name = "has_posted") val hasPosted: Int?,
+    @ColumnInfo(name = "is_post_private") val isPostPrivate: Int?
 )

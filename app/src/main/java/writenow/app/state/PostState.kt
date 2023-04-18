@@ -10,6 +10,13 @@ object PostState {
     /** Whether the posts are loading. */
     var isLoading by mutableStateOf(false)
 
+    /**
+     * Whether the new post is private.
+     *
+     * **Default is true.**
+     * */
+    var isPrivate by mutableStateOf(true)
+
     /** The list of all posts. */
     var allPosts = mutableListOf<Post>()
 

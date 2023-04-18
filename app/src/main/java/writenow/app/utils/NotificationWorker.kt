@@ -93,6 +93,27 @@ private fun getTimeInMillis(formattedTime: String, randomTime: String): Long {
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+fun sendNotification(context: Context, notificationToSend: (Context) -> Unit) {
+    val workManager = WorkManager.getInstance(context)
+    val constraints = Constraints.Builder().setRequiresBatteryNotLow(true).build()
+    val notificationWorker =
+        OneTimeWorkRequestBuilder<NotificationWorker>().setInitialDelay(10, TimeUnit.SECONDS)
+            .setConstraints(constraints).build()
+
+    workManager.enqueue(notificationWorker)
+
+    workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever {
+        Log.d("NotificationWorker", "sendNotification: ${it.state}")
+
+        if (it.state == WorkInfo.State.SUCCEEDED) {
+            notificationToSend(context)
+            Log.d("NotificationWorker", "sendNotification: SUCCEEDED")
+        }
+
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun sendNotification(context: Context, activeHours: ActiveHours, activeDays: Set<String>) {
     val (randomTimeStart, randomTimeEnd) = generateRandomTimeRange()
     val currentTime = Calendar.getInstance()

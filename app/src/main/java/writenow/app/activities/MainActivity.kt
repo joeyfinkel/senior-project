@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -25,6 +26,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.work.*
 import kotlinx.coroutines.launch
 import writenow.app.components.*
+import writenow.app.dbtables.Question
+import writenow.app.dbtables.Questions
 import writenow.app.dbtables.Users
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
@@ -49,15 +52,20 @@ import writenow.app.state.UserState
 import writenow.app.ui.theme.WriteNowTheme
 import writenow.app.utils.createNotificationChannel
 import writenow.app.utils.getProfilePicture
-import writenow.app.utils.sendNotification
+import java.time.LocalDate
+import writenow.app.data.entity.Question as QuestionEntity
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun fetchUser(context: Context) {
-        if (GlobalState.user != null) {
-            val user = GlobalState.user!!
+    private suspend fun onLoad(context: Context) {
+        val question = GlobalState.question
+        val user = GlobalState.user
 
+        if (user != null) {
+            Log.d("MainActivity", "${user.isPostPrivate}")
             UserState.isLoggedIn = true
+            UserState.hasPosted = user.hasPosted == 1
+            UserState.isPostPrivate = user.isPostPrivate == 1
             UserState.id = user.uuid
             UserState.firstName = user.firstName
             UserState.username = user.username
@@ -69,12 +77,48 @@ class MainActivity : ComponentActivity() {
                 if (user.activeHoursStart != null) user.activeHoursStart.toString() else ""
             UserState.activeHours.end =
                 if (user.activeHoursEnd != null) user.activeHoursEnd.toString() else ""
+            UserState.isPostPrivate = user.isPostPrivate == 0
+        }
+
+        // If there is a current question, set it as the current question, otherwise get a new question
+        if (question != null) {
+            UserState.currentQuestion = Question(
+                id = question.id,
+                text = question.text,
+                author = question.author,
+                category = question.category,
+            )
+        } else {
+            UserState.currentQuestion = Questions.getRandom().let {
+                Question(
+                    id = it.id,
+                    text = it.text,
+                    author = it.author,
+                    category = it.category,
+                    dateRetrieved = it.dateRetrieved
+                )
+            }
+
+            if (GlobalState.question == null) {
+                val repo = GlobalState.questionRepository
+                GlobalState.question = QuestionEntity(
+                    id = UserState.currentQuestion!!.id,
+                    text = UserState.currentQuestion!!.text,
+                    author = UserState.currentQuestion!!.author,
+                    category = UserState.currentQuestion!!.category,
+                    dateRetrieved = UserState.currentQuestion!!.dateRetrieved
+                        ?: LocalDate.now().dayOfMonth
+                )
+
+                repo.addQuestion(GlobalState.question!!)
+            }
         }
 
         createNotificationChannel(context)
-        sendNotification(context, UserState.activeHours, UserState.selectedDays)
 
+//        sendNotification(context, UserState.activeHours, UserState.selectedDays)
         PostState.fetchNewPosts(UserState.getHasPosted()).updateAll()
+
         if (GlobalState.user?.uuid != null) UserState.updateActiveHours(GlobalState.user?.uuid!!)
     }
 
@@ -88,7 +132,7 @@ class MainActivity : ComponentActivity() {
             val fetchedUser = GlobalState.user?.uuid?.let { Users.getCurrent(it) }
 
             GlobalState.provide(context)
-            fetchUser(context)
+            onLoad(context)
 
             if (fetchedUser != null) GlobalState.user = GlobalState.user?.copy(
                 uuid = if (GlobalState.user!!.uuid != fetchedUser.id) fetchedUser.id else GlobalState.user!!.uuid,
@@ -100,8 +144,9 @@ class MainActivity : ComponentActivity() {
                 displayName = if (GlobalState.user!!.displayName != fetchedUser.displayName) fetchedUser.displayName else GlobalState.user!!.displayName,
                 bio = if (GlobalState.user!!.bio != fetchedUser.bio) fetchedUser.bio else GlobalState.user!!.bio,
                 activeDays = if (GlobalState.user!!.activeDays != fetchedUser.activeDays) fetchedUser.activeDays else GlobalState.user!!.activeDays,
-                activeHoursStart = if (GlobalState.user!!.activeHoursStart != fetchedUser.activeHours.start) fetchedUser.activeHours.start else GlobalState.user!!.activeHoursStart,
-                activeHoursEnd = if (GlobalState.user!!.activeHoursEnd != fetchedUser.activeHours.end) fetchedUser.activeHours.end else GlobalState.user!!.activeHoursEnd,
+                activeHoursStart = if (GlobalState.user!!.activeHoursStart != fetchedUser.preferences?.activeHours?.start) fetchedUser.preferences?.activeHours?.start else GlobalState.user!!.activeHoursStart,
+                activeHoursEnd = if (GlobalState.user!!.activeHoursEnd != fetchedUser.preferences?.activeHours?.end) fetchedUser.preferences?.activeHours?.end else GlobalState.user!!.activeHoursEnd,
+                isPostPrivate = if (GlobalState.user!!.isPostPrivate != fetchedUser.preferences?.isPrivate) fetchedUser.preferences?.isPrivate else GlobalState.user!!.isPostPrivate,
             )
         }
 
