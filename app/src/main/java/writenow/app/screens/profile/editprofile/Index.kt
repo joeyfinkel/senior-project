@@ -53,9 +53,11 @@ fun EditProfile(navController: NavController) {
             uploadedImage = true
         }
     }
+    // End of stuff for profile picture
 
-    // Saves the image to the internal storage
+
     LaunchedEffect(uploadedImage) {
+        // Saves the image to the internal storage
         if (uploadedImage) {
             val directory = context.filesDir
             val file = File(directory, "${UserState.id}_profile_picture.png")
@@ -64,24 +66,17 @@ fun EditProfile(navController: NavController) {
             bitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
             withContext(Dispatchers.IO) {
-//                Users.uploadPFP(UserState.id, bitmap!!)
                 stream.flush()
                 stream.close()
             }
-
         }
     }
 
-    ProfileLayout(
-        title = "Edit profile",
+    ProfileLayout(title = "Edit profile",
         topText = "Change photo",
         navController = navController,
         onBackClick = { navController.navigate(Screens.UserProfile) },
-        accountIconAction = {
-            if (navController.currentDestination?.route == "editProfile") launcher.launch(
-                "image/*"
-            )
-        },
+        accountIconAction = { launcher.launch("image/*") },
         content = { _, _ ->
             item { Spacer(modifier = Modifier.height(25.dp)) }
             item {
@@ -89,10 +84,16 @@ fun EditProfile(navController: NavController) {
                     ClickableRow(
                         key = "Name",
                         value = UserState.displayName,
-                    ) { navController.navigate(Screens.EditName) }
+                        onClick = { navController.navigate(Screens.EditName) },
+                    )
                     ClickableRow(
-                        key = "Username", value = UserState.username
-                    ) { navController.navigate(Screens.EditUsername) }
+                        key = "Username",
+                        value = UserState.username,
+                        onClick = { navController.navigate(Screens.EditUsername) })
+                    ClickableRow(
+                        key = "Birthday",
+                        value = UserState.birthday,
+                        onClick = { navController.navigate(Screens.EditBirthday) })
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -100,8 +101,7 @@ fun EditProfile(navController: NavController) {
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(text = "Bio", color = MaterialTheme.colorScheme.onSurface)
-                        OutlinedTextField(
-                            value = UserState.bio,
+                        OutlinedTextField(value = UserState.bio,
                             placeholder = {
                                 if (UserState.bio.isEmpty() || UserState.bio.isBlank()) Text(text = "Add some more info about yourself")
                             },

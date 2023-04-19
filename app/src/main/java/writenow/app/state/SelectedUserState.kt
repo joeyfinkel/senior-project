@@ -12,6 +12,7 @@ object SelectedUserState {
     var id by mutableStateOf<Int?>(null)
     var username by mutableStateOf("")
     var displayName by mutableStateOf("")
+    var birthday by mutableStateOf("")
 
     var followers = mutableListOf<Follower>()
     var following = mutableListOf<Follower>()

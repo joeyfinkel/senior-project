@@ -53,7 +53,7 @@ fun Username(navController: NavController) {
         if (isValid.isValid) {
             proceedToNextScreen()
             //
-            navController.navigate(Screens.Posts)
+            navController.navigate(Screens.EditProfile)
         }
     }
 

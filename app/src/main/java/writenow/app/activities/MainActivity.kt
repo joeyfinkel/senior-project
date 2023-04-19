@@ -35,6 +35,7 @@ import writenow.app.screens.posts.EditPost
 import writenow.app.screens.posts.NewPost
 import writenow.app.screens.profile.FollowersOrFollowing
 import writenow.app.screens.profile.Profile
+import writenow.app.screens.profile.editprofile.EditBirthday
 import writenow.app.screens.profile.editprofile.EditName
 import writenow.app.screens.profile.editprofile.EditProfile
 import writenow.app.screens.profile.editprofile.EditUsername
@@ -62,7 +63,6 @@ class MainActivity : ComponentActivity() {
         val user = GlobalState.user
 
         if (user != null) {
-            Log.d("MainActivity", "${user.isPostPrivate}")
             UserState.isLoggedIn = true
             UserState.hasPosted = user.hasPosted == 1
             UserState.isPostPrivate = user.isPostPrivate == 1
@@ -218,6 +218,7 @@ fun Main() {
         composable(Screens.EditProfile) { EditProfile(navController) }
         composable(Screens.EditName) { EditName(navController) }
         composable(Screens.EditUsername) { EditUsername(navController) }
+        composable(Screens.EditBirthday) { EditBirthday(navController) }
         //endregion
         //region Followers/Following List
         composable(Screens.FollowersOrFollowingList) { FollowersOrFollowing(navController) }
