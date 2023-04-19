@@ -86,9 +86,14 @@ fun EditProfile(navController: NavController) {
                         value = UserState.displayName,
                         onClick = { navController.navigate(Screens.EditName) },
                     )
-                    ClickableRow(key = "Username",
+                    ClickableRow(
+                        key = "Username",
                         value = UserState.username,
                         onClick = { navController.navigate(Screens.EditUsername) })
+                    ClickableRow(
+                        key = "Birthday",
+                        value = UserState.birthday,
+                        onClick = { navController.navigate(Screens.EditBirthday) })
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
