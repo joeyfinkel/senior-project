@@ -8,13 +8,13 @@ import writenow.app.state.UserState
 
 @Composable
 fun EditPost(navController: NavController) {
-    var value by remember { mutableStateOf("") }
-    var isPublic by remember { mutableStateOf(true) }
-    var isEdited by remember { mutableStateOf(false) }
+    val (value, setValue) = remember { mutableStateOf("") }
+    val (isPublic, setIsPublic) = remember { mutableStateOf(true) }
+    val (isEdited, setIsEdited) = remember { mutableStateOf(false) }
 
     fun edit() {
         Posts.edit(UserState.selectedPost?.id ?: 0, value) {
-            if (it) isEdited = true
+            if (it) setIsEdited(true)
         }.apply {
             UserState.selectedPost?.isEdited = isEdited
 
@@ -25,6 +25,5 @@ fun EditPost(navController: NavController) {
     PostBox(navController = navController,
         placeholder = UserState.selectedPost?.text ?: "",
         onBtnClick = { edit() },
-        onValueChange = { value = it }
-    ) { isPublic = it }
+        onValueChange = { setValue(it) }) { setIsPublic(it) }
 }

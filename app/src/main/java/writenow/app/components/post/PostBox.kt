@@ -39,7 +39,7 @@ fun PostBox(
     onValueChange: (String) -> Unit,
     onChipClick: (Boolean) -> Unit
 ) {
-    val (value, setValue) = remember { mutableStateOf("") }
+    val (value, setValue) = remember { mutableStateOf(placeholder) }
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     val darkMode = isSystemInDarkTheme()

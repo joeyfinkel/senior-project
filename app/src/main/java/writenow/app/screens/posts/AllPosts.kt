@@ -27,7 +27,7 @@ fun AllPosts(navController: NavController, lazyListState: LazyListState) {
         if (GlobalState.user == null) {
             GlobalState.user = GlobalState.userRepository.getUser()
 
-            GlobalState.userRepository.addUser(GlobalState.user!!)
+            if (GlobalState.user != null) GlobalState.userRepository.addUser(GlobalState.user!!)
         }
     }
 
