@@ -69,8 +69,8 @@ object UserState {
 
     suspend fun updateActiveHours(userId: Int) {
         val prefs = Users.getPrefs(userId)
-        Log.d("UserState", "updateActiveHours: $prefs")
-        activeHours = prefs[0].activeHours
+
+        if (prefs.isNotEmpty()) activeHours = prefs[0].activeHours
     }
 
     /**
