@@ -17,7 +17,10 @@ import writenow.app.state.UserState
 
 @Composable
 fun PostProtector(navController: NavController) {
-    val genericMessage = "If you'd like to be able to see the feed, please post something."
+    val genericMessage = """
+        If you'd like to be able to see the feed, please post something to answer 
+        the question of the day.
+    """.trimIndent()
     val name = UserState.username.ifEmpty {
         if (UserState.firstName.isEmpty() && UserState.lastName.isEmpty()) {
             ""
@@ -47,6 +50,16 @@ fun PostProtector(navController: NavController) {
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSurface
         )
+        if (UserState.currentQuestion != null) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = UserState.currentQuestion!!.text,
+                textAlign = TextAlign.Justify,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+        }
         Spacer(modifier = Modifier.height(200.dp))
         DefaultButton(btnText = "Post") { navController.navigate(Screens.NewPost) }
     }

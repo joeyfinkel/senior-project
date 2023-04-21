@@ -1,0 +1,20 @@
+{
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "name": "writenow-cloud-functions",
+  "version": "1.0.0",
+  "description": "Google cloud functions for WriteNow",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Joey Finkel",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-functions": "^4.3.1"
+  }
+}

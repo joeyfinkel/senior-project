@@ -17,18 +17,18 @@ import writenow.app.state.UserState
 fun EditBirthday(navController: NavController) {
     ProfileLayout(title = "Edit birthday",
         navController = navController,
-        onBackClick = { navController.popBackStack() }) { _, _ ->
-        item {
-            Section(columnSpacing = 0.dp) {
-                TextInput(value = UserState.birthday,
-                    label = "Birthday",
-                    spacer = false,
-                    modifier = Modifier.fillMaxWidth(),
-                    onValueChange = {
-                        UserState.birthday = it
-                        SelectedUserState.birthday = it
-                    })
+        onBackClick = { navController.popBackStack() }, content = { _, _ ->
+            item {
+                Section(columnSpacing = 0.dp) {
+                    TextInput(value = UserState.birthday,
+                        label = "Birthday",
+                        spacer = false,
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = {
+                            UserState.birthday = it
+                            SelectedUserState.birthday = it
+                        })
+                }
             }
-        }
-    }
+        })
 }

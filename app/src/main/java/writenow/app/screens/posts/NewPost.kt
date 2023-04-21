@@ -34,11 +34,18 @@ fun NewPost(navController: NavController) {
         }
     }
 
-    PostBox(navController = navController, placeholder = "New post", onBtnClick = {
-        if (!UserState.hasPosted && (value.isNotEmpty() || value.isNotBlank())) {
-            post()
-            UserState.hasPosted = true
-        }
-        navController.navigate(Screens.Posts)
-    }, onValueChange = { setValue(it) }) { PostState.isPrivate = it }
+    PostBox(
+        navController = navController,
+        placeholder = "New post",
+        onBtnClick = {
+            if (!UserState.hasPosted && (value.isNotEmpty() || value.isNotBlank())) {
+                post()
+                UserState.hasPosted = true
+            }
+            navController.navigate(Screens.Posts)
+        },
+        onValueChange = { setValue(it) },
+        editing = false,
+        questionOfTheDay = UserState.currentQuestion?.text
+    ) { PostState.isPrivate = it }
 }

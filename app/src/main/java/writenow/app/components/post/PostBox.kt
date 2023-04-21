@@ -21,7 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import writenow.app.R
 import writenow.app.components.TopBar
@@ -35,11 +37,13 @@ import writenow.app.ui.theme.placeholderColor
 fun PostBox(
     navController: NavController,
     placeholder: String,
+    editing: Boolean,
+    questionOfTheDay: String? = null,
     onBtnClick: () -> Unit,
     onValueChange: (String) -> Unit,
     onChipClick: (Boolean) -> Unit
 ) {
-    val (value, setValue) = remember { mutableStateOf(placeholder) }
+    val (value, setValue) = remember { mutableStateOf(if (editing) placeholder else "") }
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     val darkMode = isSystemInDarkTheme()
@@ -68,6 +72,14 @@ fun PostBox(
                 )
             }
         })
+        if (questionOfTheDay != null) {
+            Text(
+                text = questionOfTheDay,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
         PostContainer(halfHeight = true) {
             Row(
                 modifier = Modifier

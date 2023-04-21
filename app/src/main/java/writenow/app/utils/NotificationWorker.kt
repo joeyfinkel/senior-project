@@ -46,10 +46,10 @@ fun createNotificationChannel(context: Context) {
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-fun testNotification(context: Context) {
+fun createNotification(context: Context, title: String, message: String) {
     val builder = NotificationCompat.Builder(context, "default")
-        .setSmallIcon(R.drawable.ic_launcher_foreground).setContentTitle("Notification Title")
-        .setContentText("Notification Content").setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setSmallIcon(R.drawable.ic_launcher_foreground).setContentTitle(title)
+        .setContentText(message).setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
     with(NotificationManagerCompat.from(context)) {
         // notificationId is a unique int for each notification that you must define
@@ -113,39 +113,39 @@ fun sendNotification(context: Context, notificationToSend: (Context) -> Unit) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-fun sendNotification(context: Context, activeHours: ActiveHours, activeDays: Set<String>) {
-    val (randomTimeStart, randomTimeEnd) = generateRandomTimeRange()
-    val currentTime = Calendar.getInstance()
-    val currentDayOfWeek = LocalDate.now().dayOfWeek.name
-    val start = Calendar.getInstance().apply {
-        timeInMillis = getTimeInMillis(activeHours.start, randomTimeStart)
-    }
-    val end = Calendar.getInstance().apply {
-        timeInMillis = getTimeInMillis(activeHours.end, randomTimeEnd)
-    }
-
-    if (currentTime in start..end && activeDays.any {
-            it.equals(
-                currentDayOfWeek, ignoreCase = true
-            )
-        }) {
-        val workManager = WorkManager.getInstance(context)
-        val constraints = Constraints.Builder().setRequiresBatteryNotLow(true).build()
-        val notificationWorker =
-            OneTimeWorkRequestBuilder<NotificationWorker>().setInitialDelay(10, TimeUnit.SECONDS)
-                .setConstraints(constraints).build()
-
-        workManager.enqueue(notificationWorker)
-
-        workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever {
-            Log.d("NotificationWorker", "sendNotification: ${it.state}")
-
-            if (it.state == WorkInfo.State.SUCCEEDED) {
-                testNotification(context)
-                Log.d("NotificationWorker", "sendNotification: SUCCEEDED")
-            }
-
-        }
-    }
-}
+//@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+//fun sendNotification(context: Context, activeHours: ActiveHours, activeDays: Set<String>) {
+//    val (randomTimeStart, randomTimeEnd) = generateRandomTimeRange()
+//    val currentTime = Calendar.getInstance()
+//    val currentDayOfWeek = LocalDate.now().dayOfWeek.name
+//    val start = Calendar.getInstance().apply {
+//        timeInMillis = getTimeInMillis(activeHours.start, randomTimeStart)
+//    }
+//    val end = Calendar.getInstance().apply {
+//        timeInMillis = getTimeInMillis(activeHours.end, randomTimeEnd)
+//    }
+//
+//    if (currentTime in start..end && activeDays.any {
+//            it.equals(
+//                currentDayOfWeek, ignoreCase = true
+//            )
+//        }) {
+//        val workManager = WorkManager.getInstance(context)
+//        val constraints = Constraints.Builder().setRequiresBatteryNotLow(true).build()
+//        val notificationWorker =
+//            OneTimeWorkRequestBuilder<NotificationWorker>().setInitialDelay(10, TimeUnit.SECONDS)
+//                .setConstraints(constraints).build()
+//
+//        workManager.enqueue(notificationWorker)
+//
+//        workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever {
+//            Log.d("NotificationWorker", "sendNotification: ${it.state}")
+//
+//            if (it.state == WorkInfo.State.SUCCEEDED) {
+//                createNotification(context)
+//                Log.d("NotificationWorker", "sendNotification: SUCCEEDED")
+//            }
+//
+//        }
+//    }
+//}

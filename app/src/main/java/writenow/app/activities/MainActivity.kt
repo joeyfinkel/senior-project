@@ -2,10 +2,12 @@ package writenow.app.activities
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -24,7 +26,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
+import writenow.app.R
 import writenow.app.components.*
 import writenow.app.dbtables.Question
 import writenow.app.dbtables.Questions
@@ -51,6 +56,7 @@ import writenow.app.state.GlobalState
 import writenow.app.state.PostState
 import writenow.app.state.UserState
 import writenow.app.ui.theme.WriteNowTheme
+import writenow.app.utils.CloudNotification
 import writenow.app.utils.createNotificationChannel
 import writenow.app.utils.getProfilePicture
 import java.time.LocalDate
@@ -101,20 +107,24 @@ class MainActivity : ComponentActivity() {
 
             if (GlobalState.question == null) {
                 val repo = GlobalState.questionRepository
-                GlobalState.question = QuestionEntity(
-                    id = UserState.currentQuestion!!.id,
-                    text = UserState.currentQuestion!!.text,
-                    author = UserState.currentQuestion!!.author,
-                    category = UserState.currentQuestion!!.category,
-                    dateRetrieved = UserState.currentQuestion!!.dateRetrieved
-                        ?: LocalDate.now().dayOfMonth
-                )
+                UserState.currentQuestion.let {
+                    GlobalState.question = QuestionEntity(
+                        id = it?.id ?: 0,
+                        text = it?.text ?: "",
+                        author = it?.author ?: 0,
+                        category = it?.category ?: "",
+                        dateRetrieved = it?.dateRetrieved ?: LocalDate.now().dayOfMonth
+                    )
+                }
 
                 repo.addQuestion(GlobalState.question!!)
             }
         }
 
+        Log.d("MainActivity", "onLoad: ${Questions.getRandom()}")
+
         createNotificationChannel(context)
+        CloudNotification().sendNotification(context)
 
 //        sendNotification(context, UserState.activeHours, UserState.selectedDays)
         PostState.fetchNewPosts(UserState.getHasPosted()).updateAll()

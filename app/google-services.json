@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1079700010452",
+    "project_id": "writenow-cc43f",
+    "storage_bucket": "writenow-cc43f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1079700010452:android:7e524fed89f1bf5519d241",
+        "android_client_info": {
+          "package_name": "writenow.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1079700010452-aosi7m8eedd9t66hnnv859ifankh9h4e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZqXnKq8A0zv_5nctvwq1FT9OORS7bfjI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1079700010452-aosi7m8eedd9t66hnnv859ifankh9h4e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

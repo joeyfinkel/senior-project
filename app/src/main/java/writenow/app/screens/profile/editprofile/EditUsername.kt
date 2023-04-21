@@ -17,18 +17,18 @@ import writenow.app.state.UserState
 fun EditUsername(navController: NavController) {
     ProfileLayout(title = "Edit username",
         navController = navController,
-        onBackClick = { navController.popBackStack() }) { _, _ ->
-        item {
-            Section(columnSpacing = 0.dp) {
-                TextInput(value = UserState.username,
-                    label = "Username",
-                    spacer = false,
-                    modifier = Modifier.fillMaxWidth(),
-                    onValueChange = {
-                        UserState.username = it
-                        SelectedUserState.username = it
-                    })
+        onBackClick = { navController.popBackStack() }, content = { _, _ ->
+            item {
+                Section(columnSpacing = 0.dp) {
+                    TextInput(value = UserState.username,
+                        label = "Username",
+                        spacer = false,
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = {
+                            UserState.username = it
+                            SelectedUserState.username = it
+                        })
+                }
             }
-        }
-    }
+        })
 }
