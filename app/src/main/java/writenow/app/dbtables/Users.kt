@@ -100,8 +100,8 @@ class Users private constructor() {
          * @param id The id of the user to get the list of users that they are following.
          * @return A list of user ids that the user with the given [id] is following.
          */
-        private suspend fun getFollowing(id: Int): List<Follower> {
-            return utils.getAll("relationship/following?sourceFriend=$id") {
+        suspend fun getFollowing(id: Int): List<Follower> {
+            return utils.getAll("relationship/following?userID=$id") {
                 Follower(it.getInt("targetFriend"))
             }
         }
@@ -112,8 +112,8 @@ class Users private constructor() {
          * @param id The id of the user to get the list of users that are following them.
          * @return A list of user ids that are following the user with the given [id].
          */
-        private suspend fun getFollowers(id: Int): List<Follower> {
-            return utils.getAll("relationship/followers?targetFriend=$id") {
+        suspend fun getFollowers(id: Int): List<Follower> {
+            return utils.getAll("relationship/followers?userID=$id") {
                 Follower(it.getInt("sourceFriend"))
             }
         }

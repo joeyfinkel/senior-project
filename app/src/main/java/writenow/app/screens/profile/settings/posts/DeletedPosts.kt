@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.components.post.Post
 import writenow.app.components.post.PostList
-import writenow.app.components.settings.SettingsLayout
+import writenow.app.components.profile.settings.SettingsLayout
 import writenow.app.dbtables.Posts
 import writenow.app.state.PostState
 import writenow.app.state.UserState

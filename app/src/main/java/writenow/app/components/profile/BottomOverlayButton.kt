@@ -14,11 +14,7 @@ internal fun BottomOverlayButton(
     color: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) = ClickableRow(
-    key = text,
-    chevron = false,
-    color = color,
-    leadingIcon = icon,
-    onClick = onClick
+    key = text, chevron = false, color = color, leadingIcon = icon, onClick = onClick
 )
 
 @Composable
@@ -28,9 +24,12 @@ internal fun BottomOverlayButton(
     color: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) = ClickableRow(
-    key = text,
-    chevron = false,
-    color = color,
-    leadingIcon = icon,
-    onClick = onClick
+    key = text, chevron = false, color = color, leadingIcon = icon, onClick = onClick
+)
+
+@Composable
+internal fun BottomOverlayButton(
+    text: String, color: Color = MaterialTheme.colorScheme.onSurface, onClick: () -> Unit
+) = ClickableRow(
+    key = text, chevron = false, color = color, onClick = onClick
 )

@@ -30,13 +30,13 @@ fun PostActions(
     postId: Int,
     hasEllipsis: Boolean = true
 ) {
-    var isLiked by remember { mutableStateOf(PostState.allPosts.find { it.id == postId }?.isLiked == true) }
-    var currentPost by remember { mutableStateOf(PostState.allPosts.find { it.id == postId }) }
-    var commentsSize by remember { mutableStateOf(PostState.allPosts.find { it.id == postId }?.comments?.size) }
-    var likesSize by remember { mutableStateOf(0) }
+    val (isLiked, setIsLiked) = remember { mutableStateOf(PostState.allPosts.find { it.id == postId }?.isLiked == true) }
+    val (currentPost, setCurrentPost) = remember { mutableStateOf(PostState.allPosts.find { it.id == postId }) }
+    val (commentsSize, setCommentsSize) = remember { mutableStateOf(PostState.allPosts.find { it.id == postId }?.comments?.size) }
+    val (likesSize, setLikesSize) = remember { mutableStateOf(0) }
 
     LaunchedEffectOnce {
-        likesSize = Posts.getLikesPerPost(postId)
+        setLikesSize(Posts.getLikesPerPost(postId))
     }
 
     LaunchedEffect(commentsSize) {
@@ -45,37 +45,37 @@ fun PostActions(
             return@LaunchedEffect
         }
 
-        currentPost = PostState.allPosts.filter { it.id == postId }[0]
-        commentsSize = currentPost?.comments?.size
+        setCurrentPost(PostState.allPosts.filter { it.id == postId }[0])
+        setCommentsSize(currentPost?.comments?.size)
     }
 
     fun updateLike() {
         CoroutineScope(Dispatchers.IO).launch {
             val updatedPost = Posts.getToDisplay().find { post -> post.id == postId }
 
-            isLiked = updatedPost?.isLiked ?: false
+            setIsLiked(updatedPost?.isLiked ?: false)
         }
     }
 
     fun toggleLike() {
         if (currentPost != null) {
-            Posts.toggleLike(currentPost!!.id, UserState.id) {
+            Posts.toggleLike(currentPost.id, UserState.id) {
                 if (it && !isLiked) {
-                    currentPost?.likes = listOf(
+                    currentPost.likes = listOf(
                         PostLikes(
                             postId = postId, userId = UserState.id, isUnliked = 1
                         )
-                    ) + (currentPost?.likes ?: emptyList())
+                    ) + currentPost.likes
 //                    likesSize = likesSize?.plus(1)
 
                     updateLike()
                 }
 
                 if (it && isLiked) {
-                    val removed = currentPost?.likes?.toMutableList()
-                        ?.remove(currentPost?.likes?.find { post -> post.postId == postId && post.userId == UserState.id })
+                    val removed = currentPost.likes.toMutableList()
+                        .remove(currentPost.likes.find { post -> post.postId == postId && post.userId == UserState.id })
 
-                    if (removed == true) {
+                    if (removed) {
 //                        likesSize = likesSize?.minus(1)
                     }
 

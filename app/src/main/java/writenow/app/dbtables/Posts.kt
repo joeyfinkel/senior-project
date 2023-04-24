@@ -40,26 +40,27 @@ class Posts private constructor() {
     companion object {
         private val utils = DBUtils("post")
 
-        private suspend fun getAllWithComments(): List<Post> {
-            val postsWithComments = utils.getAll("?withComments=true") {
-                PrivatePost(
-                    id = it.getInt("postID"),
-                    uuid = it.getInt("userIdOfWhoPosted"),
-                    username = it.getString("postedBy"),
-                    text = it.getString("postContents"),
-                    visible = it.getInt("isPostVisible"),
-                    createdAt = it.getString("postedDate"),
-                    comment = Comment(
-                        id = it.getInt("commentID"),
-                        userId = it.getInt("userWhoCommented"),
-                        username = it.getString("commentedBy"),
-                        postId = it.getInt("postID"),
-                        text = it.getString("commentText"),
-                        isDeleted = it.getInt("isCommentVisible"),
-                        dateCommented = it.getString("dateCommented"),
+        private suspend fun getAllWithComments(userId: Int? = null): List<Post> {
+            val postsWithComments =
+                utils.getAll("?withComments=true${if (userId != null) "&userID=$userId" else ""}") {
+                    PrivatePost(
+                        id = it.getInt("postID"),
+                        uuid = it.getInt("userIdOfWhoPosted"),
+                        username = it.getString("postedBy"),
+                        text = it.getString("postContents"),
+                        visible = it.getInt("isPostVisible"),
+                        createdAt = it.getString("postedDate"),
+                        comment = Comment(
+                            id = it.getInt("commentID"),
+                            userId = it.getInt("userWhoCommented"),
+                            username = it.getString("commentedBy"),
+                            postId = it.getInt("postID"),
+                            text = it.getString("commentText"),
+                            isDeleted = it.getInt("isCommentVisible"),
+                            dateCommented = it.getString("dateCommented"),
+                        )
                     )
-                )
-            }
+                }
 
             return postsWithComments.groupBy { it.id to it.uuid }.map { (id, list) ->
                 val comments = list.map { it.comment!! }
@@ -76,8 +77,8 @@ class Posts private constructor() {
             }
         }
 
-        private suspend fun getLikes(): List<PostLikes> {
-            return utils.getAll("?withLikes=true") {
+        private suspend fun getLikes(userId: Int? = null): List<PostLikes> {
+            return utils.getAll("?withLikes=true${if (userId != null) "&userID=$userId" else ""}") {
                 PostLikes(
                     it.getInt("postID"),
                     it.getInt("userID"),
@@ -90,13 +91,13 @@ class Posts private constructor() {
         /**
          * Gets all posts from the database with each posts comments and likes.
          *
-         * @param url The url to get the posts from. If null, the default url will be used.
+         * @param userId The user's id.
          * @return A list of posts.
          */
-        private suspend fun getAll(url: String? = null): List<Post> {
-            val postsWithComments = getAllWithComments()
-            val allLikes = getLikes()
-            val allPosts = utils.getAll(url) {
+        private suspend fun getAll(userId: Int? = null): List<Post> {
+            val postsWithComments = getAllWithComments(userId)
+            val allLikes = getLikes(userId)
+            val allPosts = utils.getAll("?userID=${userId}") {
                 Post(
                     id = it.getInt("postID"),
                     uuid = it.getInt("uuid"),
@@ -142,7 +143,7 @@ class Posts private constructor() {
         suspend fun getToDisplay() =
             getAll().filter { it.visible == 1 }.sortedByDescending { it.createdAt }.toMutableList()
 
-        suspend fun getByUser(id: Int) = getAll().filter { it.uuid == id }
+        suspend fun getByUser(id: Int) = getAll(id)
 
         suspend fun getDeleted(id: Int) = getByUser(id).filter { it.visible == 0 }
 

@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.components.Layout
 import writenow.app.components.post.*
+import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.state.GlobalState
@@ -20,9 +21,12 @@ import writenow.app.utils.LaunchedEffectOnce
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AllPosts(navController: NavController, lazyListState: LazyListState) {
+    val followers = remember { mutableStateListOf<Follower>() }
+    val following = remember { mutableStateListOf<Follower>() }
+
     LaunchedEffectOnce {
-        Users.updateRelationList(UserState.followers)
-        Users.updateRelationList(UserState.following, false)
+        UserState.following.addAll(Users.getFollowing(UserState.id))
+        UserState.followers.addAll(Users.getFollowers(UserState.id))
 
         if (GlobalState.user == null) {
             GlobalState.user = GlobalState.userRepository.getUser()

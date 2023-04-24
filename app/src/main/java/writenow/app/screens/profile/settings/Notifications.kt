@@ -21,7 +21,7 @@ import writenow.app.components.ClickableRow
 import writenow.app.components.dialogs.ActiveHoursDialog
 import writenow.app.components.dialogs.activeday.ActiveDayDialog
 import writenow.app.components.profile.Section
-import writenow.app.components.settings.SettingsLayout
+import writenow.app.components.profile.settings.SettingsLayout
 import writenow.app.dbtables.Users
 import writenow.app.state.GlobalState
 import writenow.app.state.UserState
@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Notifications(navController: NavController) {
-    var isDaySelected by remember { mutableStateOf(false) }
+    val (isDaySelected, setIsDaySelected) = remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current
@@ -164,7 +164,7 @@ fun Notifications(navController: NavController) {
             }
             modalDialogActiveHoursState.showing -> {
                 ActiveDayDialog(dialogState = modalDialogActiveHoursState, onDaySelected = {
-                    isDaySelected = UserState.selectedDays.contains(it)
+                    setIsDaySelected(UserState.selectedDays.contains(it))
 
                     if (isDaySelected) {
                         UserState.selectedDays -= it

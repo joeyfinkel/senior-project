@@ -2,12 +2,10 @@ package writenow.app.activities
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -26,14 +24,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
-import writenow.app.R
 import writenow.app.components.*
-import writenow.app.dbtables.Question
-import writenow.app.dbtables.Questions
-import writenow.app.dbtables.Users
+import writenow.app.dbtables.*
 import writenow.app.screens.*
 import writenow.app.screens.posts.AllPosts
 import writenow.app.screens.posts.EditPost
@@ -61,14 +54,18 @@ import writenow.app.utils.createNotificationChannel
 import writenow.app.utils.getProfilePicture
 import java.time.LocalDate
 import writenow.app.data.entity.Question as QuestionEntity
+import writenow.app.data.entity.ReportReason as ReportReasonsEntity
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun onLoad(context: Context) {
         val question = GlobalState.question
         val user = GlobalState.user
+        val followers = GlobalState.followers
+        val followings = GlobalState.followings
 
         if (user != null) {
+            Log.d("MainActivity", "User is not null")
             UserState.isLoggedIn = true
             UserState.hasPosted = user.hasPosted == 1
             UserState.isPostPrivate = user.isPostPrivate == 1
@@ -84,8 +81,10 @@ class MainActivity : ComponentActivity() {
             UserState.activeHours.end =
                 if (user.activeHoursEnd != null) user.activeHoursEnd.toString() else ""
             UserState.isPostPrivate = user.isPostPrivate == 0
+
         }
 
+        PostState.fetchNewPosts(UserState.getHasPosted()).updateAll()
         // If there is a current question, set it as the current question, otherwise get a new question
         if (question != null) {
             UserState.currentQuestion = Question(
@@ -121,13 +120,31 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        if (followers?.isEmpty() == true) {
+            UserState.followers =
+                GlobalState.followerRepository.getFollowers()?.map { Follower(it.id) }
+                    ?.toMutableList() ?: mutableListOf()
+        }
+
+        if (followings?.isEmpty() == true) {
+            UserState.following = followings.map { Follower(it.id) }.toMutableList()
+        }
+
+        if (GlobalState.reportReasons?.isEmpty() == true) {
+            GlobalState.reportReasonRepository.insertReportReasons(ReportReasons.getAll().map {
+                ReportReasonsEntity(
+                    it.id, it.reason
+                )
+            })
+
+            GlobalState.reportReasons =
+                GlobalState.reportReasonRepository.getReportReasons().toMutableList()
+        }
+
         Log.d("MainActivity", "onLoad: ${Questions.getRandom()}")
 
         createNotificationChannel(context)
         CloudNotification().sendNotification(context)
-
-//        sendNotification(context, UserState.activeHours, UserState.selectedDays)
-        PostState.fetchNewPosts(UserState.getHasPosted()).updateAll()
 
         if (GlobalState.user?.uuid != null) UserState.updateActiveHours(GlobalState.user?.uuid!!)
     }
@@ -143,21 +160,22 @@ class MainActivity : ComponentActivity() {
 
             GlobalState.provide(context)
             onLoad(context)
-
-            if (fetchedUser != null) GlobalState.user = GlobalState.user?.copy(
-                uuid = if (GlobalState.user!!.uuid != fetchedUser.id) fetchedUser.id else GlobalState.user!!.uuid,
-                firstName = if (GlobalState.user!!.firstName != fetchedUser.firstName) fetchedUser.firstName else GlobalState.user!!.firstName,
-                lastName = if (GlobalState.user!!.lastName != fetchedUser.lastName) fetchedUser.lastName else GlobalState.user!!.lastName,
-                email = if (GlobalState.user!!.email != fetchedUser.email) fetchedUser.email else GlobalState.user!!.email,
-                password = if (GlobalState.user!!.password != fetchedUser.passwordHash) fetchedUser.passwordHash else GlobalState.user!!.password,
-                username = if (GlobalState.user!!.username != fetchedUser.username) fetchedUser.username else GlobalState.user!!.username,
-                displayName = if (GlobalState.user!!.displayName != fetchedUser.displayName) fetchedUser.displayName else GlobalState.user!!.displayName,
-                bio = if (GlobalState.user!!.bio != fetchedUser.bio) fetchedUser.bio else GlobalState.user!!.bio,
-                activeDays = if (GlobalState.user!!.activeDays != fetchedUser.activeDays) fetchedUser.activeDays else GlobalState.user!!.activeDays,
-                activeHoursStart = if (GlobalState.user!!.activeHoursStart != fetchedUser.preferences?.activeHours?.start) fetchedUser.preferences?.activeHours?.start else GlobalState.user!!.activeHoursStart,
-                activeHoursEnd = if (GlobalState.user!!.activeHoursEnd != fetchedUser.preferences?.activeHours?.end) fetchedUser.preferences?.activeHours?.end else GlobalState.user!!.activeHoursEnd,
-                isPostPrivate = if (GlobalState.user!!.isPostPrivate != fetchedUser.preferences?.isPrivate) fetchedUser.preferences?.isPrivate else GlobalState.user!!.isPostPrivate,
-            )
+            if (fetchedUser != null) {
+                GlobalState.user = GlobalState.user?.copy(
+                    uuid = if (GlobalState.user!!.uuid != fetchedUser.id) fetchedUser.id else GlobalState.user!!.uuid,
+                    firstName = if (GlobalState.user!!.firstName != fetchedUser.firstName) fetchedUser.firstName else GlobalState.user!!.firstName,
+                    lastName = if (GlobalState.user!!.lastName != fetchedUser.lastName) fetchedUser.lastName else GlobalState.user!!.lastName,
+                    email = if (GlobalState.user!!.email != fetchedUser.email) fetchedUser.email else GlobalState.user!!.email,
+                    password = if (GlobalState.user!!.password != fetchedUser.passwordHash) fetchedUser.passwordHash else GlobalState.user!!.password,
+                    username = if (GlobalState.user!!.username != fetchedUser.username) fetchedUser.username else GlobalState.user!!.username,
+                    displayName = if (GlobalState.user!!.displayName != fetchedUser.displayName) fetchedUser.displayName else GlobalState.user!!.displayName,
+                    bio = if (GlobalState.user!!.bio != fetchedUser.bio) fetchedUser.bio else GlobalState.user!!.bio,
+                    activeDays = if (GlobalState.user!!.activeDays != fetchedUser.activeDays) fetchedUser.activeDays else GlobalState.user!!.activeDays,
+                    activeHoursStart = if (GlobalState.user!!.activeHoursStart != fetchedUser.preferences?.activeHours?.start) fetchedUser.preferences?.activeHours?.start else GlobalState.user!!.activeHoursStart,
+                    activeHoursEnd = if (GlobalState.user!!.activeHoursEnd != fetchedUser.preferences?.activeHours?.end) fetchedUser.preferences?.activeHours?.end else GlobalState.user!!.activeHoursEnd,
+                    isPostPrivate = if (GlobalState.user!!.isPostPrivate != fetchedUser.preferences?.isPrivate) fetchedUser.preferences?.isPrivate else GlobalState.user!!.isPostPrivate,
+                )
+            }
         }
 
         setContent {

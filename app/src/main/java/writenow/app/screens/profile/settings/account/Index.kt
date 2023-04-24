@@ -8,9 +8,9 @@ import writenow.app.components.profile.ProfileLayout
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AccountSettings(navController: NavController) {
-    ProfileLayout(
-        title = "Account",
+    ProfileLayout(title = "Account",
         navController = navController,
+        snackbar = null,
         onBackClick = { navController.popBackStack() },
-        content = { _, _ -> })
+        content = { _, _, _ -> })
 }

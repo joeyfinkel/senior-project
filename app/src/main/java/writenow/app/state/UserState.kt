@@ -1,11 +1,14 @@
 package writenow.app.state
 
 import android.graphics.Bitmap
-import android.util.Log
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import writenow.app.dbtables.*
 import writenow.app.screens.Screens
 import writenow.app.utils.ActiveHours
@@ -32,8 +35,10 @@ object UserState {
     var isLoggedIn by mutableStateOf(false)
     var isCommentClicked by mutableStateOf(false)
     var isEllipsisClicked by mutableStateOf(false)
+    var isProfileEllipsisClicked by mutableStateOf(false)
     var isPostClicked by mutableStateOf(false)
     var clickedFollower by mutableStateOf(false)
+    var clickedOnSettings by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)
     var hasClickedLogOut by mutableStateOf(false)
 
@@ -98,5 +103,22 @@ object UserState {
     fun logout(navController: NavController) {
         navController.navigate(Screens.MainScreen)
         reset()
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    fun editPost(
+        navController: NavController,
+        scope: CoroutineScope,
+        sheetState: ModalBottomSheetState
+    ) {
+        navController.navigate(Screens.EditPost)
+
+        scope.launch {
+            sheetState.hide()
+
+            isEllipsisClicked = false
+            isCommentClicked = false
+            isPostClicked = false
+        }
     }
 }

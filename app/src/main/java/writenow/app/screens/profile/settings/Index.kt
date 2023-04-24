@@ -1,25 +1,23 @@
 package writenow.app.screens.profile.settings
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,19 +40,37 @@ fun Settings(navController: NavController) {
     fun togglePostPrivacy(flag: Boolean? = null) {
         UserState.isPostPrivate = flag ?: !UserState.isPostPrivate
 
+        if (UserState.clickedOnSettings) UserState.clickedOnSettings = false
+
         Users.toggleDefaultPostVisibility(UserState.id, if (UserState.isPostPrivate) 0 else 1)
         setToggled(!toggled)
     }
 
-    LaunchedEffect(key1 = UserState.isPostPrivate) {
+    LaunchedEffect(UserState.isPostPrivate) {
         GlobalState.userRepository.updateUser(GlobalState.user!!.copy(isPostPrivate = if (UserState.isPostPrivate) 0 else 1))
-        Log.d("Settings", "UserState.isPostPrivate: ${UserState.isPostPrivate}")
     }
 
-    ProfileLayout(title = "Settings",
+    ProfileLayout(
+        title = "Settings",
         navController = navController,
         onBackClick = { navController.navigate(Screens.UserProfile) },
-        content = { _, _ ->
+        snackbarWidth = 0.5f,
+        snackbar = {
+            Snackbar(modifier = Modifier.padding(16.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = Shapes.Full,
+                content = {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = it.message,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                })
+        },
+        content = { _, _, snackbarState ->
             // Account section
             item {
                 Spacer(modifier = Modifier.height(25.dp))
@@ -78,6 +94,15 @@ fun Settings(navController: NavController) {
             }
             // Posts section
             item {
+                LaunchedEffect(UserState.clickedOnSettings, toggled) {
+                    if (!UserState.clickedOnSettings && toggled || !UserState.clickedOnSettings && !toggled) {
+                        snackbarState.showSnackbar(
+                            message = if (!UserState.isPostPrivate) "New posts will be private" else "New posts will be public",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(25.dp))
                 Section(title = "Posts") {
                     ClickableRow(
@@ -102,7 +127,7 @@ fun Settings(navController: NavController) {
                                             alpha = 0.5f
                                         ),
                                         checkedBorderColor = MaterialTheme.colorScheme.primary,
-                                        uncheckedBorderColor = MaterialTheme.colorScheme.onSurface,
+                                        uncheckedBorderColor = Color.Transparent,
                                     )
                                 )
                             }) { togglePostPrivacy() }
@@ -139,22 +164,6 @@ fun Settings(navController: NavController) {
                     LogoutButton(navController = navController)
                 }
             }
-        },
-        additionalContent = {
-            if (toggled)
-                Snackbar(modifier = Modifier.padding(16.dp), action = {
-                    Text(
-                        text = "Dismiss",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 14.sp
-                    )
-                }, content = {
-                    Text(
-                        text = "You can change your username and profile picture in the Account section",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 14.sp
-                    )
-                })
         })
 }
 

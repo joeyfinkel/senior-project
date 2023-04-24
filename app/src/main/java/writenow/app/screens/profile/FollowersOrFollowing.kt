@@ -1,5 +1,6 @@
 package writenow.app.screens.profile
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.navigation.NavController
@@ -43,8 +44,10 @@ fun FollowersOrFollowing(navController: NavController) {
 
     ProfileLayout(title = UserState.followingOrFollower,
         navController = navController,
+        topVerticalArrangement = Arrangement.Center,
         onBackClick = { navController.popBackStack() },
-        content = { _, _ ->
+        snackbar = null,
+        content = { _, _, _ ->
             item {
                 Tabs(tabs = listOf("Followers", "Following"),
                     asPills = true,
@@ -66,6 +69,5 @@ fun FollowersOrFollowing(navController: NavController) {
                 }
             }
 
-        }
-    )
+        })
 }

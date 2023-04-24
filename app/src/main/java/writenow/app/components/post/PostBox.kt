@@ -4,10 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -60,15 +57,11 @@ fun PostBox(
                 ),
                 onClick = { navController.popBackStack() })
         }, trailingIcon = {
-            IconButton(onClick = {
-                if (value.isEmpty()) {
-                    // show dialog here
-                } else {
-                    onBtnClick()
-                }
-            }) {
+            IconButton(onClick = { onBtnClick() }, enabled = value.isNotEmpty()) {
                 Icon(
-                    painter = painterResource(id = R.drawable.new_post), contentDescription = "Post"
+                    painter = painterResource(id = R.drawable.new_post),
+                    contentDescription = "Post",
+                    tint = if (value.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
                 )
             }
         })

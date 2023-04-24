@@ -24,10 +24,10 @@ fun Post(
     state: ModalBottomSheetState,
     coroutineScope: CoroutineScope,
 ) {
-    var isEdited by remember { mutableStateOf(false) }
+    val (isEdited, setIsEdited) = remember { mutableStateOf(false) }
 
     LaunchedEffectOnce {
-        isEdited = Posts.isPostEdited(post?.id ?: 0)
+        setIsEdited(Posts.isPostEdited(post?.id ?: 0))
     }
 
     LaunchedEffect(state) {
@@ -57,8 +57,7 @@ fun Post(
                 text = post.text,
                 datePosted = getPostedDate(post.createdAt),
                 navController = navController,
-                onLongPress = { openPostMenu(post, coroutineScope, state) }
-            ) { openMenu() }
+                onLongPress = { openPostMenu(post, coroutineScope, state) }) { openMenu() }
             PostActions(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 state = state,

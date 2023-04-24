@@ -11,6 +11,7 @@ fun Privacy(navController: NavController) {
     ProfileLayout(
         title = "Privacy",
         navController = navController,
+        snackbar = null,
         onBackClick = { navController.popBackStack() },
-        content = { _, _ -> })
+        content = { _, _, _ -> })
 }

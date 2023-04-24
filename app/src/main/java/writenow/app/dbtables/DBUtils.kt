@@ -29,6 +29,8 @@ class DBUtils(table: String) {
             val link = if (path != null) "$url/$path" else url
             val request = Request.Builder().url(link).get().build()
 
+            Log.d("QueryLink", link)
+
             return@async try {
                 val response = client.newCall(request).execute()
                 val json = response.body?.string()

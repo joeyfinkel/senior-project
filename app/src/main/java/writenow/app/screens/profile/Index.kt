@@ -1,5 +1,6 @@
 package writenow.app.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
@@ -25,8 +26,10 @@ import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.screens.Screens
+import writenow.app.state.GlobalState
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
+import writenow.app.utils.LaunchedEffectOnce
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -38,16 +41,21 @@ fun Profile(navController: NavController) {
     val allPosts = remember { UserState.posts.filter { it.visible == 1 }.toMutableList() }
     val likedPosts = remember { UserState.likedPosts.filter { it.visible == 1 }.toMutableList() }
 
-//    LaunchedEffectOnce {
-//        isFollowing = Users.isFollowing(UserState.id, SelectedUserState.id!!)
-//
-//        Log.d("Profile", "isFollowing: $isFollowing")
-//
-//        if (UserState.id == SelectedUserState.id) {
-//            allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
-//            likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
-//        }
-//    }
+    LaunchedEffectOnce {
+        isFollowing = Users.isFollowing(UserState.id, SelectedUserState.id!!)
+
+        UserState.followers.addAll(GlobalState.followers?.map { Follower(it.id) }
+            ?.toMutableList()!!)
+        Log.d("Profile", "isFollowing: ${UserState.followers}")
+        Log.d("Profile", "isFollowing: ${UserState.following}")
+        Log.d("Profile", "isFollowing: ${GlobalState.isTheSameUser}")
+        Log.d("Profile", "isFollowing: ${UserState.id === SelectedUserState.id}")
+
+        if (UserState.id == SelectedUserState.id) {
+            allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
+            likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
+        }
+    }
 
     LaunchedEffect(UserState.posts, UserState.likedPosts) {
         withContext(Dispatchers.IO) {
@@ -66,15 +74,17 @@ fun Profile(navController: NavController) {
     LaunchedEffect(UserState.id != SelectedUserState.id) {
         isFollowing = Users.isFollowing(SelectedUserState.id!!, UserState.id)
 
-        Users.updateRelationList(SelectedUserState.followers)
-        Users.updateRelationList(SelectedUserState.following, false)
+//        Users.updateRelationList(SelectedUserState.followers)
+//        Users.updateRelationList(SelectedUserState.following, false)
     }
 
-    ProfileLayout(title = SelectedUserState.displayName.ifEmpty { username },
+    ProfileLayout(
+        title = SelectedUserState.displayName.ifEmpty { username },
         topText = "@${username.trim()}",
         topVerticalArrangement = Arrangement.spacedBy(10.dp),
         hasEllipsis = true,
         navController = navController,
+        snackbar = null,
         onBackClick = {
             if (UserState.clickedFollower) {
                 navController.navigate(Screens.FollowersOrFollowingList)
@@ -106,13 +116,13 @@ fun Profile(navController: NavController) {
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.followers.size.toString() else SelectedUserState.followers.size.toString(),
+                    RowData(primaryText = if (UserState.id == SelectedUserState.id) UserState.followers.size.toString() else SelectedUserState.followers.size.toString(),
                         secondaryText = "Followers",
                         onClick = {
                             UserState.followingOrFollower = "Followers"
                             navController.navigate(Screens.FollowersOrFollowingList)
                         })
-                    RowData(primaryText = if (SelectedUserState.id == UserState.id) UserState.following.size.toString() else SelectedUserState.following.size.toString(),
+                    RowData(primaryText = if (UserState.id == SelectedUserState.id) UserState.following.size.toString() else SelectedUserState.following.size.toString(),
                         secondaryText = "Following",
                         onClick = {
                             UserState.followingOrFollower = "Following"
@@ -124,41 +134,41 @@ fun Profile(navController: NavController) {
             }
             Spacer(modifier = Modifier.height(15.dp))
         },
-        accountIconAction = null,
-        content = { state, scope ->
-            stickyHeader {
-                Tabs(tabs = if (SelectedUserState.username == UserState.username) listOf(
-                    painterResource(id = R.drawable.grid_view), Icons.Default.Favorite
-                )
-                else listOf(painterResource(id = R.drawable.grid_view)),
-                    selectedTabIndex = selectedTabIndex,
-                    onClick = { index -> selectedTabIndex = index })
-            }
-            item {
-                Column(
-                    modifier = Modifier.padding(top = 5.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    when (selectedTabIndex) {
-                        0 -> allPosts.forEach { post ->
-                            Post(
-                                post = post,
-                                navController = navController,
-                                state = state,
-                                coroutineScope = scope
-                            )
-                        }
-                        1 -> likedPosts.forEach { post ->
-                            Post(
-                                post = post,
-                                navController = navController,
-                                state = state,
-                                coroutineScope = scope
-                            )
-                        }
+        accountIconAction = null
+    ) { state, scope, _ ->
+        stickyHeader {
+            Tabs(tabs = if (SelectedUserState.username == UserState.username) listOf(
+                painterResource(id = R.drawable.grid_view), Icons.Default.Favorite
+            )
+            else listOf(painterResource(id = R.drawable.grid_view)),
+                selectedTabIndex = selectedTabIndex,
+                onClick = { index -> selectedTabIndex = index })
+        }
+        item {
+            Column(
+                modifier = Modifier.padding(top = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                when (selectedTabIndex) {
+                    0 -> allPosts.forEach { post ->
+                        Post(
+                            post = post,
+                            navController = navController,
+                            state = state,
+                            coroutineScope = scope
+                        )
+                    }
+                    1 -> likedPosts.forEach { post ->
+                        Post(
+                            post = post,
+                            navController = navController,
+                            state = state,
+                            coroutineScope = scope
+                        )
                     }
                 }
             }
-        })
+        }
+    }
 }
 

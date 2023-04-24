@@ -8,8 +8,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +35,7 @@ import writenow.app.components.post.SelectedPost
 import writenow.app.components.profile.BottomOverlayButton
 import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
+import writenow.app.state.GlobalState
 import writenow.app.state.PostState
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
@@ -79,6 +83,8 @@ private fun Layout(
 ) {
     var deletedPost by remember { mutableStateOf(false) }
 
+    val (isReporting, setIsReporting) = remember { mutableStateOf(false) }
+    val (hasReported, setHasReported) = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
     val totalChildren = if (UserState.selectedPost?.uuid == UserState.id) 2 else 1
@@ -86,6 +92,8 @@ private fun Layout(
         UserState.isEllipsisClicked -> totalChildren.toFloat() * 0.07
         UserState.isCommentClicked -> 0.5
         UserState.isPostClicked -> 1.5
+        isReporting -> 0.56
+        hasReported -> 0.2
         else -> 1.0
     }
 
@@ -111,20 +119,11 @@ private fun Layout(
                 UserState.isCommentClicked -> Comments(navController)
                 UserState.isEllipsisClicked -> BottomOverlayButtonContainer {
                     if (UserState.selectedPost?.uuid == UserState.id) {
-                        BottomOverlayButton(
-                            icon = painterResource(id = R.drawable.outline_edit),
+                        BottomOverlayButton(icon = painterResource(id = R.drawable.outline_edit),
                             text = "Edit post",
-                            onClick = {
-                                navController.navigate(Screens.EditPost)
-                                scope.launch {
-                                    sheetState.hide()
-
-                                    UserState.isEllipsisClicked = false
-                                    UserState.isCommentClicked = false
-                                    UserState.isPostClicked = false
-                                }
-                            })
-                        BottomOverlayButton(icon = Icons.Default.Delete,
+                            onClick = { UserState.editPost(navController, scope, sheetState) })
+                        BottomOverlayButton(
+                            icon = Icons.Default.Delete,
                             text = "Delete",
                             color = Color.Red,
                             onClick = {
@@ -142,17 +141,69 @@ private fun Layout(
                                 }
                             })
                     } else {
-                        BottomOverlayButton(
-                            icon = painterResource(id = R.drawable.report),
+                        BottomOverlayButton(icon = painterResource(id = R.drawable.report),
                             text = "Report",
-                        ) {
+                            onClick = {
+                                UserState.isEllipsisClicked = false
 
-                        }
+                                setIsReporting(true)
+                            })
                     }
                 }
                 UserState.isPostClicked -> SelectedPost(
                     scope = scope, sheetState = sheetState, navController = navController
                 )
+                isReporting -> BottomOverlayButtonContainer {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 5.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = {
+                                setIsReporting(false)
+
+                                UserState.isEllipsisClicked = true
+                            }, modifier = Modifier
+                                .size(24.dp)
+                                .padding(0.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.chevron_left),
+                                contentDescription = "Back",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                    GlobalState.reportReasons?.forEach {
+                        BottomOverlayButton(text = it.reason) {
+                            setIsReporting(false)
+                            setHasReported(true)
+                        }
+                    }
+                }
+                hasReported -> BottomOverlayButtonContainer(verticalArrangement = Arrangement.SpaceAround) {
+                    Text(
+                        text = "Thank you for reporting this post!",
+                        fontSize = 24.sp,
+                    )
+                    Text(
+                        text = "We will review it shortly.",
+                        fontSize = 16.sp,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        DefaultButton(btnText = "Back to post") {
+                            setHasReported(false)
+                            scope.launch { sheetState.hide() }
+                        }
+                    }
+                }
             }
         },
             maxHeight = maxHeight,

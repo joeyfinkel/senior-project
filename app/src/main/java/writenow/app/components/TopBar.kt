@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import writenow.app.R
 import writenow.app.components.icons.More
+import writenow.app.state.UserState
 
 @Composable
 fun TopBar(
@@ -42,30 +43,32 @@ fun TopBar(
     state: ModalBottomSheetState? = null,
     coroutineScope: CoroutineScope? = null,
     onBackClick: () -> Unit,
-) = TopBar(
-    leadingIcon = {
-        IconButton(onClick = onBackClick, modifier = Modifier.size(24.dp)) {
-            Icon(
-                painterResource(id = R.drawable.chevron_left),
-                contentDescription = "Back",
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    },
-    title = {
-        if (title != null) Text(
-            text = title,
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
+) = TopBar(leadingIcon = {
+    IconButton(onClick = onBackClick, modifier = Modifier.size(24.dp)) {
+        Icon(
+            painterResource(id = R.drawable.chevron_left),
+            contentDescription = "Back",
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface
         )
-    },
-    trailingIcon = {
-        if (hasEllipsis) More { coroutineScope?.launch { state?.show() } }
-        else Box(modifier = Modifier.width(40.dp), content = {})
     }
-)
+}, title = {
+    if (title != null) Text(
+        text = title,
+        fontSize = 16.sp,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center,
+    )
+}, trailingIcon = {
+    if (hasEllipsis) More {
+        coroutineScope?.launch {
+            UserState.isProfileEllipsisClicked = true
+
+            state?.show()
+        }
+    }
+    else Box(modifier = Modifier.width(40.dp), content = {})
+})
 
 @OptIn(ExperimentalMaterialApi::class)
 @Preview

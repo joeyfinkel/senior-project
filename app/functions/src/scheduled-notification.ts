@@ -1,32 +1,29 @@
 import functions from 'firebase-functions';
 import admin from 'firebase-admin';
 
+type ActiveTime = { start: string; end: string };
+type Body = {
+  timezone: string;
+  activeTime: ActiveTime;
+  activeDays: string[];
+};
+
 const db = admin.firestore();
 
-functions.pubsub
-  .schedule('0 8 * * *')
-  .timeZone('America/New_York')
-  .onRun(async (context) => {
-    // Get the user's device token from the database
-    const userDoc = await admin
-      .firestore()
-      .collection('users')
-      .doc('USER_ID')
-      .get();
-    const deviceToken = userDoc.data().deviceToken;
+functions.https.onRequest(async (req, res: functions.Response) => {
+  const { timezone, activeDays, activeTime } = req.body;
 
-    // Send the notification
-    const payload = {
-      notification: {
-        title: 'Good morning!',
-        body: "It's time to start your day.",
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
-      },
-    };
-    await admin.messaging().sendToDevice(deviceToken, payload);
+  // Schedule a Cloud Function to send the notification at the specified time
+  const scheduledFunction = functions.pubsub.schedule(
+    notificationMoment.format()
+  );
+  scheduledFunction.timeZone(userTimezone);
+  scheduledFunction.topic('<YOUR_TOPIC_NAME>');
+  scheduledFunction.data({ notificationMessage });
 
-    // Log that the notification was sent
-    console.log('Morning notification sent to device with token:', deviceToken);
+  console.log(
+    `Scheduled notification: ${notificationMessage} at ${notificationMoment.format()}`
+  );
 
-    return null;
-  });
+  res.status(200).send('Notification scheduled successfully');
+});

@@ -15,13 +15,16 @@ import writenow.app.state.UserState
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EditName(navController: NavController) {
-    ProfileLayout(title = "Edit name",
+    ProfileLayout(
+        title = "Edit name",
         navController = navController,
         onBackClick = { navController.popBackStack() },
-        content = { _, _ ->
+        snackbar = null,
+        content = { _, _, _ ->
             item {
                 Section(columnSpacing = 0.dp) {
-                    TextInput(value = UserState.displayName,
+                    TextInput(
+                        value = UserState.displayName,
                         label = "Display name",
                         hint = "This is how your name will appear to others",
                         spacer = false,

@@ -15,14 +15,15 @@ fun BottomOverlayButtonContainer(
     horizontalPadding: Dp = 15.dp,
     verticalPadding: Dp = 5.dp,
     verticalSpacing: Dp = 10.dp,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(verticalSpacing),
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable () -> Unit
-) =
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
-        verticalArrangement = Arrangement.spacedBy(verticalSpacing),
-        horizontalAlignment = Alignment.Start
-    ) {
-        content()
-    }
+) = Column(
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+    verticalArrangement = verticalArrangement,
+    horizontalAlignment = horizontalAlignment
+) {
+    content()
+}

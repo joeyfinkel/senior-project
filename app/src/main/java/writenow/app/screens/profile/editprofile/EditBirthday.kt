@@ -15,9 +15,12 @@ import writenow.app.state.UserState
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EditBirthday(navController: NavController) {
-    ProfileLayout(title = "Edit birthday",
+    ProfileLayout(
+        title = "Edit birthday",
         navController = navController,
-        onBackClick = { navController.popBackStack() }, content = { _, _ ->
+        snackbar = null,
+        onBackClick = { navController.popBackStack() },
+        content = { _, _, _ ->
             item {
                 Section(columnSpacing = 0.dp) {
                     TextInput(value = UserState.birthday,

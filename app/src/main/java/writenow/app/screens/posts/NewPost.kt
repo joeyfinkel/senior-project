@@ -38,11 +38,10 @@ fun NewPost(navController: NavController) {
         navController = navController,
         placeholder = "New post",
         onBtnClick = {
-            if (!UserState.hasPosted && (value.isNotEmpty() || value.isNotBlank())) {
+            if (!UserState.hasPosted && value.isNotBlank()) {
                 post()
-                UserState.hasPosted = true
+                navController.navigate(Screens.Posts)
             }
-            navController.navigate(Screens.Posts)
         },
         onValueChange = { setValue(it) },
         editing = false,

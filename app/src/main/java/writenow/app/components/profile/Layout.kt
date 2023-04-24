@@ -1,23 +1,26 @@
 package writenow.app.components.profile
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
+import writenow.app.R
 import writenow.app.components.TopBar
 import writenow.app.components.bottom.overlay.BottomOverlay
 import writenow.app.components.bottom.overlay.BottomOverlayButtonContainer
@@ -32,11 +35,21 @@ import writenow.app.state.UserState
 private fun ProfileLayout(
     title: String,
     hasEllipsis: Boolean,
+    snackbarWidth: Float? = 1f,
     onBackClick: () -> Unit,
-    content: @Composable (PaddingValues, ModalBottomSheetState, CoroutineScope) -> Unit
+    snackbar: (@Composable (SnackbarData) -> Unit)? = null,
+    content: @Composable (PaddingValues, ModalBottomSheetState, CoroutineScope, SnackbarHostState) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            UserState.isEllipsisClicked = false
+            UserState.isProfileEllipsisClicked = false
+        }
+    }
 
     Scaffold(topBar = {
         TopBar(
@@ -46,89 +59,77 @@ private fun ProfileLayout(
             state = sheetState,
             coroutineScope = scope
         )
-    }, content = { innerPadding -> content(innerPadding, sheetState, scope) })
+    }, content = { innerPadding ->
+        content(
+            innerPadding, sheetState, scope, scaffoldState.snackbarHostState
+        )
+    }, snackbarHost = {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            SnackbarHost(hostState = scaffoldState.snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(snackbarWidth ?: 1f),
+                snackbar = { data -> snackbar?.invoke(data) })
+        }
+    })
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun ProfileLayout(
+fun ProfileLayout(
     title: String,
     navController: NavController,
     hasEllipsis: Boolean,
+    snackbarWidth: Float? = 1f,
     onBackClick: () -> Unit,
-    content: @Composable (PaddingValues, ModalBottomSheetState, CoroutineScope) -> Unit
+    snackbar: (@Composable (SnackbarData) -> Unit)? = null,
+    content: @Composable (PaddingValues, ModalBottomSheetState, CoroutineScope, SnackbarHostState) -> Unit
 ) {
     val totalChildren = 2
-    val isTheSameUser = SelectedUserState.username == UserState.username
+    val isTheSameUser = SelectedUserState.id == UserState.id
 
-    ProfileLayout(title = title,
+    ProfileLayout(
+        title = title,
         hasEllipsis = hasEllipsis,
         onBackClick = onBackClick,
-        content = { innerPadding, state, scope ->
+        snackbarWidth = snackbarWidth,
+        snackbar = snackbar,
+        content = { innerPadding, state, scope, snackbarState ->
             BottomOverlay(sheetContent = {
                 BottomOverlayButtonContainer {
                     when {
                         UserState.isCommentClicked -> Comments(navController = navController)
                         UserState.isEllipsisClicked -> BottomOverlayButtonContainer {
-                            BottomOverlayButton(
-                                icon = Icons.Default.Settings, text = "Settings"
-                            ) {
-                                navController.navigate(Screens.Settings)
-                            }
-                            LogoutButton(navController = navController, color = Color.Red)
+                            BottomOverlayButton(icon = painterResource(id = R.drawable.outline_edit),
+                                text = "Edit",
+                                onClick = { UserState.editPost(navController, scope, state) })
+                            BottomOverlayButton(icon = Icons.Default.Delete,
+                                text = "Delete",
+                                color = Color.Red,
+                                onClick = { })
                         }
-                        isTheSameUser -> {
+                        UserState.isProfileEllipsisClicked -> {
                             BottomOverlayButton(
-                                icon = Icons.Default.Settings, text = "Settings"
-                            ) {
-                                navController.navigate(Screens.Settings)
-                            }
+                                icon = Icons.Default.Settings,
+                                text = "Settings",
+                                onClick = {
+                                    UserState.clickedOnSettings = true
+
+                                    navController.navigate(Screens.Settings)
+                                })
                             LogoutButton(navController = navController, color = Color.Red)
                         }
                     }
                 }
-            }, maxHeight = when {
-                UserState.isCommentClicked -> 0.5
-                UserState.isEllipsisClicked -> 0.3
-                isTheSameUser -> totalChildren.toFloat() * 0.07
-                else -> 0.25
-            }, sheetState = state, content = { content(innerPadding, state, scope) })
+            },
+                maxHeight = when {
+                    UserState.isCommentClicked -> 0.5
+                    UserState.isProfileEllipsisClicked || UserState.isEllipsisClicked -> totalChildren.toFloat() * 0.07
+                    else -> 0.25
+                },
+                sheetState = state,
+                content = { content(innerPadding, state, scope, snackbarState) })
         })
-
-//    Scaffold(topBar = {
-//        TopBar(
-//            title = title,
-//            hasEllipsis = hasEllipsis,
-//            onBackClick = onBackClick,
-//            state = sheetState,
-//            coroutineScope = scope
-//        )
-//    }, content = { innerPadding ->
-//        BottomOverlay(sheetContent = {
-//            BottomOverlayButtonContainer(layoutId = "bottomOverlay") {
-//                when {
-//                    UserState.isCommentClicked -> Comments(navController = navController)
-//                    UserState.isEllipsisClicked -> BottomOverlayButtonContainer(layoutId = "bottomOverlay") {
-//                        BottomOverlayButton(icon = Icons.Default.Settings, text = "Settings") {
-//                            navController.navigate(Screens.Settings)
-//                        }
-//                        LogoutButton(navController = navController, color = Color.Red)
-//                    }
-//                    isTheSameUser -> {
-//                        BottomOverlayButton(icon = Icons.Default.Settings, text = "Settings") {
-//                            navController.navigate(Screens.Settings)
-//                        }
-//                        LogoutButton(navController = navController, color = Color.Red)
-//                    }
-//                }
-//            }
-//        }, maxHeight = when {
-//            UserState.isCommentClicked -> 0.5
-//            UserState.isEllipsisClicked -> 0.3
-//            isTheSameUser -> totalChildren.toFloat() * 0.07
-//            else -> 0.25
-//        }, sheetState = sheetState, content = { content(innerPadding, sheetState, scope) })
-//    })
 }
 
 @Composable
@@ -161,13 +162,17 @@ fun ProfileLayout(
     hasBottomSheet: Boolean = true,
     hasEllipsis: Boolean = false,
     onBackClick: () -> Unit,
-    content: @Composable (PaddingValues, ModalBottomSheetState, CoroutineScope) -> Unit
+    snackbarWidth: Float? = 1f,
+    snackbar: (@Composable (SnackbarData) -> Unit)? = null,
+    content: @Composable (PaddingValues, ModalBottomSheetState, CoroutineScope, SnackbarHostState) -> Unit
 ) = ProfileLayout(title = title,
     onBackClick = onBackClick,
     hasEllipsis = hasEllipsis,
-    content = { innerPadding, state, scope ->
+    snackbarWidth = snackbarWidth,
+    snackbar = snackbar,
+    content = { innerPadding, state, scope, snackbarState ->
         if (hasBottomSheet) content(
-            innerPadding, state, scope
+            innerPadding, state, scope, snackbarState
         )
     })
 
@@ -178,33 +183,36 @@ fun ProfileLayout(
     navController: NavController,
     topText: String? = null,
     hasEllipsis: Boolean = false,
+    snackbarWidth: Float? = 1f,
     topVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     onBackClick: () -> Unit,
     accountIconAction: (() -> Unit)? = null,
-    additionalTopContent: (@Composable () -> Unit)? = null,
-    content: (LazyListScope.(state: ModalBottomSheetState, scope: CoroutineScope) -> Unit),
-    additionalContent: (@Composable () -> Unit)? = null
-) = ProfileLayout(
-    title = title,
-    navController = navController,
-    onBackClick = onBackClick,
-    hasEllipsis = hasEllipsis,
-    content = { innerPadding, state, scope ->
-        LazyColumn(contentPadding = innerPadding) {
-            if (topText != null) {
-                item {
-                    TopSection(
-                        topText = topText,
-                        topVerticalArrangement = topVerticalArrangement,
-                        accountIconAction = accountIconAction,
-                        additionalTopContent = additionalTopContent
-                    )
+    additionalTopContent: @Composable (() -> Unit)? = null,
+    snackbar: @Composable ((SnackbarData) -> Unit)? = null,
+    content: LazyListScope.(ModalBottomSheetState, CoroutineScope, SnackbarHostState) -> Unit
+) {
+    ProfileLayout(title = title,
+        navController = navController,
+        hasEllipsis = hasEllipsis,
+        onBackClick = onBackClick,
+        snackbarWidth = snackbarWidth,
+        snackbar = snackbar,
+        content = { innerPadding, state, scope, snackbarState ->
+            LazyColumn(contentPadding = innerPadding) {
+                if (topText != null) {
+                    item {
+                        TopSection(
+                            topText = topText,
+                            topVerticalArrangement = topVerticalArrangement,
+                            accountIconAction = accountIconAction,
+                            additionalTopContent = additionalTopContent
+                        )
+                    }
                 }
+                content(state, scope, snackbarState)
             }
-            content(state, scope)
-        }
-        additionalContent?.invoke()
-    })
+        })
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -222,7 +230,7 @@ fun ProfileLayout(
     navController = navController,
     onBackClick = onBackClick,
     hasEllipsis = hasEllipsis,
-    content = { innerPadding, state, scope ->
+    content = { innerPadding, state, scope, _ ->
         if (topText != null) {
             TopSection(
                 topText = topText,

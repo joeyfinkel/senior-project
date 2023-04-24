@@ -86,8 +86,8 @@ fun Login(navController: NavController) {
                 val loggedIn = performLogin()
 
                 if (loggedIn) {
-                    navController.navigate(Screens.Posts)
                     UserState.getHasPosted()
+                    navController.navigate(Screens.Posts)
 
                     if (date == Posts.getLastPostDate(UserState.id)) {
                         UserState.hasPosted = true
