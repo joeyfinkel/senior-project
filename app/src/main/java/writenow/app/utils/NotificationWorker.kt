@@ -35,7 +35,7 @@ class NotificationWorker(context: Context, userParams: WorkerParameters) :
 fun createNotificationChannel(context: Context) {
     val name = "Notification Channel"
     val descriptionText = "Notification Channel Description"
-    val importance = NotificationManager.IMPORTANCE_DEFAULT
+    val importance = NotificationManager.IMPORTANCE_HIGH
     val channel = NotificationChannel("default", name, importance).apply {
         description = descriptionText
     }
@@ -50,6 +50,8 @@ fun createNotification(context: Context, title: String, message: String) {
     val builder = NotificationCompat.Builder(context, "default")
         .setSmallIcon(R.drawable.ic_launcher_foreground).setContentTitle(title)
         .setContentText(message).setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+    Log.d("TAG", "From: $title")
 
     with(NotificationManagerCompat.from(context)) {
         // notificationId is a unique int for each notification that you must define

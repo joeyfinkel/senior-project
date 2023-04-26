@@ -14,9 +14,14 @@ import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
-class DBUtils(table: String) {
-    private val url = "https://write-now.lesspopmorefizz.com/api/$table"
+class DBUtils(table: String? = null, requestUrl: String? = null) {
+    private val url = requestUrl ?: "https://write-now.lesspopmorefizz.com/api/$table"
     private val client = OkHttpClient()
+
+    init {
+        require(table != null || requestUrl != null) { "Either `table` or `requestUrl` must be provided" }
+        require(table == null || requestUrl == null) { "Either `table` or `requestUrl` must be provided, not both" }
+    }
 
     /**
      * Posts data to the table.
@@ -135,6 +140,19 @@ class DBUtils(table: String) {
         val req = Request.Builder().url("$url/$section").post(body).build()
 
         requestBuilder("post", req, callback)
+    }
+
+    /**
+     * Posts data to the table.
+     * @param json The data to post.
+     * @param callback A function that takes a Boolean and returns Unit.
+     * @return Unit.
+     */
+    fun post(json: JSONObject, callback: (Boolean) -> Unit) {
+        val body = json.toString().toRequestBody("application/json".toMediaTypeOrNull())
+        val req = Request.Builder().url(url).post(body).build()
+
+        requestBuilder("postWithCallback ($url)", req, callback)
     }
 
 

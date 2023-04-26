@@ -1,5 +1,6 @@
 package writenow.app.screens.profile.settings
 
+import android.util.Log
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,16 +17,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import writenow.app.R
 import writenow.app.components.ClickableRow
 import writenow.app.components.dialogs.ActiveHoursDialog
 import writenow.app.components.dialogs.activeday.ActiveDayDialog
 import writenow.app.components.profile.Section
 import writenow.app.components.profile.settings.SettingsLayout
+import writenow.app.dbtables.DBUtils
 import writenow.app.dbtables.Users
 import writenow.app.state.GlobalState
 import writenow.app.state.UserState
 import writenow.app.utils.ActiveHours
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -68,8 +73,17 @@ fun Notifications(navController: NavController) {
 
     fun updateActiveTimes() {
         lifecycle.lifecycleScope.launch {
+            val dbUtils =
+                DBUtils(requestUrl = "https://us-central1-writenow-cc43f.cloudfunctions.net/scheduleNotification")
             val start = UserState.activeHours.start.ifEmpty { "" }
             val end = UserState.activeHours.end.ifEmpty { "" }
+            val localStartTime = LocalTime.parse(start, DateTimeFormatter.ofPattern("h:mm a"))
+            val localEndTime = LocalTime.parse(end, DateTimeFormatter.ofPattern("h:mm a"))
+            val activeTimes = JSONObject().apply {
+                put("start", DateTimeFormatter.ofPattern("HH:mm").format(localStartTime))
+                put("end", DateTimeFormatter.ofPattern("HH:mm").format(localEndTime))
+            }
+
 
             GlobalState.userRepository.updateUser(
                 GlobalState.user!!.copy(
@@ -81,6 +95,16 @@ fun Notifications(navController: NavController) {
                 )
             )
             Users.updateActiveHours(UserState.id, ActiveHours(start, end))
+            dbUtils.post(JSONObject().apply {
+                put("timezone", "America/New_York")
+                put("activeTimes", activeTimes)
+                put("activeDays", UserState.selectedDays)
+            }) {
+                Log.d(
+                    "Notifications",
+                    if (it) "Successfully set notification times" else "Failed to set notification times"
+                )
+            }
         }
     }
 
@@ -139,11 +163,13 @@ fun Notifications(navController: NavController) {
 
                         updateActiveTimes()
                         modalDialogEndTimeState.show()
-                    }) {
-                    UserState.activeHours.start = DateTimeFormatter.ofPattern("h:mm a").format(it)
+                    },
+                    onTimeChange = {
+                        UserState.activeHours.start =
+                            DateTimeFormatter.ofPattern("h:mm a").format(it)
 
-                    updateActiveTimes()
-                }
+                        updateActiveTimes()
+                    })
             }
             modalDialogEndTimeState.showing -> {
                 ActiveHoursDialog(dialogState = modalDialogEndTimeState,
@@ -156,11 +182,12 @@ fun Notifications(navController: NavController) {
 
                         updateActiveTimes()
                     },
-                    negativeOnClick = { modalDialogStartTimeState.show() }) {
-                    UserState.activeHours.end = DateTimeFormatter.ofPattern("h:mm a").format(it)
+                    negativeOnClick = { modalDialogStartTimeState.show() },
+                    onTimeChange = {
+                        UserState.activeHours.end = DateTimeFormatter.ofPattern("h:mm a").format(it)
 
-                    updateActiveTimes()
-                }
+                        updateActiveTimes()
+                    })
             }
             modalDialogActiveHoursState.showing -> {
                 ActiveDayDialog(dialogState = modalDialogActiveHoursState, onDaySelected = {

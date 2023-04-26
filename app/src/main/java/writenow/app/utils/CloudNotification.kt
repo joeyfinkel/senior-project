@@ -19,11 +19,15 @@ class CloudNotification : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        Log.d("Token", token)
         FirebaseMessaging.getInstance().subscribeToTopic("all")
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
+
+        Log.d("TAG", "From: ${remoteMessage.from}")
 
         // Extract data payload from the message
         val data = remoteMessage.data
@@ -31,13 +35,17 @@ class CloudNotification : FirebaseMessagingService() {
         val message = data["message"]
 
         // Create a notification using the payload data
-        val notificationBuilder = NotificationCompat.Builder(this, "default").setContentTitle(title)
-            .setContentText(message).setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-        // Show the notification
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(0, notificationBuilder.build())
+//        val notificationBuilder = NotificationCompat.Builder(this, "default").setContentTitle(title)
+//            .setContentText(message).setPriority(NotificationCompat.PRIORITY_HIGH)
+//
+//        // Show the notification
+//        val notificationManager =
+//            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//        notificationManager.notify(0, notificationBuilder.build())
+        remoteMessage.notification?.let {
+            Log.d("TAG", "Message Notification Body: ${it.body}")
+        }
+        createNotification(this, title?: "", message?:"")
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -49,6 +57,15 @@ class CloudNotification : FirebaseMessagingService() {
                 .setConstraints(constraints).build()
 
         workManager.enqueue(notificationWorker)
+
+        Log.d("Token", FirebaseMessaging.getInstance().token.toString())
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
+//            Log.d("Token", it.result.toString())
+            it.result?.let { token ->
+                Log.d("Token", token)
+                FirebaseMessaging.getInstance().subscribeToTopic("all")
+            }
+        }
 
         workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever {
             Log.d("NotificationWorker", "sendNotification: ${it.state}")

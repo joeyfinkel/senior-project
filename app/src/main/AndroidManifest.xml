@@ -46,11 +46,9 @@
         </receiver>
         <service
             android:name=".utils.CloudNotification"
-            tools:ignore="Instantiatable"
-            android:exported="false"
-            android:permission="TODO">
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGINE_EVENT" />
             </intent-filter>
         </service>
     </application>
