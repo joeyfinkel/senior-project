@@ -13,6 +13,12 @@ import androidx.work.WorkManager
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import writenow.app.dbtables.DBUtils
+import writenow.app.state.UserState
 import java.util.concurrent.TimeUnit
 
 class CloudNotification : FirebaseMessagingService() {
@@ -34,18 +40,10 @@ class CloudNotification : FirebaseMessagingService() {
         val title = data["title"]
         val message = data["message"]
 
-        // Create a notification using the payload data
-//        val notificationBuilder = NotificationCompat.Builder(this, "default").setContentTitle(title)
-//            .setContentText(message).setPriority(NotificationCompat.PRIORITY_HIGH)
-//
-//        // Show the notification
-//        val notificationManager =
-//            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//        notificationManager.notify(0, notificationBuilder.build())
         remoteMessage.notification?.let {
             Log.d("TAG", "Message Notification Body: ${it.body}")
         }
-        createNotification(this, title?: "", message?:"")
+        createNotification(this, title ?: "", message ?: "")
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -57,26 +55,40 @@ class CloudNotification : FirebaseMessagingService() {
                 .setConstraints(constraints).build()
 
         workManager.enqueue(notificationWorker)
-
-        Log.d("Token", FirebaseMessaging.getInstance().token.toString())
         FirebaseMessaging.getInstance().token.addOnCompleteListener {
-//            Log.d("Token", it.result.toString())
             it.result?.let { token ->
-                Log.d("Token", token)
+                UserState.token = token
+
                 FirebaseMessaging.getInstance().subscribeToTopic("all")
+                CoroutineScope(Dispatchers.IO).launch {
+                    val json = JSONObject().apply {
+                        put("token", token)
+                        put("title", "Test")
+                        put("body", "This is a test message")
+                    }
+                    val db =
+                        DBUtils(requestUrl = "https://us-central1-writenow-cc43f.cloudfunctions.net/scheduleMessage")
+
+                    db.post(json) {
+                        Log.d("TAG", "Message sent")
+                    }
+                }
             }
-        }
-
-        workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever {
-            Log.d("NotificationWorker", "sendNotification: ${it.state}")
-
-            if (it.state == WorkInfo.State.SUCCEEDED) {
-                createNotification(context, "Write Now", "Write Now is waiting for you!")
-                Log.d("NotificationWorker", "sendNotification: SUCCEEDED")
-            }
-
         }
     }
-
 }
+
+//CoroutineScope(Dispatchers.IO).launch {
+//    val json = JSONObject().apply {
+//        put("token", token)
+//        put("title", "Test")
+//        put("body", "This is a test message")
+//    }
+//    val db =
+//        DBUtils(requestUrl = "https://us-central1-writenow-cc43f.cloudfunctions.net/scheduleMessage")
+//
+//    db.post(json){
+//        Log.d("TAG", "Message sent")
+//    }
+//}
 

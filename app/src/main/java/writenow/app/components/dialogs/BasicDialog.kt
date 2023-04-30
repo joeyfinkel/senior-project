@@ -27,7 +27,8 @@ fun BasicDialog(
         buttons = {
             positiveButton(positiveText, onClick = { positiveOnClick?.invoke() })
             negativeButton(negativeText, onClick = { negativeOnClick?.invoke() })
-            button(neutralText!!, onClick = { neutralOnClick?.invoke() })
+            if (neutralText != null)
+                button(neutralText, onClick = { neutralOnClick?.invoke() })
         },
     ) {
         scope.value = this

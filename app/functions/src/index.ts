@@ -1,12 +1,22 @@
 import * as functions from 'firebase-functions';
-// import { ScheduleNotificationBody } from './types';
-// import { PubSub } from '@google-cloud/pubsub';
-import { ScheduleNotificationBody } from './types';
-import { initializeApp, messaging } from 'firebase-admin';
+import { ScheduleNotificationBody, Time } from './types';
+import { messaging, credential } from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app';
+// import * as express from 'express';
+import { client_email, private_key, project_id } from '../serviceAccount.json';
 
-initializeApp();
+initializeApp({
+  credential: credential.cert({
+    clientEmail: client_email,
+    privateKey: private_key,
+    projectId: project_id,
+  }),
+  databaseURL: 'https://writenow-cc43f-default-rtdb.firebaseio.com/',
+});
 
-const stringToTime = (startTime: string, endTime: string) => {
+// const app = express();
+
+function stringToTime(startTime: Time, endTime: Time) {
   const start = startTime.split(':');
   const end = endTime.split(':');
 
@@ -14,7 +24,7 @@ const stringToTime = (startTime: string, endTime: string) => {
     start: { hours: parseInt(start[0]), minutes: parseInt(start[1]) },
     end: { hours: parseInt(end[0]), minutes: parseInt(end[0]) },
   };
-};
+}
 
 function getRandomTime(time: ReturnType<typeof stringToTime>) {
   const { end, start } = time;
@@ -42,20 +52,49 @@ function getRandomTime(time: ReturnType<typeof stringToTime>) {
   return randomTime;
 }
 
-export const scheduleNotification = functions.https.onRequest(
+// app.post<'/register-device', {}, {}, { userId: string; token: string }>(
+//   '/register-device',
+//   async (req, res) => {
+//     const { userId, token } = req.body;
+
+//     await database().ref(`/users/${userId}/deviceTokens`).push({ token });
+
+//     res.status(200).send('Device registered');
+//   }
+// );
+
+// export const scheduleMessage = functions.database
+//   .ref('/notifications/{userId}/{notificationId}')
+//   .onCreate(async (snapshot, context) => {
+//     const { notificationId } = context.params;
+//     const { endTime, startTime, token, body, title } =
+//       snapshot.val() as ScheduleNotificationBody;
+//     const time = stringToTime(startTime, endTime);
+//     const randomTime = getRandomTime(time); // Use this for scheduling
+
+//     console.log({ randomTime });
+
+//     messaging()
+//       .send({ notification: { title, body }, data: { notificationId }, token })
+//       .then((response) => {
+//         console.log('Successfully sent message:', response);
+//       })
+//       .catch((error) => {
+//         console.error('Error sending message:', error);
+//       });
+//   });
+
+export const scheduleMessage = functions.https.onRequest(
   async (req, res: functions.Response) => {
-    const { endTime, startTime, token } = req.body as ScheduleNotificationBody;
+    const { endTime, startTime, token, body, title } =
+      req.body as ScheduleNotificationBody;
     const time = stringToTime(startTime, endTime);
-    const randomTime = getRandomTime(time);
+    const randomTime = getRandomTime(time); // Use this for scheduling
+
+    console.log({ randomTime });
 
     messaging()
-      .send({
-        notification: {
-          title: 'Notification',
-          body: `At ${randomTime}`,
-        },
-        token,
-      })
+      .send({ notification: { title, body }, token })
       .then((response) => {
         console.log('Successfully sent message:', response);
         res.status(200).send('Notification sent');
@@ -64,54 +103,7 @@ export const scheduleNotification = functions.https.onRequest(
         console.error('Error sending message:', error);
         res.status(500).send('Error sending notification');
       });
-
-    // // Schedule a Cloud Function to send the notification at the specified time
-    // functions.pubsub.schedule('40 19 * * * *').onRun(() => {
-    //   console.log('This will be run every day at 7:40 pm!');
-    //   res.send('This will be run every day at 7:40 pm!');
-    // });
-
-    // functions.pubsub.topic('scheduled-notification');
-    // scheduledFunction.onRun((context) => {
-    //   context.params;
-    // });
-
-    // scheduledFunction.timeZone(timezone);
-
-    // res
-    //   .status(200)
-    //   .send(
-    //     `Notification scheduled successfully on ${activeDays.join(
-    //       ', '
-    //     )} between ${time.start} and ${time.end}`
-    //   );
-    // res.send({
-    //   message: 'Hello from Firebase!',
-    //   timezone,
-    //   activeDays,
-    //   randomTime,
-    // });
   }
 );
 
-// export const scheduleMessage = functions.https.onRequest((req, res) => {
-//   const { message, time } = req.body;
-//   const pubsub = new PubSub();
-//   const topicName = 'my-topic';
-//   const topic = pubsub.topic(topicName);
-
-//   const dataBuffer = Buffer.from(JSON.stringify({ message }));
-//   const options = {
-//     publishTime: time.toISOString(),
-//   };
-
-//   topic.publish(dataBuffer, options, (err, messageIds) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).send('Error scheduling message');
-//     } else {
-//       console.log(`Message ${message} published at ${time.toISOString()}`);
-//       res.status(200).send(`Message scheduled for ${time.toISOString()}`);
-//     }
-//   });
-// });
+// export const api = functions.https.onRequest(app);

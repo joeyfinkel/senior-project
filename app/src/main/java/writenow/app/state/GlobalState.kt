@@ -32,7 +32,6 @@ object GlobalState {
     val commentRepository by lazy { CommentRepository(database.commentDao()) }
     val userPostRepository by lazy { UserPostRepository(database.userPostDao()) }
 
-
     @SuppressLint("StaticFieldLeak")
     fun provide(context: Context) {
         val migration2To3 = object : Migration(2, 3) {

@@ -30,6 +30,7 @@ object UserState {
     var password by mutableStateOf("")
     var bio by mutableStateOf("")
     var followingOrFollower by mutableStateOf("")
+    var token by mutableStateOf("")
 
     var isPostPrivate by mutableStateOf(false)
     var isLoggedIn by mutableStateOf(false)

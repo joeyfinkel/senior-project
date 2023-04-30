@@ -14,6 +14,11 @@ import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
+/**
+ * A utility class for interacting with the database.
+ * @param table The name of the table to interact with.
+ * @param requestUrl The url to send requests to.
+ */
 class DBUtils(table: String? = null, requestUrl: String? = null) {
     private val url = requestUrl ?: "https://write-now.lesspopmorefizz.com/api/$table"
     private val client = OkHttpClient()

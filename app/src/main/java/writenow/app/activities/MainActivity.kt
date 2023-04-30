@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 import writenow.app.components.*
 import writenow.app.dbtables.*
@@ -143,7 +144,6 @@ class MainActivity : ComponentActivity() {
 
         Log.d("MainActivity", "onLoad: ${Questions.getRandom()}")
 
-        createNotificationChannel(context)
         CloudNotification().sendNotification(context)
 
         if (GlobalState.user?.uuid != null) UserState.updateActiveHours(GlobalState.user?.uuid!!)
