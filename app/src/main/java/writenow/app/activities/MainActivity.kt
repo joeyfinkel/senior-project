@@ -24,7 +24,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
-import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 import writenow.app.components.*
 import writenow.app.dbtables.*
@@ -50,8 +49,7 @@ import writenow.app.state.GlobalState
 import writenow.app.state.PostState
 import writenow.app.state.UserState
 import writenow.app.ui.theme.WriteNowTheme
-import writenow.app.utils.CloudNotification
-import writenow.app.utils.createNotificationChannel
+import writenow.app.utils.PushNotificationService
 import writenow.app.utils.getProfilePicture
 import java.time.LocalDate
 import writenow.app.data.entity.Question as QuestionEntity
@@ -144,7 +142,7 @@ class MainActivity : ComponentActivity() {
 
         Log.d("MainActivity", "onLoad: ${Questions.getRandom()}")
 
-        CloudNotification().sendNotification(context)
+        PushNotificationService().sendNotification(context)
 
         if (GlobalState.user?.uuid != null) UserState.updateActiveHours(GlobalState.user?.uuid!!)
     }
@@ -262,14 +260,18 @@ fun Main() {
         //region Search
         composable(Screens.Search) {
             Layout(navController = navController) { _, _ ->
-                Text(text = "Search screen")
+                Text(
+                    text = "Search screen", color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
         //endregion
         //region Notifications
         composable(Screens.Notifications) {
             Layout(navController = navController) { _, _ ->
-                Text(text = "Notifications will be here")
+                Text(
+                    text = "Notifications will be here", color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
         //endregion

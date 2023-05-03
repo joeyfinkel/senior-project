@@ -40,7 +40,7 @@ fun ActiveHoursDialog(
                 headerTextColor = MaterialTheme.colorScheme.onSurface,
                 inactiveTextColor = MaterialTheme.colorScheme.onSurface,
             ),
-            onTimeChange = onTimeChange
+            onTimeChange = onTimeChange,
         )
     }
 }

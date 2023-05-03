@@ -1,9 +1,9 @@
 import * as functions from 'firebase-functions';
 import { ScheduleNotificationBody, Time } from './types';
-import { messaging, credential } from 'firebase-admin';
+import { messaging, credential, firestore } from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 // import * as express from 'express';
-import { client_email, private_key, project_id } from '../serviceAccount.json';
+import { client_email, private_key, project_id } from './serviceAccount.json';
 
 initializeApp({
   credential: credential.cert({
@@ -14,96 +14,78 @@ initializeApp({
   databaseURL: 'https://writenow-cc43f-default-rtdb.firebaseio.com/',
 });
 
-// const app = express();
+const db = firestore();
 
-function stringToTime(startTime: Time, endTime: Time) {
-  const start = startTime.split(':');
-  const end = endTime.split(':');
+function getTime(time: Time) {
+  const now = new Date();
+  const [_time, period] = time.split(' ');
+  let [hours, minutes] = _time.split(':');
 
-  return {
-    start: { hours: parseInt(start[0]), minutes: parseInt(start[1]) },
-    end: { hours: parseInt(end[0]), minutes: parseInt(end[0]) },
-  };
+  if (hours === '12') {
+    hours = '00';
+  }
+
+  if (period.toLowerCase() === 'pm') {
+    hours = (parseInt(hours, 10) + 12).toString();
+  }
+
+  return new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    +hours,
+    +minutes
+  );
 }
 
-function getRandomTime(time: ReturnType<typeof stringToTime>) {
-  const { end, start } = time;
-  const startTime = new Date();
-  const endTime = new Date();
+function getRandomTime(startTime: Time, endTime: Time) {
+  const start = getTime(startTime);
+  const end = getTime(endTime);
   const randomTime = new Date();
-
-  startTime.setHours(start.hours, start.minutes, 0, 0);
-  endTime.setHours(end.minutes, end.minutes, 0, 0);
-
-  const startTimestamp = startTime.getTime();
-  const endTimestamp = endTime.getTime();
-
+  const startTimestamp = start.getTime();
+  const endTimestamp = end.getTime();
   const randomTimestamp =
     startTimestamp + Math.random() * (endTimestamp - startTimestamp);
 
   randomTime.setTime(randomTimestamp);
 
-  console.log({
-    utc: randomTime.toUTCString(),
-    local: randomTime.toLocaleString(),
-    iso: randomTime.toISOString(),
-  });
-
   return randomTime;
 }
 
-// app.post<'/register-device', {}, {}, { userId: string; token: string }>(
-//   '/register-device',
-//   async (req, res) => {
-//     const { userId, token } = req.body;
+export const updateNotificationInformation = functions.https.onRequest(
+  async (req, res) => {
+    const { userId } = req.body as ScheduleNotificationBody;
+  }
+);
 
-//     await database().ref(`/users/${userId}/deviceTokens`).push({ token });
+export const scheduleMessage = functions.https.onRequest(async (req, res) => {
+  const { endTime, startTime, token, body, title, userId } =
+    req.body as ScheduleNotificationBody;
+  const randomTime = getRandomTime(startTime, endTime); // Use this for scheduling
+  const collectionRef = db
+    .collection('notificationInformation')
+    .doc(userId.toString())
+    .collection('notifications');
 
-//     res.status(200).send('Device registered');
-//   }
-// );
+  console.log({ randomTime });
 
-// export const scheduleMessage = functions.database
-//   .ref('/notifications/{userId}/{notificationId}')
-//   .onCreate(async (snapshot, context) => {
-//     const { notificationId } = context.params;
-//     const { endTime, startTime, token, body, title } =
-//       snapshot.val() as ScheduleNotificationBody;
-//     const time = stringToTime(startTime, endTime);
-//     const randomTime = getRandomTime(time); // Use this for scheduling
-
-//     console.log({ randomTime });
-
-//     messaging()
-//       .send({ notification: { title, body }, data: { notificationId }, token })
-//       .then((response) => {
-//         console.log('Successfully sent message:', response);
-//       })
-//       .catch((error) => {
-//         console.error('Error sending message:', error);
-//       });
-//   });
-
-export const scheduleMessage = functions.https.onRequest(
-  async (req, res: functions.Response) => {
-    const { endTime, startTime, token, body, title } =
-      req.body as ScheduleNotificationBody;
-    const time = stringToTime(startTime, endTime);
-    const randomTime = getRandomTime(time); // Use this for scheduling
-
-    console.log({ randomTime });
-
+  if (randomTime.getTime() === Date.now()) {
     messaging()
-      .send({ notification: { title, body }, token })
+      .send({
+        notification: { title, body },
+        token,
+        android: {
+          priority: 'high',
+          notification: { priority: 'high', title, body },
+        },
+      })
       .then((response) => {
-        console.log('Successfully sent message:', response);
-        res.status(200).send('Notification sent');
+        console.log(`Successfully sent message at ${randomTime}`);
+        res.status(200).send(`Notification sent at ${randomTime}`);
       })
       .catch((error) => {
         console.error('Error sending message:', error);
         res.status(500).send('Error sending notification');
       });
   }
-);
-
-// export const api = functions.https.onRequest(app);
+});

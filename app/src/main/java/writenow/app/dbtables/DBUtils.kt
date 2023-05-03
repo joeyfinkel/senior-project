@@ -148,7 +148,7 @@ class DBUtils(table: String? = null, requestUrl: String? = null) {
     }
 
     /**
-     * Posts data to the table.
+     * Posts data to the table at [url].
      * @param json The data to post.
      * @param callback A function that takes a Boolean and returns Unit.
      * @return Unit.
