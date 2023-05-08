@@ -38,6 +38,7 @@ object UserState {
     var isEllipsisClicked by mutableStateOf(false)
     var isProfileEllipsisClicked by mutableStateOf(false)
     var isPostClicked by mutableStateOf(false)
+    var isInDiscoverMode by mutableStateOf(false)
     var clickedFollower by mutableStateOf(false)
     var clickedOnSettings by mutableStateOf(false)
     var hasPosted by mutableStateOf(false)

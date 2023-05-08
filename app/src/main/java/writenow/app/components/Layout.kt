@@ -33,6 +33,7 @@ import writenow.app.components.bottom.overlay.comments.Comments
 import writenow.app.components.icons.AccountCircle
 import writenow.app.components.post.SelectedPost
 import writenow.app.components.profile.BottomOverlayButton
+import writenow.app.data.entity.User
 import writenow.app.dbtables.Posts
 import writenow.app.screens.Screens
 import writenow.app.state.GlobalState
@@ -45,32 +46,65 @@ import writenow.app.ui.theme.PersianOrange
 @Composable
 private fun TopBar(
     title: String, navController: NavController, lazyListState: LazyListState, scope: CoroutineScope
-) = Surface(
-    color = PersianOrange,
-    shape = RoundedCornerShape(bottomEnd = DefaultRadius, bottomStart = DefaultRadius)
 ) {
-    SmallTopAppBar(
-        title = {
-            ClickableText(text = AnnotatedString(title),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface
-                ),
-                onClick = { scope.launch { lazyListState.scrollToItem(0) } })
-        },
-        actions = {
-            AccountCircle(size = 50.dp, bitmap = UserState.bitmap) {
-                SelectedUserState.id = UserState.id
-                SelectedUserState.username = UserState.username
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val (selectedIdx, setSelectedIdx) = remember { mutableStateOf(0) }
 
-                navController.navigate(Screens.UserProfile)
-            }
-        },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = PersianOrange
-        ),
-    )
+    LaunchedEffect(selectedIdx) {
+        if (selectedIdx == 0) {
+            PostState.fetchNewPosts(UserState.hasPosted, UserState.id)
+        } else {
+            PostState.fetchNewPosts(UserState.hasPosted, UserState.id, false)
+        }
+    }
+
+    Surface(
+        color = PersianOrange,
+        shape = RoundedCornerShape(bottomEnd = DefaultRadius, bottomStart = DefaultRadius)
+    ) {
+        SmallTopAppBar(
+            title = {
+                Column(
+                    modifier = Modifier
+                        .height(65.dp)
+                        .padding(vertical = 5.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    ClickableText(text = AnnotatedString(title),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        onClick = { scope.launch { lazyListState.scrollToItem(0) } })
+                    Chips(
+                        values = listOf("Feed", "Discover"),
+                        activeBackgroundColor = surfaceColor,
+                        disabledBackgroundColor = Color.Transparent,
+                        enabled = UserState.hasPosted,
+                        textColor = PersianOrange,
+                        onClick = {
+                            PostState.allPosts.clear()
+                            setSelectedIdx(it)
+//                            scope.launch { lazyListState.scrollToItem(0) }
+                        },
+                    )
+                }
+            },
+            actions = {
+                AccountCircle(size = 50.dp, bitmap = UserState.bitmap) {
+                    SelectedUserState.id = UserState.id
+                    SelectedUserState.username = UserState.username
+
+                    navController.navigate(Screens.UserProfile)
+                }
+            },
+            colors = TopAppBarDefaults.mediumTopAppBarColors(
+                containerColor = PersianOrange
+            ),
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -97,8 +131,34 @@ private fun Layout(
         else -> 1.0
     }
 
+    LaunchedEffect(sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            UserState.selectedPost = null
+            UserState.isEllipsisClicked = false
+            UserState.isCommentClicked = false
+            UserState.isPostClicked = false
+        }
+    }
+
     LaunchedEffect(deletedPost) {
         if (deletedPost) {
+            GlobalState.userRepository.updateUser(
+                User(
+                    uuid = UserState.id,
+                    firstName = UserState.firstName,
+                    lastName = UserState.lastName,
+                    username = UserState.username,
+                    email = UserState.email,
+                    password = UserState.password,
+                    displayName = UserState.displayName,
+                    bio = UserState.bio,
+                    activeDays = UserState.selectedDays.toString(),
+                    activeHoursStart = UserState.activeHours.start,
+                    activeHoursEnd = UserState.activeHours.end,
+                    hasPosted = 0,
+                    isPostPrivate = 0,
+                )
+            )
             Posts.update(PostState.allPosts)
             scope.launch { sheetState.hide() }
         }
@@ -133,9 +193,9 @@ private fun Layout(
                                     Posts.delete(id) {
                                         if (it) {
                                             deletedPost = true
+                                            UserState.hasPosted = false
 
                                             PostState.allPosts.removeAt(PostState.allPosts.indexOfFirst { post -> post.id == id })
-
                                         }
                                     }
                                 }
@@ -243,16 +303,18 @@ fun Layout(
     navController: NavController,
     lazyListState: LazyListState,
     content: @Composable (sheetState: ModalBottomSheetState, scope: CoroutineScope) -> Unit
-) = Layout(
-    navController = navController, topBar = {
-        TopBar(
-            title = title,
-            navController = navController,
-            lazyListState = lazyListState,
-            scope = it,
-        )
-    }, content = content
-)
+) {
+    Layout(
+        navController = navController, topBar = {
+            TopBar(
+                title = title,
+                navController = navController,
+                lazyListState = lazyListState,
+                scope = it,
+            )
+        }, content = content
+    )
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

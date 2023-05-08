@@ -16,6 +16,7 @@ data class Post(
     val text: String,
     val visible: Int,
     var createdAt: String,
+    val question: String? = null,
     var isEdited: Boolean = false,
     var isLiked: Boolean = false,
     var comments: List<Comment> = emptyList(),
@@ -72,7 +73,7 @@ class Posts private constructor() {
                     visible = list.first().visible,
                     createdAt = list.first().createdAt,
                     isEdited = list.first().isLiked,
-                    comments = comments
+                    comments = comments,
                 )
             }
         }
@@ -94,10 +95,13 @@ class Posts private constructor() {
          * @param userId The user's id.
          * @return A list of posts.
          */
-        private suspend fun getAll(userId: Int? = null): List<Post> {
+        private suspend fun getAll(userId: Int? = null, isFeed: Boolean? = null): List<Post> {
+            val id = if (userId != null) "userID=$userId" else ""
+            val feed = if (isFeed != null) "isFeed=$isFeed" else ""
+            val params = listOf(id, feed).filter { it.isNotEmpty() }.joinToString("&")
             val postsWithComments = getAllWithComments(userId)
             val allLikes = getLikes(userId)
-            val allPosts = utils.getAll("?userID=${userId}") {
+            val allPosts = utils.getAll(if (params.isNotEmpty()) "?$params" else "") {
                 Post(
                     id = it.getInt("postID"),
                     uuid = it.getInt("uuid"),
@@ -108,7 +112,8 @@ class Posts private constructor() {
                     isLiked = allLikes.any { like ->
                         like.postId == it.getInt("postID") && like.userId == UserState.id && like.isUnliked == 0
                     },
-                    isEdited = it.getInt("isEdited") == 1
+                    isEdited = it.getInt("isEdited") == 1,
+                    question = it.getString("QuestionText"),
                 )
             }
 
@@ -140,10 +145,15 @@ class Posts private constructor() {
             return posts[0]
         }
 
-        suspend fun getToDisplay() =
-            getAll().filter { it.visible == 1 }.sortedByDescending { it.createdAt }.toMutableList()
+        suspend fun getFeed(userId: Int) =
+            getAll(userId, true).filter { it.visible == 1 && it.uuid != userId }
+                .sortedByDescending { it.createdAt }.toMutableList()
 
-        suspend fun getByUser(id: Int) = getAll(id)
+        suspend fun getDiscover(userId: Int) =
+            getAll().filter { it.visible == 1 && it.uuid != userId }
+                .sortedByDescending { it.createdAt }.toMutableList()
+
+        suspend fun getByUser(id: Int) = getAll(id).sortedByDescending { it.createdAt }
 
         suspend fun getDeleted(id: Int) = getByUser(id).filter { it.visible == 0 }
 

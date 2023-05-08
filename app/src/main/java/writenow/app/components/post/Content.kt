@@ -1,6 +1,7 @@
 package writenow.app.components.post
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -9,12 +10,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +41,7 @@ private fun TextColumn(
     onClick: () -> Unit,
     onLongPress: () -> Unit,
     username: @Composable () -> Unit,
+    question: @Composable () -> Unit,
     datePosted: (@Composable () -> Unit)? = null,
     postContents: @Composable () -> Unit,
 ) {
@@ -64,7 +67,10 @@ private fun TextColumn(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            username()
+            Column {
+                username()
+                question()
+            }
             if (isEdited) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -106,6 +112,7 @@ private fun ContentRow(
 fun PostContent(
     userId: Int,
     username: String,
+    question: String,
     isEdited: Boolean = false,
     text: String? = defaultText,
     datePosted: String,
@@ -113,16 +120,14 @@ fun PostContent(
     onLongPress: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
-
-    var isLoading by remember { mutableStateOf(false) }
-    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val (isLoading, setIsLoading) = remember { mutableStateOf(false) }
+    val (bitmap, setBitmap) = remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffectOnce {
         if (userId == SelectedUserState.id) {
-            isLoading = true
-            bitmap = UserState.bitmap
-            isLoading = false
+            setIsLoading(true)
+            setBitmap(UserState.bitmap)
+            setIsLoading(false)
         }
     }
 
@@ -162,11 +167,22 @@ fun PostContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
+            question = {
+                Log.d("question", question)
+                if (question.isNotBlank()) {
+                    Text(
+                        text = question,
+                        maxLines = 2,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
             postContents = {
                 if (text != null) {
                     Text(
                         text = text,
-                        maxLines = 4,
+                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -189,11 +205,13 @@ fun LoadingPostContent() = ContentRow(isLoading = true, circle = {
             .skeletonEffect()
     )
 }, column = {
-    TextColumn(isClickable = false,
+    TextColumn(
+        isClickable = false,
         isLoading = true,
         isEdited = false,
         onClick = {},
         onLongPress = {},
+        question = {},
         username = {
             Box(
                 modifier = Modifier

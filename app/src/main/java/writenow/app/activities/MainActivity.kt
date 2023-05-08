@@ -24,7 +24,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import writenow.app.components.*
 import writenow.app.dbtables.*
 import writenow.app.screens.*
@@ -56,35 +59,9 @@ import writenow.app.data.entity.Question as QuestionEntity
 import writenow.app.data.entity.ReportReason as ReportReasonsEntity
 
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun onLoad(context: Context) {
+    private suspend fun getQuestion() {
         val question = GlobalState.question
-        val user = GlobalState.user
-        val followers = GlobalState.followers
-        val followings = GlobalState.followings
 
-        if (user != null) {
-            Log.d("MainActivity", "User is not null")
-            UserState.isLoggedIn = true
-            UserState.hasPosted = user.hasPosted == 1
-            UserState.isPostPrivate = user.isPostPrivate == 1
-            UserState.id = user.uuid
-            UserState.firstName = user.firstName
-            UserState.username = user.username
-            UserState.bio = user.bio.toString()
-            UserState.bitmap = getProfilePicture(context, user.uuid)
-            UserState.selectedDays =
-                if (user.activeDays != null) user.activeDays.split(',').toSet() else setOf()
-            UserState.activeHours.start =
-                if (user.activeHoursStart != null) user.activeHoursStart.toString() else ""
-            UserState.activeHours.end =
-                if (user.activeHoursEnd != null) user.activeHoursEnd.toString() else ""
-            UserState.isPostPrivate = user.isPostPrivate == 0
-
-        }
-
-        PostState.fetchNewPosts(UserState.getHasPosted()).updateAll()
-        // If there is a current question, set it as the current question, otherwise get a new question
         if (question != null) {
             UserState.currentQuestion = Question(
                 id = question.id,
@@ -118,6 +95,44 @@ class MainActivity : ComponentActivity() {
                 repo.addQuestion(GlobalState.question!!)
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun onLoad(context: Context) {
+        val user = GlobalState.user
+        val followers = GlobalState.followers
+        val followings = GlobalState.followings
+
+        if (user != null) {
+            val id = user.uuid
+            val lastPost = Posts.getByUser(id).maxByOrNull { it.createdAt }
+
+            Log.d("MainActivity", "onLoad: $lastPost")
+
+            UserState.isLoggedIn = true
+            UserState.hasPosted = lastPost != null
+            UserState.isPostPrivate = user.isPostPrivate == 1
+            UserState.id = id
+            UserState.firstName = user.firstName
+            UserState.username = user.username
+            UserState.bio = user.bio.toString()
+            UserState.bitmap = getProfilePicture(context, id)
+            UserState.selectedDays =
+                if (user.activeDays != null) user.activeDays.split(',').toSet() else setOf()
+            UserState.activeHours.start =
+                if (user.activeHoursStart != null) user.activeHoursStart.toString() else ""
+            UserState.activeHours.end =
+                if (user.activeHoursEnd != null) user.activeHoursEnd.toString() else ""
+            UserState.isPostPrivate = user.isPostPrivate == 0
+
+            UserState.following.addAll(Users.getFollowing(id))
+            UserState.followers.addAll(Users.getFollowers(id))
+        }
+
+        PostState.fetchNewPosts(UserState.hasPosted, UserState.id).updateAll()
+        Log.d("MainActivity", "onLoad: ${UserState.hasPosted}")
+        // If there is a current question, set it as the current question, otherwise get a new question
+        runBlocking { getQuestion() }
 
         if (followers?.isEmpty() == true) {
             UserState.followers =
@@ -140,8 +155,6 @@ class MainActivity : ComponentActivity() {
                 GlobalState.reportReasonRepository.getReportReasons().toMutableList()
         }
 
-        Log.d("MainActivity", "onLoad: ${Questions.getRandom()}")
-
         PushNotificationService().sendNotification(context)
 
         if (GlobalState.user?.uuid != null) UserState.updateActiveHours(GlobalState.user?.uuid!!)
@@ -153,26 +166,39 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            val context = this@MainActivity
-            val fetchedUser = GlobalState.user?.uuid?.let { Users.getCurrent(it) }
+            withContext(Dispatchers.IO) {
+                val context = this@MainActivity
+                val fetchedUser = GlobalState.user?.uuid?.let { Users.getCurrent(it) }
 
-            GlobalState.provide(context)
-            onLoad(context)
-            if (fetchedUser != null) {
-                GlobalState.user = GlobalState.user?.copy(
-                    uuid = if (GlobalState.user!!.uuid != fetchedUser.id) fetchedUser.id else GlobalState.user!!.uuid,
-                    firstName = if (GlobalState.user!!.firstName != fetchedUser.firstName) fetchedUser.firstName else GlobalState.user!!.firstName,
-                    lastName = if (GlobalState.user!!.lastName != fetchedUser.lastName) fetchedUser.lastName else GlobalState.user!!.lastName,
-                    email = if (GlobalState.user!!.email != fetchedUser.email) fetchedUser.email else GlobalState.user!!.email,
-                    password = if (GlobalState.user!!.password != fetchedUser.passwordHash) fetchedUser.passwordHash else GlobalState.user!!.password,
-                    username = if (GlobalState.user!!.username != fetchedUser.username) fetchedUser.username else GlobalState.user!!.username,
-                    displayName = if (GlobalState.user!!.displayName != fetchedUser.displayName) fetchedUser.displayName else GlobalState.user!!.displayName,
-                    bio = if (GlobalState.user!!.bio != fetchedUser.bio) fetchedUser.bio else GlobalState.user!!.bio,
-                    activeDays = if (GlobalState.user!!.activeDays != fetchedUser.activeDays) fetchedUser.activeDays else GlobalState.user!!.activeDays,
-                    activeHoursStart = if (GlobalState.user!!.activeHoursStart != fetchedUser.preferences?.activeHours?.start) fetchedUser.preferences?.activeHours?.start else GlobalState.user!!.activeHoursStart,
-                    activeHoursEnd = if (GlobalState.user!!.activeHoursEnd != fetchedUser.preferences?.activeHours?.end) fetchedUser.preferences?.activeHours?.end else GlobalState.user!!.activeHoursEnd,
-                    isPostPrivate = if (GlobalState.user!!.isPostPrivate != fetchedUser.preferences?.isPrivate) fetchedUser.preferences?.isPrivate else GlobalState.user!!.isPostPrivate,
-                )
+                GlobalState.provide(context)
+                onLoad(context)
+                fetchedUser?.let { user ->
+                    GlobalState.user =
+                        GlobalState.user?.copy(uuid = user.id.takeIf { GlobalState.user?.uuid != it }
+                            ?: GlobalState.user?.uuid ?: 0,
+                            firstName = user.firstName.takeIf { GlobalState.user?.firstName != it }
+                                ?: GlobalState.user?.firstName ?: "",
+                            lastName = user.lastName.takeIf { GlobalState.user?.lastName != it }
+                                ?: GlobalState.user?.lastName ?: "",
+                            email = user.email.takeIf { GlobalState.user?.email != it }
+                                ?: GlobalState.user?.email ?: "",
+                            password = user.passwordHash.takeIf { GlobalState.user?.password != it }
+                                ?: GlobalState.user?.password ?: "",
+                            username = user.username.takeIf { GlobalState.user?.username != it }
+                                ?: GlobalState.user?.username ?: "",
+                            displayName = user.displayName.takeIf { GlobalState.user?.displayName != it }
+                                ?: GlobalState.user?.displayName,
+                            bio = user.bio.takeIf { GlobalState.user?.bio != it }
+                                ?: GlobalState.user?.bio,
+                            activeDays = user.activeDays.takeIf { GlobalState.user?.activeDays != it }
+                                ?: GlobalState.user?.activeDays,
+                            activeHoursStart = user.preferences?.activeHours?.start.takeIf { GlobalState.user?.activeHoursStart != it }
+                                ?: GlobalState.user?.activeHoursStart,
+                            activeHoursEnd = user.preferences?.activeHours?.end.takeIf { GlobalState.user?.activeHoursEnd != it }
+                                ?: GlobalState.user?.activeHoursEnd,
+                            isPostPrivate = user.preferences?.isPrivate.takeIf { GlobalState.user?.isPostPrivate != it }
+                                ?: GlobalState.user?.isPostPrivate)
+                }
             }
         }
 

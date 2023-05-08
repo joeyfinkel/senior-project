@@ -26,13 +26,15 @@ object PostState {
     /** The list of all liked posts. */
     var likedPosts = mutableListOf<Post>()
 
-    suspend fun fetchNewPosts(hasPosted: Boolean): PostState {
+    suspend fun fetchNewPosts(hasPosted: Boolean, userId: Int, forFeed: Boolean = true): PostState {
+        val posts = if (forFeed) Posts.getFeed(userId) else Posts.getDiscover(userId)
+
         if (hasPosted) {
             isLoading = true
-            allPosts = Posts.getToDisplay()
+            allPosts = posts
             isLoading = false
         } else {
-            allPosts = Posts.getToDisplay()
+            allPosts = posts
         }
 
         return this

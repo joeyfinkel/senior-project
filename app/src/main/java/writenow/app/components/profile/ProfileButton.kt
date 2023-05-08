@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -30,14 +32,14 @@ fun FollowOrUnFollow(follower: Follower) {
     Log.d("ProfileButton", "follower: $follower")
     Log.d("ProfileButton", if (follower.isFollowing) "Following" else "Follow")
 
-    var buttonText by remember { mutableStateOf("") }
-    var isFollowing by remember { mutableStateOf(false) }
-    var icon by remember { mutableStateOf<ImageVector?>(null) }
+    val (buttonText, setButtonText) = remember { mutableStateOf("") }
+    val (isFollowing, setIsFollowing) = remember { mutableStateOf(false) }
+    val (icon, setIcon) = remember { mutableStateOf<ImageVector?>(null) }
 
     LaunchedEffectOnce {
-        isFollowing = follower.isFollowing
-        buttonText = if (follower.isFollowing) "Following" else "Follow"
-        icon = if (follower.isFollowing) Icons.Default.Check else Icons.Default.Add
+        setIsFollowing(follower.isFollowing)
+        setButtonText(if (follower.isFollowing) "Following" else "Follow")
+        setIcon(if (follower.isFollowing) Icons.Default.Check else Icons.Default.Add)
     }
 
     fun toggleFollow() {
@@ -47,14 +49,14 @@ fun FollowOrUnFollow(follower: Follower) {
         ) {
             when (it) {
                 "Unfollowed" -> {
-                    isFollowing = false
-                    buttonText = "Follow"
-                    icon = Icons.Default.Add
+                    setIsFollowing(false)
+                    setButtonText("Follow")
+                    setIcon(Icons.Default.Add)
                 }
                 "Followed" -> {
-                    isFollowing = true
-                    buttonText = "Following"
-                    icon = Icons.Default.Check
+                    setIsFollowing(true)
+                    setButtonText("Following")
+                    setIcon(Icons.Default.Check)
                 }
             }
         }

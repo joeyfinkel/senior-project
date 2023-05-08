@@ -1,5 +1,6 @@
 package writenow.app.components.post
 
+import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.*
@@ -9,10 +10,8 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import writenow.app.dbtables.Post
-import writenow.app.dbtables.Posts
 import writenow.app.state.UserState
 import writenow.app.ui.theme.DefaultWidth
-import writenow.app.utils.LaunchedEffectOnce
 import writenow.app.utils.getPostedDate
 import writenow.app.utils.openPostMenu
 
@@ -24,21 +23,6 @@ fun Post(
     state: ModalBottomSheetState,
     coroutineScope: CoroutineScope,
 ) {
-    val (isEdited, setIsEdited) = remember { mutableStateOf(false) }
-
-    LaunchedEffectOnce {
-        setIsEdited(Posts.isPostEdited(post?.id ?: 0))
-    }
-
-    LaunchedEffect(state) {
-        if (!state.isVisible) {
-            UserState.selectedPost = null
-            UserState.isPostClicked = false
-            UserState.isCommentClicked = false
-            UserState.isEllipsisClicked = false
-        }
-    }
-
     fun openMenu() {
         coroutineScope.launch {
             UserState.selectedPost = post
@@ -49,11 +33,14 @@ fun Post(
         }
     }
 
+    Log.d("Post", "Question: ${post?.question}")
+
     if (post != null) {
         PostContainer(height = DefaultWidth / 2) {
             PostContent(userId = post.uuid,
                 username = post.username,
-                isEdited = isEdited,
+                question = post.question ?: "",
+                isEdited = post.isEdited,
                 text = post.text,
                 datePosted = getPostedDate(post.createdAt),
                 navController = navController,

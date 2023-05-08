@@ -9,9 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import writenow.app.components.Layout
 import writenow.app.components.post.*
-import writenow.app.dbtables.Follower
 import writenow.app.dbtables.Posts
-import writenow.app.dbtables.Users
 import writenow.app.state.GlobalState
 import writenow.app.state.PostState
 import writenow.app.state.UserState
@@ -21,13 +19,9 @@ import writenow.app.utils.LaunchedEffectOnce
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AllPosts(navController: NavController, lazyListState: LazyListState) {
-    val followers = remember { mutableStateListOf<Follower>() }
-    val following = remember { mutableStateListOf<Follower>() }
+    val hasPosted = remember { derivedStateOf { UserState.hasPosted } }
 
     LaunchedEffectOnce {
-        UserState.following.addAll(Users.getFollowing(UserState.id))
-        UserState.followers.addAll(Users.getFollowers(UserState.id))
-
         if (GlobalState.user == null) {
             GlobalState.user = GlobalState.userRepository.getUser()
 
@@ -38,19 +32,17 @@ fun AllPosts(navController: NavController, lazyListState: LazyListState) {
     Layout(
         title = "WriteNow", navController = navController, lazyListState = lazyListState
     ) { state, scope ->
-        if (PostState.isLoading && UserState.hasPosted) {
-            Column(verticalArrangement = Arrangement.spacedBy(25.dp)) {
-                repeat(5) {
-                    PostContainer(height = DefaultWidth / 2) {
-                        LoadingPostContent()
-                    }
-                }
-            }
+        if (PostState.isLoading && hasPosted.value) {
+            LoadingPosts(
+                postContainerHeight = DefaultWidth / 2,
+                renderTotal = 5,
+                verticalArrangement = Arrangement.spacedBy(25.dp)
+            )
         } else {
-            if (UserState.hasPosted) {
+            if (hasPosted.value) {
                 PostList(
                     lazyListState = lazyListState,
-                    postCallback = { PostState.allPosts = Posts.getToDisplay() },
+                    postCallback = { PostState.allPosts = Posts.getFeed(UserState.id) },
                 ) {
                     itemsIndexed(PostState.allPosts) { _, item ->
                         Post(
@@ -60,6 +52,12 @@ fun AllPosts(navController: NavController, lazyListState: LazyListState) {
                             coroutineScope = scope
                         )
                     }
+                }
+                if (PostState.allPosts.isEmpty()) {
+                    Text(
+                        text = "None of your friends have made any posts yet!\nCheck the discover tab to find new friends.",
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                    )
                 }
             } else {
                 PostProtector(navController = navController)

@@ -51,6 +51,7 @@ fun SelectedPost(
                     PostContent(
                         userId = UserState.selectedPost!!.uuid,
                         username = UserState.selectedPost!!.username,
+                        question = UserState.selectedPost!!.question ?: "",
                         isEdited = isEdited,
                         text = UserState.selectedPost!!.text,
                         datePosted = getPostedDate(UserState.selectedPost!!.createdAt),

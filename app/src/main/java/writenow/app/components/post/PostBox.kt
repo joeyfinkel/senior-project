@@ -7,7 +7,9 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -23,13 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import writenow.app.R
+import writenow.app.components.Chips
 import writenow.app.components.TopBar
 import writenow.app.components.icons.AccountCircle
 import writenow.app.state.UserState
 import writenow.app.ui.theme.PersianOrange
 import writenow.app.ui.theme.placeholderColor
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun PostBox(
     navController: NavController,
@@ -41,6 +44,7 @@ fun PostBox(
     onChipClick: (Boolean) -> Unit
 ) {
     val (value, setValue) = remember { mutableStateOf(if (editing) placeholder else "") }
+    val (backgroundColor, setBackgroundColor) = remember { mutableStateOf(Color.Unspecified) }
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     val darkMode = isSystemInDarkTheme()
@@ -91,11 +95,11 @@ fun PostBox(
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Chips(values = listOf("Public", "Private"), onClick = {
-                        UserState.isPostPrivate = it == 0
+                    Chips(values = listOf("Public", "Private")) { idx ->
+                        UserState.isPostPrivate = idx == 0
 
                         onChipClick(UserState.isPostPrivate)
-                    })
+                    }
                     TextField(
                         value = value,
                         placeholder = { Text(text = placeholder) },

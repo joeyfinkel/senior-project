@@ -37,21 +37,16 @@ fun PostActions(
 
     LaunchedEffectOnce {
         setLikesSize(Posts.getLikesPerPost(postId))
+        setCommentsSize(currentPost?.comments?.size)
     }
 
-    LaunchedEffect(commentsSize) {
-        if (commentsSize == null) {
-            Log.d("PostActions", "size is null")
-            return@LaunchedEffect
-        }
-
-        setCurrentPost(PostState.allPosts.filter { it.id == postId }[0])
-        setCommentsSize(currentPost?.comments?.size)
+    LaunchedEffect(UserState.isCommentClicked) {
+        if (UserState.isCommentClicked) setCurrentPost(PostState.allPosts.find { it.id == postId })
     }
 
     fun updateLike() {
         CoroutineScope(Dispatchers.IO).launch {
-            val updatedPost = Posts.getToDisplay().find { post -> post.id == postId }
+            val updatedPost = Posts.getFeed(UserState.id).find { post -> post.id == postId }
 
             setIsLiked(updatedPost?.isLiked ?: false)
         }
@@ -104,18 +99,19 @@ fun PostActions(
                 verticalArrangement = Arrangement.Center,
                 toggleLike = { toggleLike() })
             Comment(
-                label = commentsSize.toString(),
+                label = commentsSize?.toString() ?: "0",
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 UserState.isCommentClicked = true
+                UserState.selectedPost = currentPost
+                Log.d("PostActions", "${postId}")
 
-                if (UserState.isCommentClicked) coroutineScope.launch {
+                coroutineScope.launch {
                     state.show()
 
                     UserState.isEllipsisClicked = false
                     UserState.isPostClicked = false
-                    UserState.selectedPost = currentPost
                 }
             }
             if (hasEllipsis) {

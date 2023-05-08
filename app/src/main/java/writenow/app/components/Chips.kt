@@ -1,4 +1,4 @@
-package writenow.app.components.post
+package writenow.app.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +13,17 @@ import writenow.app.ui.theme.placeholderColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Chips(values: List<String>, onClick: (Int) -> Unit) {
-    var selectedChip by remember { mutableStateOf(0) }
-
+fun Chips(
+    values: List<String>,
+    activeBackgroundColor: Color = PersianOrange,
+    inactiveBackgroundColor: Color = Color.Unspecified,
+    disabledBackgroundColor: Color = PersianOrange,
+    textColor: Color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
+    disabledTextColor: Color = Color.White,
+    enabled: Boolean? = null,
+    onClick: (idx: Int) -> Unit
+) {
+    val (selectedChip, setSelectedChip) = remember { mutableStateOf(0) }
     val darkMode = isSystemInDarkTheme()
 
     Row(
@@ -25,19 +33,19 @@ fun Chips(values: List<String>, onClick: (Int) -> Unit) {
         values.forEachIndexed { index, value ->
             Chip(
                 onClick = {
-                    selectedChip = index
+                    setSelectedChip(index)
                     onClick(index)
                 },
-                enabled = selectedChip != index,
+                enabled = enabled ?: (selectedChip != index),
                 colors = ChipDefaults.chipColors(
                     backgroundColor = if (selectedChip == index) {
-                        PersianOrange
+                        activeBackgroundColor
                     } else {
-                        Color.Unspecified
+                        inactiveBackgroundColor
                     },
-                    disabledBackgroundColor = PersianOrange,
-                    contentColor = MaterialTheme.colors.onPrimary,
-                    disabledContentColor = Color.White
+                    disabledBackgroundColor = disabledBackgroundColor,
+                    contentColor = textColor,
+                    disabledContentColor = disabledTextColor
                 )
             ) {
                 Text(text = value, color = placeholderColor(darkMode))

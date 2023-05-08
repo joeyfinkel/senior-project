@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import writenow.app.R
 import writenow.app.components.Tabs
+import writenow.app.components.post.LoadingPosts
 import writenow.app.components.post.Post
 import writenow.app.components.profile.EditProfile
 import writenow.app.components.profile.FollowOrUnFollow
@@ -27,55 +28,58 @@ import writenow.app.dbtables.Posts
 import writenow.app.dbtables.Users
 import writenow.app.screens.Screens
 import writenow.app.state.GlobalState
+import writenow.app.state.PostState
 import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
-import writenow.app.utils.LaunchedEffectOnce
+import writenow.app.ui.theme.DefaultWidth
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun Profile(navController: NavController) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    var isFollowing by remember { mutableStateOf(false) }
+    val (selectedTabIdx, setSelectedTabIdx) = remember { mutableStateOf(0) }
+    var (isFollowing, setIsFollowing) = remember { mutableStateOf(false) }
+    val (isTheSameUser, setIsTheSameUser) = remember { mutableStateOf(UserState.id == SelectedUserState.id) }
+    val username =
+        remember { if (isTheSameUser) UserState.username else SelectedUserState.username }
+    val allPosts = remember { if (isTheSameUser) UserState.posts else mutableStateListOf() }
+    val likedPosts = remember { if (isTheSameUser) UserState.likedPosts else mutableStateListOf() }
 
-    val username = SelectedUserState.username
-    val allPosts = remember { UserState.posts.filter { it.visible == 1 }.toMutableList() }
-    val likedPosts = remember { UserState.likedPosts.filter { it.visible == 1 }.toMutableList() }
+    LaunchedEffect(UserState.posts, UserState.likedPosts) {
+        UserState.clickedFollower = !isTheSameUser
 
-    LaunchedEffectOnce {
-        isFollowing = Users.isFollowing(UserState.id, SelectedUserState.id!!)
+        setIsFollowing(Users.isFollowing(UserState.id, SelectedUserState.id!!))
 
         UserState.followers.addAll(GlobalState.followers?.map { Follower(it.id) }
             ?.toMutableList()!!)
-        Log.d("Profile", "isFollowing: ${UserState.followers}")
-        Log.d("Profile", "isFollowing: ${UserState.following}")
-        Log.d("Profile", "isFollowing: ${GlobalState.isTheSameUser}")
-        Log.d("Profile", "isFollowing: ${UserState.id === SelectedUserState.id}")
 
-        if (UserState.id == SelectedUserState.id) {
-            allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
-            likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
-        }
-    }
-
-    LaunchedEffect(UserState.posts, UserState.likedPosts) {
         withContext(Dispatchers.IO) {
             if (UserState.id == SelectedUserState.id) {
-                if (UserState.posts != Posts.getByUser(SelectedUserState.id!!)) {
-                    allPosts.addAll(Posts.getByUser(SelectedUserState.id!!))
-                }
+                PostState.isLoading = true
+                val usersPosts = Posts.getByUser(UserState.id)
+                val usersLikedPosts = Posts.getLikedPosts(UserState.id)
 
-                if (UserState.likedPosts != Posts.getLikedPosts(SelectedUserState.id!!)) {
-                    likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!))
-                }
+                setIsTheSameUser(true)
+                allPosts.clear()
+                likedPosts.clear()
+
+                if (UserState.posts != usersPosts) allPosts.addAll(usersPosts)
+                if (UserState.likedPosts != usersLikedPosts) likedPosts.addAll(usersLikedPosts)
+                PostState.isLoading = false
+            } else {
+                PostState.isLoading = true
+                Log.d("Profile", "This is not the current user's profile page")
+                setIsTheSameUser(false)
+                allPosts.clear()
+                likedPosts.clear()
+                allPosts.addAll(Posts.getByUser(SelectedUserState.id!!).toMutableList())
+                likedPosts.addAll(Posts.getLikedPosts(SelectedUserState.id!!).toMutableList())
+                PostState.isLoading = false
             }
         }
     }
 
     LaunchedEffect(UserState.id != SelectedUserState.id) {
         isFollowing = Users.isFollowing(SelectedUserState.id!!, UserState.id)
-
-//        Users.updateRelationList(SelectedUserState.followers)
-//        Users.updateRelationList(SelectedUserState.following, false)
     }
 
     ProfileLayout(
@@ -86,15 +90,20 @@ fun Profile(navController: NavController) {
         navController = navController,
         snackbar = null,
         onBackClick = {
-            if (UserState.clickedFollower) {
-                navController.navigate(Screens.FollowersOrFollowingList)
-                UserState.clickedFollower = false
-            } else {
+//            if (UserState.clickedFollower) {
+//                navController.navigate(Screens.FollowersOrFollowingList)
+//                UserState.clickedFollower = false
+//            } else {
+//                navController.navigate(Screens.Posts)
+//            }
+            if (isTheSameUser) {
                 navController.navigate(Screens.Posts)
+            } else {
+                navController.popBackStack()
             }
         },
         additionalTopContent = {
-            if (username == UserState.username) {
+            if (isTheSameUser) {
                 // This is the current user's profile
                 EditProfile(navController = navController)
             } else {
@@ -116,13 +125,13 @@ fun Profile(navController: NavController) {
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RowData(primaryText = if (UserState.id == SelectedUserState.id) UserState.followers.size.toString() else SelectedUserState.followers.size.toString(),
+                    RowData(primaryText = if (isTheSameUser) UserState.followers.size.toString() else SelectedUserState.followers.size.toString(),
                         secondaryText = "Followers",
                         onClick = {
                             UserState.followingOrFollower = "Followers"
                             navController.navigate(Screens.FollowersOrFollowingList)
                         })
-                    RowData(primaryText = if (UserState.id == SelectedUserState.id) UserState.following.size.toString() else SelectedUserState.following.size.toString(),
+                    RowData(primaryText = if (isTheSameUser) UserState.following.size.toString() else SelectedUserState.following.size.toString(),
                         secondaryText = "Following",
                         onClick = {
                             UserState.followingOrFollower = "Following"
@@ -137,34 +146,38 @@ fun Profile(navController: NavController) {
         accountIconAction = null
     ) { state, scope, _ ->
         stickyHeader {
-            Tabs(tabs = if (SelectedUserState.username == UserState.username) listOf(
+            Tabs(tabs = if (isTheSameUser) listOf(
                 painterResource(id = R.drawable.grid_view), Icons.Default.Favorite
             )
             else listOf(painterResource(id = R.drawable.grid_view)),
-                selectedTabIndex = selectedTabIndex,
-                onClick = { index -> selectedTabIndex = index })
+                selectedTabIndex = selectedTabIdx,
+                onClick = { setSelectedTabIdx(it) })
         }
         item {
             Column(
                 modifier = Modifier.padding(top = 5.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                when (selectedTabIndex) {
-                    0 -> allPosts.forEach { post ->
-                        Post(
-                            post = post,
-                            navController = navController,
-                            state = state,
-                            coroutineScope = scope
-                        )
-                    }
-                    1 -> likedPosts.forEach { post ->
-                        Post(
-                            post = post,
-                            navController = navController,
-                            state = state,
-                            coroutineScope = scope
-                        )
+                if (PostState.isLoading) {
+                    LoadingPosts(postContainerHeight = DefaultWidth / 2, renderTotal = 3)
+                } else {
+                    when (selectedTabIdx) {
+                        0 -> allPosts.forEach { post ->
+                            Post(
+                                post = post,
+                                navController = navController,
+                                state = state,
+                                coroutineScope = scope
+                            )
+                        }
+                        1 -> likedPosts.forEach { post ->
+                            Post(
+                                post = post,
+                                navController = navController,
+                                state = state,
+                                coroutineScope = scope
+                            )
+                        }
                     }
                 }
             }

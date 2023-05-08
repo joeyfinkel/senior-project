@@ -31,6 +31,7 @@ fun <T> Tabs(
     TabRow(
         selectedTabIndex = selectedTabIndex,
         backgroundColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         indicator = { tabPositions ->
             if (!asPills) {
                 TabRowDefaults.Indicator(
@@ -50,6 +51,8 @@ fun <T> Tabs(
             Tab(
                 selected = selectedTabIndex == index,
                 onClick = { onClick(index) },
+                selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                unselectedContentColor = Color.Black,
                 modifier = Modifier
                     .height(48.dp)
                     .background(

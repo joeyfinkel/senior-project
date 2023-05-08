@@ -32,14 +32,22 @@ import writenow.app.state.UserState
 fun Comments(navController: NavController) {
     var text by remember { mutableStateOf("") }
     var commented by remember { mutableStateOf(false) }
-    var current by remember { mutableStateOf(UserState.selectedPost) }
+
+    val (isLoading, setIsLoading) = remember { mutableStateOf(false) }
+    val (current, setCurrent) = remember { mutableStateOf(UserState.selectedPost) }
+    val totalComments = derivedStateOf { current?.comments?.size ?: 0 }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    LaunchedEffect(Unit) {
+        setIsLoading(true)
+        setCurrent(UserState.selectedPost)
+        setIsLoading(false)
+    }
+
     LaunchedEffect(commented) {
         if (commented) {
-            current = UserState.selectedPost
-
+            setCurrent(UserState.selectedPost)
             Posts.update(PostState.allPosts)
         }
 
@@ -78,7 +86,7 @@ fun Comments(navController: NavController) {
             .fillMaxWidth()
     ) {
         Text(
-            text = "${UserState.selectedPost?.comments?.size} comments",
+            text = "${totalComments.value} comments",
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(vertical = 16.dp)
@@ -90,14 +98,28 @@ fun Comments(navController: NavController) {
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 8.dp),
-                state = LazyListState(0)
-            ) {
-                current?.let {
-                    itemsIndexed(it.comments.sortedByDescending { comment -> comment.dateCommented }) { _, comment ->
-                        Comment(comment = comment, navController = navController)
+            if (totalComments.value == 0) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "There are no comments yet. Be the first to comment!",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+            } else {
+                if (isLoading) {
+                    Text(text = "Loading...")
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(vertical = 8.dp),
+                        state = LazyListState(0)
+                    ) {
+                        current?.let {
+                            itemsIndexed(it.comments.sortedByDescending { comment -> comment.dateCommented }) { _, comment ->
+                                Comment(comment = comment, navController = navController)
+                            }
+                        }
                     }
                 }
             }

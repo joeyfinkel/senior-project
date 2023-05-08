@@ -35,7 +35,7 @@ fun BottomBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(65.dp)
             .background(
                 color = PersianOrange,
                 shape = RoundedCornerShape(

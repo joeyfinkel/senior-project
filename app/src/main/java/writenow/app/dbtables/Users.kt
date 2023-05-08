@@ -7,7 +7,7 @@ import writenow.app.state.SelectedUserState
 import writenow.app.state.UserState
 import writenow.app.utils.ActiveHours
 
-data class Follower(val id: Int, val isFollowing: Boolean = false)
+data class Follower(val id: Int, val username: String = "", val isFollowing: Boolean = false)
 data class Relationship(val sourceFriend: Int, val targetFriend: Int)
 data class Preferences(
     val userId: Int, val activeHours: ActiveHours,
@@ -79,8 +79,7 @@ class Users private constructor() {
                     passwordHash = it.getString("passwordHash"),
                 )
             }
-            val prefs =
-                getPrefs().distinctBy { it.userId }.groupBy { it.userId }
+            val prefs = getPrefs().distinctBy { it.userId }.groupBy { it.userId }
 
             return users.map { user ->
                 user.copy(
@@ -90,9 +89,7 @@ class Users private constructor() {
             }
         }
 
-        suspend fun getCurrent(id: Int): User {
-            return getAll().first { it.id == id }
-        }
+        suspend fun getCurrent(id: Int) = getAll().first { it.id == id }
 
         /**
          * Gets a list of user ids that the user with the given id is following.
@@ -100,10 +97,12 @@ class Users private constructor() {
          * @param id The id of the user to get the list of users that they are following.
          * @return A list of user ids that the user with the given [id] is following.
          */
-        suspend fun getFollowing(id: Int): List<Follower> {
-            return utils.getAll("relationship/following?userID=$id") {
-                Follower(it.getInt("targetFriend"))
-            }
+        suspend fun getFollowing(id: Int) = utils.getAll("relationship/following?userID=$id") {
+            Follower(
+                id = it.getInt("targetFriend"),
+                username = it.getString("username"),
+                isFollowing = true
+            )
         }
 
         /**
@@ -131,7 +130,6 @@ class Users private constructor() {
             if (SelectedUserState.id != null) {
                 val id =
                     if (UserState.id == SelectedUserState.id) UserState.id else SelectedUserState.id
-                Log.d("updateRelationList", "id: $id, getFollowers: $getFollowers")
                 val followers = if (getFollowers) getFollowers(id!!).map {
                     Follower(it.id, isFollowing = isFollowing(id, it.id))
                 } else getFollowing(UserState.id).map {

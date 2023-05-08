@@ -127,7 +127,7 @@ class DBUtils(table: String? = null, requestUrl: String? = null) {
                     callback(jsonArray.getJSONObject(i))
                 }
             } catch (e: Exception) {
-                Log.e("API Error from `getAll` ($path)", e.toString())
+                Log.e("API Error from `getAll` ($url/$path)", e.toString())
                 emptyList()
             }
         } ?: emptyList()
